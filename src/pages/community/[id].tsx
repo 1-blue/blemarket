@@ -6,6 +6,7 @@ import { ICON_SHAPE } from "@src/types";
 
 // common-component
 import Icon from "@src/components/common/Icon";
+import Button from "@src/components/common/Button";
 
 const CommunityPostDetail: NextPage = () => {
   return (
@@ -31,11 +32,11 @@ const CommunityPostDetail: NextPage = () => {
         </div>
         <div className="flex px-4 space-x-5 mt-3 text-gray-700 py-2.5 border-t border-b-[2px]  w-full">
           <span className="flex space-x-2 items-center text-sm">
-            <Icon shape={ICON_SHAPE.CHECK} width={4} height={4} />
+            <Icon shape={ICON_SHAPE.CHECK} width={16} height={16} />
             <span>궁금해요 1</span>
           </span>
           <span className="flex space-x-2 items-center text-sm">
-            <Icon shape={ICON_SHAPE.CHAT} width={4} height={4} />
+            <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
             <span>답변 1</span>
           </span>
         </div>
@@ -60,9 +61,7 @@ const CommunityPostDetail: NextPage = () => {
           rows={6}
           placeholder="Answer this question!"
         />
-        <button className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none ">
-          Reply
-        </button>
+        <Button type="button" text="Reply" className="w-full mt-2" />
       </div>
     </>
   );

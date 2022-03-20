@@ -9,8 +9,8 @@ interface IProps {
   height?: number;
 }
 
-const Icon = ({ shape, width = 6, height = 6 }: IProps) => {
-  const getIcon = useCallback(() => {
+const Icon = ({ shape, width = 24, height = 24 }: IProps) => {
+  const getIcon = useCallback((shape: ICON_SHAPE) => {
     switch (shape) {
       case ICON_SHAPE.HOME:
         return (
@@ -118,18 +118,19 @@ const Icon = ({ shape, width = 6, height = 6 }: IProps) => {
       default:
         break;
     }
-  }, [shape]);
+  }, []);
 
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={`w-${width} h-${height}`}
+      width={width}
+      height={height}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
       strokeWidth={2}
     >
-      {getIcon()}
+      {getIcon(shape)}
     </svg>
   );
 };

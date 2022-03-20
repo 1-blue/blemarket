@@ -1,3 +1,4 @@
+// 아이콘 형태
 export enum ICON_SHAPE {
   HOME,
   NEWS,
@@ -11,4 +12,10 @@ export enum ICON_SHAPE {
   BACK,
   CART,
   BAG,
+}
+
+// 로그인 방식
+export enum LOGIN_TYPE {
+  EMAIL = "email",
+  PHONE = "phone",
 }

@@ -1,7 +1,11 @@
-import Icon from "@src/components/common/Icon";
-import { ICON_SHAPE } from "@src/types";
 import type { NextPage } from "next";
 import Link from "next/link";
+
+// type
+import { ICON_SHAPE } from "@src/types";
+
+// common-component
+import Icon from "@src/components/common/Icon";
 
 const Profile: NextPage = () => {
   return (
@@ -19,7 +23,7 @@ const Profile: NextPage = () => {
         <Link href="/profile/bought">
           <a className="flex-1 group flex flex-col items-center">
             <div className="flex justify-center items-center bg-orange-400 w-16 h-16 rounded-full text-white mb-2 group-hover:bg-orange-500 ">
-              <Icon shape={ICON_SHAPE.CART} width={6} height={6} />
+              <Icon shape={ICON_SHAPE.CART} />
             </div>
             <span className="text-gray-700 font-medium">판매내역</span>
           </a>
@@ -27,7 +31,7 @@ const Profile: NextPage = () => {
         <Link href="/profile/bought">
           <a className="flex-1 group flex flex-col items-center">
             <div className="flex justify-center items-center bg-orange-400 w-16 h-16 rounded-full text-white mb-2 group-hover:bg-orange-500">
-              <Icon shape={ICON_SHAPE.BAG} width={6} height={6} />
+              <Icon shape={ICON_SHAPE.BAG} />
             </div>
             <span>구매내역</span>
           </a>
@@ -35,7 +39,7 @@ const Profile: NextPage = () => {
         <Link href="/profile/loved">
           <a className="flex-1 group flex flex-col items-center">
             <div className="flex justify-center items-center bg-orange-400 w-16 h-16 rounded-full text-white mb-2 group-hover:bg-orange-500">
-              <Icon shape={ICON_SHAPE.HEART} width={6} height={6} />
+              <Icon shape={ICON_SHAPE.HEART} />
             </div>
             <span>관심목록</span>
           </a>

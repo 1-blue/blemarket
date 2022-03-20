@@ -30,11 +30,11 @@ const Community: NextPage = () => {
           </div>
           <div className="flex py-2 border-y border-b-2 space-x-4">
             <span className="flex items-center space-x-1">
-              <Icon shape={ICON_SHAPE.CHECK} width={4} height={4} />
+              <Icon shape={ICON_SHAPE.CHECK} width={16} height={16} />
               <span>궁금해요 1</span>
             </span>
             <span className="flex items-center space-x-1">
-              <Icon shape={ICON_SHAPE.CHAT} width={4} height={4} />
+              <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
               <span>답변 1</span>
             </span>
           </div>

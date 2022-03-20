@@ -5,7 +5,7 @@ import Layout from "@src/components/layout";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <Layout title="제목" canGoBack hasTabBar>
+    <Layout hasTabBar>
       <Component {...pageProps} />
     </Layout>
   );

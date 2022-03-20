@@ -28,11 +28,11 @@ const Home: NextPage = () => {
             </div>
             <div className="flex items-end space-x-2">
               <div className="flex items-center space-x-0.5 text-gray-700 text-sm">
-                <Icon shape={ICON_SHAPE.HEART} width={4} height={4} />
+                <Icon shape={ICON_SHAPE.HEART} width={16} height={16} />
                 <span>1</span>
               </div>
               <div className="flex items-center space-x-0.5 text-gray-700 text-sm">
-                <Icon shape={ICON_SHAPE.CHAT} width={4} height={4} />
+                <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
                 <span>1</span>
               </div>
             </div>

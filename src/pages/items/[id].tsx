@@ -7,6 +7,7 @@ import { ICON_SHAPE } from "@src/types";
 
 // common-component
 import Icon from "@src/components/common/Icon";
+import Button from "@src/components/common/Button";
 
 const ItemDatail: NextPage = () => {
   return (
@@ -38,9 +39,7 @@ const ItemDatail: NextPage = () => {
             motherfucker to get shot. You understand?
           </p>
           <div className="flex justify-between space-x-2  ">
-            <button className="flex-1 py-3 bg-orange-400 text-white rounded-md font-medium hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2">
-              Talk to seller
-            </button>
+            <Button text="Talk to seller" type="button" className="flex-1" />
             <button className="p-3 bg-red-100 rounded-md hover:bg-red-200 text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500">
               <Icon shape={ICON_SHAPE.HEART} />
             </button>

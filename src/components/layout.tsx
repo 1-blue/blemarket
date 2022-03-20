@@ -12,30 +12,37 @@ import NavBar from "@src/components/NavBar";
 
 interface IProps {
   children: React.ReactNode;
-  title: string;
-  canGoBack?: boolean;
   hasTabBar?: boolean;
 }
 
-const Layout = ({ children, title, canGoBack, hasTabBar }: IProps) => {
+const Layout = ({ children, hasTabBar }: IProps) => {
   const router = useRouter();
 
   // 2022/03/19 - 뒤로가기 - by 1-blue
   const goBack = useCallback(() => router.back(), [router]);
 
+  const getTitle = useCallback((asPath: string) => {
+    if (asPath === "/" || asPath.includes("/items")) return "홈";
+    if (asPath === "/" || asPath.includes("/community")) return "동네생활";
+    if (asPath === "/" || asPath.includes("/chats")) return "채팅";
+    if (asPath === "/" || asPath.includes("/streams")) return "라이브";
+    if (asPath === "/" || asPath.includes("/profile")) return "프로필";
+    return "알 수 없는 페이지";
+  }, []);
+
   return (
     <>
       <header className="fixed w-full max-w-lg inset-x-0 mx-auto border-b-2 py-4 bg-white shadow-lg">
-        <h1 className="text-xl font-bold text-center">{title}</h1>
-        {canGoBack && (
-          <button
-            type="button"
-            onClick={goBack}
-            className="absolute w-10 h-10 top-3 left-4"
-          >
-            <Icon shape={ICON_SHAPE.BACK} width={10} height={10} />
-          </button>
-        )}
+        <h1 className="text-xl font-bold text-center">
+          {getTitle(router.asPath)}
+        </h1>
+        <button
+          type="button"
+          onClick={goBack}
+          className="absolute w-10 h-10 top-3 left-4 rounded-full text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-4 00 focus:ring-offset-2"
+        >
+          <Icon shape={ICON_SHAPE.BACK} width={40} height={40} />
+        </button>
       </header>
       <main className="w-full max-w-lg mx-auto pt-20 pb-24">{children}</main>
       {hasTabBar && <NavBar />}

@@ -1,13 +1,10 @@
 import React, { useCallback, useState } from "react";
 
-// 로그인 방식
-enum LOGIN_TYPE {
-  EMAIL = "email",
-  PHONE = "phone",
-}
+// type
+import { LOGIN_TYPE } from "@src/types";
 
-// 임시
-const cls = (...classname: string[]) => classname.join(" ");
+// utils
+import { combineClassNames } from "@src/libs/util";
 
 const Enter = () => {
   const [method, setMethod] = useState<LOGIN_TYPE>(LOGIN_TYPE.EMAIL);
@@ -28,7 +25,7 @@ const Enter = () => {
             <button
               type="button"
               onClick={onClickEmail}
-              className={cls(
+              className={combineClassNames(
                 "p-4",
                 method === LOGIN_TYPE.EMAIL
                   ? "border-b-2 border-orange-500 text-orange-400 font-semibold"
@@ -40,7 +37,7 @@ const Enter = () => {
             <button
               type="button"
               onClick={onClickPhone}
-              className={cls(
+              className={combineClassNames(
                 "p-4",
                 method === LOGIN_TYPE.PHONE
                   ? "border-b-2 border-orange-500 text-orange-400 font-semibold"

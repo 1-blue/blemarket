@@ -1,5 +1,8 @@
 import type { NextPage } from "next";
 
+// common-component
+import Button from "@src/components/common/Button";
+
 const Upload: NextPage = () => {
   return (
     <div className="px-4">
@@ -58,12 +61,7 @@ const Upload: NextPage = () => {
           />
         </div>
       </div>
-      <button
-        type="button"
-        className="w-full bg-orange-500 py-2 text-white rounded-md hover:bg-orange-600 outline-none shadow-sm text-sm font-medium focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-      >
-        Upload product
-      </button>
+      <Button type="button" text="Upload product" className="w-full" />
     </div>
   );
 };
