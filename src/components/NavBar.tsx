@@ -8,7 +8,7 @@ import { ICON_SHAPE } from "@src/types";
 import Icon from "@src/components/common/Icon";
 
 // util
-import { combineClassNames } from "@src/libs/util";
+import { combineClassNames } from "@src/libs/client/util";
 
 const NavBar = () => {
   const { asPath } = useRouter();

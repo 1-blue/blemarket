@@ -1,4 +1,4 @@
-import { combineClassNames } from "@src/libs/util";
+import { combineClassNames } from "@src/libs/client/util";
 
 interface IProps {
   text: string;

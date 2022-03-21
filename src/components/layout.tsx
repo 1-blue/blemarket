@@ -23,10 +23,11 @@ const Layout = ({ children, hasTabBar }: IProps) => {
 
   const getTitle = useCallback((asPath: string) => {
     if (asPath === "/" || asPath.includes("/items")) return "홈";
-    if (asPath === "/" || asPath.includes("/community")) return "동네생활";
-    if (asPath === "/" || asPath.includes("/chats")) return "채팅";
-    if (asPath === "/" || asPath.includes("/streams")) return "라이브";
-    if (asPath === "/" || asPath.includes("/profile")) return "프로필";
+    if (asPath.includes("/community")) return "동네생활";
+    if (asPath.includes("/chats")) return "채팅";
+    if (asPath.includes("/streams")) return "라이브";
+    if (asPath.includes("/profile")) return "프로필";
+    if (asPath.includes("/enter")) return "로그인";
     return "알 수 없는 페이지";
   }, []);
 
