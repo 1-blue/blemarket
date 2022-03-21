@@ -20,17 +20,21 @@ interface ILoginForm {
 const Enter = () => {
   const [enter, { loading, data, error }] =
     useMutation<ILoginForm>("/api/users/enter");
-  const { register, handleSubmit } = useForm<ILoginForm>();
+  const { register, handleSubmit, reset } = useForm<ILoginForm>();
   const [method, setMethod] = useState<LOGIN_TYPE>(LOGIN_TYPE.EMAIL);
 
   // 2022/03/17 - 로그인 타입 이메일/휴대폰으로 변경 - by 1-blue
-  const onClickEmail = useCallback(() => setMethod(LOGIN_TYPE.EMAIL), []);
-  const onClickPhone = useCallback(() => setMethod(LOGIN_TYPE.PHONE), []);
+  const onClickEmail = useCallback(() => {
+    reset();
+    setMethod(LOGIN_TYPE.EMAIL);
+  }, [reset]);
+  const onClickPhone = useCallback(() => {
+    reset();
+    setMethod(LOGIN_TYPE.PHONE);
+  }, [reset]);
 
   // 2022/03/21 - 로그인 이벤트 - by 1-blue
   const onValid = useCallback((body: ILoginForm) => enter(body), [enter]);
-
-  console.log(loading, data, error);
 
   return (
     <>
@@ -103,6 +107,7 @@ const Enter = () => {
                 ? "Get out-time password"
                 : ""
             }
+            $loading={loading}
           />
         </form>
         {/* division line */}

@@ -1,12 +1,16 @@
 import { combineClassNames } from "@src/libs/client/util";
 
+// common-component
+import Spinner from "./Spinner";
+
 interface IProps {
   text: string;
   className?: string;
+  $loading?: boolean;
   [props: string]: any;
 }
 
-const Button = ({ text, className, ...props }: IProps) => {
+const Button = ({ text, className, $loading, ...props }: IProps) => {
   return (
     <button
       {...props}
@@ -15,7 +19,7 @@ const Button = ({ text, className, ...props }: IProps) => {
         className ? className : ""
       )}
     >
-      {text}
+      {$loading ? <Spinner kinds="button" /> : text}
     </button>
   );
 };
