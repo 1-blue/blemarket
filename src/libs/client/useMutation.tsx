@@ -1,22 +1,26 @@
 import { useState } from "react";
 
-interface IState {
+import { IEnterForm, ITokenForm } from "@src/types";
+
+interface IUseMutationState<T> {
   loading: boolean;
-  data: any;
+  data: T | null;
   error: any;
 }
+type UseMutationResult<T> = [
+  (body: IEnterForm | ITokenForm) => void,
+  IUseMutationState<T>
+];
 
 // 2022/03/21 - API함수 및 유용한 변수들을 반환하는 hook - by 1-blue
-export default function useMutation<T>(
-  url: string
-): [(body: T) => void, { loading: boolean; data: any; error: any }] {
-  const [state, setState] = useState<IState>({
+export default function useMutation<T>(url: string): UseMutationResult<T> {
+  const [state, setState] = useState<IUseMutationState<T>>({
     loading: false,
     data: null,
     error: null,
   });
 
-  const mutation = (body: T) => {
+  const mutation = (body: IEnterForm | ITokenForm) => {
     setState((prev) => ({ ...prev, loading: true }));
     fetch(url, {
       method: "POST",

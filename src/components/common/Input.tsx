@@ -25,7 +25,7 @@ const Input = ({
       type={type}
       placeholder={placeholder}
       className={combineClassNames(
-        "appearance-none w-full border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-orange-500 focus:ring-0",
+        "appearance-none w-full border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-orange-500 focus:ring-0 placeholder:text-sm",
         className ? className : ""
       )}
     />

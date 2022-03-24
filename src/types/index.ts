@@ -19,3 +19,12 @@ export enum LOGIN_TYPE {
   EMAIL = "email",
   PHONE = "phone",
 }
+
+// 로그인 폼 전송 데이터
+export interface IEnterForm {
+  email?: string;
+  phone?: string;
+}
+export interface ITokenForm {
+  token: string;
+}
