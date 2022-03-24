@@ -22,7 +22,7 @@ const Layout = ({ children, hasTabBar }: IProps) => {
   const goBack = useCallback(() => router.back(), [router]);
 
   const getTitle = useCallback((asPath: string) => {
-    if (asPath === "/" || asPath.includes("/items")) return "홈";
+    if (asPath === "/" || asPath.includes("/products")) return "홈";
     if (asPath.includes("/community")) return "동네생활";
     if (asPath.includes("/chats")) return "채팅";
     if (asPath.includes("/streams")) return "라이브";

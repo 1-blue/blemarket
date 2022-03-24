@@ -21,7 +21,7 @@ const NavBar = () => {
             <a
               className={combineClassNames(
                 "flex flex-col justify-center items-center focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none rounded-sm",
-                asPath === "/" || asPath.includes("/items")
+                asPath === "/" || asPath.includes("/products")
                   ? "text-orange-500"
                   : ""
               )}

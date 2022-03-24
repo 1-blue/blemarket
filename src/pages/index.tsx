@@ -10,11 +10,16 @@ import Icon from "@src/components/common/Icon";
 import SideButton from "@src/components/SideButton";
 import Link from "next/link";
 
+// hook
+import useUser from "@src/libs/client/useUser";
+
 const Home: NextPage = () => {
+  const {} = useUser("/api/users/me");
+
   return (
     <div className="flex flex-col space-y-5 divide-y">
       {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
-        <Link key={i} href={`items/${i}`}>
+        <Link key={i} href={`products/${i}`}>
           <a className="flex justify-between px-4 pt-4 first:pt-0">
             <div className="flex space-x-4">
               <div className="w-20 h-20 bg-gray-400 rounded-md" />
@@ -39,7 +44,7 @@ const Home: NextPage = () => {
           </a>
         </Link>
       ))}
-      <Link href="/items/upload">
+      <Link href="/products/upload">
         <a>
           <SideButton>
             <Icon shape={ICON_SHAPE.PLUS} />

@@ -12,6 +12,7 @@ export enum ICON_SHAPE {
   BACK,
   CART,
   BAG,
+  PHOTO,
 }
 
 // 로그인 방식
