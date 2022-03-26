@@ -15,17 +15,29 @@ export enum ICON_SHAPE {
   PHOTO,
 }
 
+// api 리턴 값 ( 인터페이스... 상속으로 사용하기 )
+export interface IMutationResult {
+  ok: boolean;
+  message: string;
+}
+
 // 로그인 방식
 export enum LOGIN_TYPE {
   EMAIL = "email",
   PHONE = "phone",
 }
 
-// 로그인 폼 전송 데이터
+// 폼 전송 데이터
 export interface IEnterForm {
   email?: string;
   phone?: string;
 }
 export interface ITokenForm {
   token: string;
+}
+export interface IUploadForm {
+  name: string;
+  price: number;
+  description: string;
+  keywords: string;
 }

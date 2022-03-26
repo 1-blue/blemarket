@@ -1,10 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-type methodType = "GET" | "POST" | "DELETE";
-type fnType = (req: NextApiRequest, res: NextApiResponse) => Promise<any>;
+type Methods = "GET" | "POST" | "DELETE";
 
 interface IConfig {
-  method: "GET" | "POST" | "DELETE";
+  methods: Methods[];
   handler: (req: NextApiRequest, res: NextApiResponse) => Promise<any>;
   isPrivate?: boolean;
 }
@@ -17,9 +16,9 @@ export interface IResponseType {
 
 // 2022/03/25 - method에 따른 라우팅을 쉽게 처리해주는 HOF + 접근 권한 확인 - by 1-blue
 const withHandler =
-  ({ method, handler, isPrivate = true }: IConfig) =>
+  ({ methods, handler, isPrivate = true }: IConfig) =>
   async (req: NextApiRequest, res: NextApiResponse) => {
-    if (req.method !== method) return res.status(405).end();
+    if (!methods.includes(req.method as Methods)) return res.status(405).end();
 
     if (isPrivate && !req.session.user)
       return res

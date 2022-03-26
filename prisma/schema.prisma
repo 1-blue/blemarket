@@ -18,16 +18,41 @@ model User {
   phone     String?  @unique
   email     String?  @unique
   avatar    String?
-  tokens    Token[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  tokens   Token[]
+  products Product[]
 }
 
 model Token {
   id        Int      @id @default(autoincrement())
   payload   String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
 }
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(30)
+  price       Int
+  description String   @db.MediumText
+  image       String
+  keywords    String   @db.VarChar(40)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+}
+
+// 관계도
+// User : Token ( 1 : N )
+// User : Product ( 1 : N )
+
+// 추후에 구현할 것
+// Product : Keyword ( N : M )
+// Product : Hashtag ( N : M )

@@ -1,7 +1,9 @@
 import type { NextPage } from "next";
+import useSWR from "swr";
 
 // type
-import { ICON_SHAPE } from "@src/types";
+import { ICON_SHAPE, IMutationResult } from "@src/types";
+import { Product } from "@prisma/client";
 
 // common-component
 import Icon from "@src/components/common/Icon";
@@ -12,37 +14,21 @@ import Link from "next/link";
 
 // hook
 import useUser from "@src/libs/client/useUser";
+import Item from "@src/components/common/Item";
+
+interface IProductsResponse extends IMutationResult {
+  products?: Product[];
+}
 
 const Home: NextPage = () => {
   const {} = useUser("/api/users/me");
+  const { data } = useSWR<IProductsResponse>("/api/products");
 
   return (
     <div className="flex flex-col space-y-5 divide-y">
-      {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
-        <Link key={i} href={`products/${i}`}>
-          <a className="flex justify-between px-4 pt-4 first:pt-0">
-            <div className="flex space-x-4">
-              <div className="w-20 h-20 bg-gray-400 rounded-md" />
-              <div className="flex flex-col pt-2">
-                <h3 className="text-sm font-medium text-gray-900">
-                  New iPhone 14
-                </h3>
-                <span className="text-xs text-gray-500">Black</span>
-                <span className="font-medium mt-1 text-gray-900">$95</span>
-              </div>
-            </div>
-            <div className="flex items-end space-x-2">
-              <div className="flex items-center space-x-0.5 text-gray-700 text-sm">
-                <Icon shape={ICON_SHAPE.HEART} width={16} height={16} />
-                <span>1</span>
-              </div>
-              <div className="flex items-center space-x-0.5 text-gray-700 text-sm">
-                <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
-                <span>1</span>
-              </div>
-            </div>
-          </a>
-        </Link>
+      {/* >> 여기서 데이터 가져오는 동안 스피너 보여주기! */}
+      {data?.products?.map((product) => (
+        <Item key={product.id} item={product} />
       ))}
       <Link href="/products/upload">
         <a>

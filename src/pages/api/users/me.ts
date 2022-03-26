@@ -11,31 +11,20 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
 ) {
-  const { token } = req.body;
-
   try {
-    const exToken = await prisma.token.findUnique({
+    const exUser = await prisma.user.findUnique({
       where: {
-        payload: token,
+        id: req.session.user?.id,
       },
     });
 
-    if (!exToken)
-      return res
-        .status(404)
-        .json({ ok: false, message: "유효하지 않은 토큰입니다." });
-
-    req.session.user = { id: exToken.userId };
-    await req.session.save();
-    await prisma.token.deleteMany({ where: { userId: exToken.userId } });
-
     res.status(200).json({
       ok: true,
-      message: "이메일/전화번호 인증을 성공했습니다.",
-      token,
+      message: "로그인 인증 완료",
+      user: exUser,
     });
   } catch (error) {
-    console.error("/api/users/confirm error >> ", error);
+    console.error("/api/users/me error >> ", error);
 
     res.status(500).json({
       ok: false,
@@ -45,6 +34,4 @@ async function handler(
   }
 }
 
-export default withApiSession(
-  withHandler({ method: "POST", handler, isPrivate: false })
-);
+export default withApiSession(withHandler({ methods: ["GET"], handler }));

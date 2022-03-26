@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { IEnterForm, ITokenForm } from "@src/types";
+import { IEnterForm, ITokenForm, IUploadForm } from "@src/types";
 
 interface IUseMutationState<T> {
   loading: boolean;
@@ -8,7 +8,7 @@ interface IUseMutationState<T> {
   error: any;
 }
 type UseMutationResult<T> = [
-  (body: IEnterForm | ITokenForm) => void,
+  (body: IEnterForm | ITokenForm | IUploadForm) => void,
   IUseMutationState<T>
 ];
 
@@ -20,7 +20,7 @@ export default function useMutation<T>(url: string): UseMutationResult<T> {
     error: null,
   });
 
-  const mutation = (body: IEnterForm | ITokenForm) => {
+  const mutation = (body: IEnterForm | ITokenForm | IUploadForm) => {
     setState((prev) => ({ ...prev, loading: true }));
     fetch(url, {
       method: "POST",

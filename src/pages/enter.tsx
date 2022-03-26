@@ -3,7 +3,12 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
 // type
-import { IEnterForm, ITokenForm, LOGIN_TYPE } from "@src/types";
+import {
+  IEnterForm,
+  IMutationResult,
+  ITokenForm,
+  LOGIN_TYPE,
+} from "@src/types";
 
 // utils
 import { combineClassNames } from "@src/libs/client/util";
@@ -13,11 +18,6 @@ import useMutation from "@src/libs/client/useMutation";
 import Button from "@src/components/common/Button";
 import Input from "@src/components/common/Input";
 import Notice from "@src/components/common/Notice";
-
-interface IMutationResult {
-  ok: boolean;
-  message: string;
-}
 
 const Enter = () => {
   const router = useRouter();
