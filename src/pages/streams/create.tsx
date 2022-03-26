@@ -1,6 +1,9 @@
 import React from "react";
 import type { NextPage } from "next";
 
+// common-component
+import Button from "@src/components/common/Button";
+
 const Create: NextPage = () => {
   return (
     <div className="px-4 space-y-4">
@@ -39,12 +42,7 @@ const Create: NextPage = () => {
           />
         </div>
       </div>
-      <button
-        type="button"
-        className="w-full bg-orange-500 py-2 text-white rounded-md hover:bg-orange-600 outline-none shadow-sm text-sm font-medium focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-      >
-        Go Live
-      </button>
+      <Button type="button" $primary className="w-full" text="Go Live" />
     </div>
   );
 };

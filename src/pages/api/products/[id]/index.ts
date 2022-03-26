@@ -11,11 +11,12 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
 ) {
-  const id = +req.query.id;
+  const productId = +req.query.id;
+  const userId = +req.session.user?.id!;
 
   try {
     const findProductWithUser = await prisma.product.findUnique({
-      where: { id },
+      where: { id: productId },
       include: {
         user: {
           select: {
@@ -28,7 +29,6 @@ async function handler(
     });
 
     const keywords = findProductWithUser?.keywords.split(" ");
-
     const relatedProducts = await prisma.product.findMany({
       where: {
         OR: keywords?.map((keyword) => ({
@@ -38,9 +38,16 @@ async function handler(
         })),
         AND: {
           id: {
-            not: id,
+            not: productId,
           },
         },
+      },
+    });
+
+    const isFavorite = await prisma.favorite.findFirst({
+      where: {
+        userId,
+        productId,
       },
     });
 
@@ -49,6 +56,7 @@ async function handler(
       message: "특정 상품에 대한 정보를 가져왔습니다.",
       product: findProductWithUser,
       relatedProducts,
+      isFavorite: !!isFavorite,
     });
   } catch (error) {
     console.error("/api/products error >> ", error);

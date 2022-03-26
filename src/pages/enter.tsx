@@ -89,6 +89,7 @@ const Enter = () => {
             type="submit"
             className="w-full"
             text="Confirm Token"
+            $primary
             $loading={tokenLoading}
           />
         </form>
@@ -186,6 +187,7 @@ const Enter = () => {
             <Button
               type="submit"
               className="w-full"
+              $primary
               text={
                 method === LOGIN_TYPE.EMAIL
                   ? "Get login link"

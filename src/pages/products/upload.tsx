@@ -136,6 +136,7 @@ const Upload: NextPage = () => {
         <Button
           type="submit"
           text="Upload product"
+          $primary
           $loading={loading}
           className="w-full"
         />

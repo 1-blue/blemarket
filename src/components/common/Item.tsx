@@ -2,16 +2,19 @@ import Link from "next/link";
 
 // type
 import { ICON_SHAPE } from "@src/types";
-import { Product } from "@prisma/client";
 
 // common-component
 import Icon from "@src/components/common/Icon";
 
 interface IProps {
-  item: Product;
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  favoriteCount: number;
 }
 
-const Item = ({ item: { id, name, description, price } }: IProps) => {
+const Item = ({ id, name, description, price, favoriteCount }: IProps) => {
   return (
     <Link href={`products/${id}`}>
       <a className="flex justify-between px-4 pt-4 first:pt-0">
@@ -31,7 +34,7 @@ const Item = ({ item: { id, name, description, price } }: IProps) => {
           {/* 좋아요  개수 */}
           <div className="flex items-center space-x-0.5 text-gray-700 text-sm">
             <Icon shape={ICON_SHAPE.HEART} width={16} height={16} />
-            <span>1</span>
+            <span>{favoriteCount}</span>
           </div>
           {/* 댓글 개수 */}
           <div className="flex items-center space-x-0.5 text-gray-700 text-sm">

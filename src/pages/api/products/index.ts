@@ -18,7 +18,15 @@ async function handler(
 
   try {
     if (req.method === "GET") {
-      const findProducts = await prisma.product.findMany({});
+      const findProducts = await prisma.product.findMany({
+        include: {
+          _count: {
+            select: {
+              favorites: true,
+            },
+          },
+        },
+      });
 
       res.status(200).json({
         ok: true,

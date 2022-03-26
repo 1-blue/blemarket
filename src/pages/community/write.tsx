@@ -10,7 +10,7 @@ const Write: NextPage = () => {
         rows={6}
         placeholder="Ask this question!"
       />
-      <Button type="button" text="Submit" className="w-full mt-2" />
+      <Button type="button" text="Submit" $primary className="w-full mt-2" />
     </div>
   );
 };

@@ -61,7 +61,7 @@ const CommunityPostDetail: NextPage = () => {
           rows={6}
           placeholder="Answer this question!"
         />
-        <Button type="button" text="Reply" className="w-full mt-2" />
+        <Button type="button" text="Reply" $primary className="w-full mt-2" />
       </div>
     </>
   );

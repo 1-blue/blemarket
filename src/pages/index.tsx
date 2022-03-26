@@ -16,8 +16,14 @@ import Link from "next/link";
 import useUser from "@src/libs/client/useUser";
 import Item from "@src/components/common/Item";
 
+interface ProductWithFavoriteCount extends Product {
+  _count: {
+    favorites: number;
+  };
+}
+
 interface IProductsResponse extends IMutationResult {
-  products?: Product[];
+  products?: ProductWithFavoriteCount[];
 }
 
 const Home: NextPage = () => {
@@ -28,7 +34,14 @@ const Home: NextPage = () => {
     <div className="flex flex-col space-y-5 divide-y">
       {/* >> 여기서 데이터 가져오는 동안 스피너 보여주기! */}
       {data?.products?.map((product) => (
-        <Item key={product.id} item={product} />
+        <Item
+          key={product.id}
+          id={product.id}
+          name={product.name}
+          description={product.description}
+          price={product.price}
+          favoriteCount={product._count.favorites}
+        />
       ))}
       <Link href="/products/upload">
         <a>

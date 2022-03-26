@@ -7,9 +7,10 @@ interface IProps {
   shape: ICON_SHAPE;
   width?: number;
   height?: number;
+  $fill?: boolean;
 }
 
-const Icon = ({ shape, width = 24, height = 24 }: IProps) => {
+const Icon = ({ shape, width = 24, height = 24, $fill = false }: IProps) => {
   const getIcon = useCallback((shape: ICON_SHAPE) => {
     switch (shape) {
       case ICON_SHAPE.HOME:
@@ -129,18 +130,72 @@ const Icon = ({ shape, width = 24, height = 24 }: IProps) => {
     }
   }, []);
 
+  const getFillIcon = useCallback((shape: ICON_SHAPE) => {
+    switch (shape) {
+      case ICON_SHAPE.HOME:
+        return <></>;
+      case ICON_SHAPE.NEWS:
+        return <></>;
+      case ICON_SHAPE.CHAT:
+        return <></>;
+      case ICON_SHAPE.CAMERA:
+        return <></>;
+      case ICON_SHAPE.USER:
+        return <></>;
+      case ICON_SHAPE.PLUS:
+        return <></>;
+      case ICON_SHAPE.HEART:
+        return (
+          <path
+            fillRule="evenodd"
+            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+            clipRule="evenodd"
+          />
+        );
+      case ICON_SHAPE.CHECK:
+        return <></>;
+      case ICON_SHAPE.PENCIL:
+        return <></>;
+      case ICON_SHAPE.BACK:
+        return <></>;
+      case ICON_SHAPE.CART:
+        return <></>;
+      case ICON_SHAPE.BAG:
+        return <></>;
+      case ICON_SHAPE.PHOTO:
+        return <></>;
+
+      default:
+        break;
+    }
+  }, []);
+
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={width}
-      height={height}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      {getIcon(shape)}
-    </svg>
+    <>
+      {$fill ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={width}
+          height={height}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          {getFillIcon(shape)}
+        </svg>
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={width}
+          height={height}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          {getIcon(shape)}
+        </svg>
+      )}
+    </>
   );
 };
 

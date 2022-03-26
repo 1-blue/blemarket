@@ -8,7 +8,7 @@ interface IUseMutationState<T> {
   error: any;
 }
 type UseMutationResult<T> = [
-  (body: IEnterForm | ITokenForm | IUploadForm) => void,
+  (body: IEnterForm | ITokenForm | IUploadForm | null) => void,
   IUseMutationState<T>
 ];
 
@@ -20,7 +20,7 @@ export default function useMutation<T>(url: string): UseMutationResult<T> {
     error: null,
   });
 
-  const mutation = (body: IEnterForm | ITokenForm | IUploadForm) => {
+  const mutation = (body: IEnterForm | ITokenForm | IUploadForm | null) => {
     setState((prev) => ({ ...prev, loading: true }));
     fetch(url, {
       method: "POST",
