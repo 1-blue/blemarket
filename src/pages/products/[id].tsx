@@ -14,6 +14,7 @@ import { combineClassNames } from "@src/libs/client/util";
 // common-component
 import Icon from "@src/components/common/Icon";
 import Button from "@src/components/common/Button";
+import Profile from "@src/components/common/Profile";
 import useMutation from "@src/libs/client/useMutation";
 
 interface IProductWithUser extends Product {
@@ -55,17 +56,11 @@ const ProductsDatail: NextPage = () => {
         {/* 상품 이미지 */}
         <div className="h-96 w-full bg-slate-300" />
         {/* 게시글 작성자 프사, 이름 */}
-        <Link href={`/users/profiles/${data?.product.user.id}`}>
-          <a className="flex items-center border-y py-4 px-2 space-x-2 cursor-pointer mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:rounded-md">
-            <div className="w-14 h-14 rounded-full bg-slate-300" />
-            <div>
-              <p className="font-semibold">{data?.product.user.name}</p>
-              <span className="text-xs font-semibold text-gray-500">
-                View profile &rarr;
-              </span>
-            </div>
-          </a>
-        </Link>
+        <Profile
+          id={data?.product.user.id}
+          name={data?.product.user.name}
+          avatar={data?.product.user.avatar}
+        />
         {/* 상품 이름, 가격, 설명, 채팅, 좋아요 */}
         <div className="flex flex-col">
           <h1 className="font-bold text-3xl mb-1">{data?.product.name}</h1>
