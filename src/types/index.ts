@@ -27,6 +27,13 @@ export enum LOGIN_TYPE {
   PHONE = "phone",
 }
 
+// 간단한 유저 타입
+export interface SimpleUser {
+  id: number;
+  name: string;
+  avatar: string;
+}
+
 // 폼 전송 데이터
 export interface IEnterForm {
   email?: string;
@@ -40,4 +47,10 @@ export interface IUploadForm {
   price: number;
   description: string;
   keywords: string;
+}
+export interface IQuestionForm {
+  question: string;
+}
+export interface IAnswerForm {
+  answer: string;
 }

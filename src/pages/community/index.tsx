@@ -1,45 +1,44 @@
 import type { NextPage } from "next";
 import Link from "next/link";
+import useSWR from "swr";
 
 // type
-import { ICON_SHAPE } from "@src/types";
+import { ICON_SHAPE, IMutationResult } from "@src/types";
+import { Post } from "@prisma/client";
 
 // common-component
 import Icon from "@src/components/common/Icon";
 
 // component
 import SideButton from "@src/components/SideButton";
+import CommunityItem from "@src/components/CommunityItem";
+
+export interface IPostWithEtc extends Post {
+  user: {
+    name: string;
+  };
+  _count: {
+    answers: number;
+    recommendations: number;
+  };
+}
+
+interface IPostResponse extends IMutationResult {
+  posts: IPostWithEtc[];
+}
 
 const Community: NextPage = () => {
+  const { data } = useSWR<IPostResponse>("/api/posts");
+
   return (
     <div className="px-4 space-y-8">
-      <Link href={`/community/1`}>
-        <a>
-          <span className="inline-block bg-gray-200 px-2 py-1 rounded-full text-xs mb-1">
-            동네질문
-          </span>
-          <div className="mb-2">
-            <span className="text-orange-500 font-semibold">Q.</span> What is
-            the best mandu restaurant?
-          </div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-gray-500 text-sm">니꼬</span>
-            <span className="text-gray-500 text-sm font-semibold">
-              18시간 전
-            </span>
-          </div>
-          <div className="flex py-2 border-y border-b-2 space-x-4">
-            <span className="flex items-center space-x-1">
-              <Icon shape={ICON_SHAPE.CHECK} width={16} height={16} />
-              <span>궁금해요 1</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
-              <span>답변 1</span>
-            </span>
-          </div>
-        </a>
-      </Link>
+      <ul className="space-y-8">
+        {data?.posts.map((post) => (
+          <li key={post.id}>
+            <CommunityItem post={post} />
+          </li>
+        ))}
+      </ul>
 
       <Link href="/community/write">
         <a>
