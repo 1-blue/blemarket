@@ -11,6 +11,7 @@ import { Post } from "@prisma/client";
 import Button from "@src/components/common/Button";
 import Textarea from "@src/components/common/Textarea";
 import useMutation from "@src/libs/client/useMutation";
+import useCoords from "@src/libs/client/useCoords";
 
 interface IWriteResponse extends IMutationResult {
   post: Post;
@@ -21,11 +22,12 @@ const Write: NextPage = () => {
   const { register, handleSubmit } = useForm<IQuestionForm>();
   const [question, { loading, data }] =
     useMutation<IWriteResponse>("/api/posts");
+  const coords = useCoords();
 
   // 2022/03/27 - 질문 생성 - by 1-blue
   const onValid = useCallback(
-    (data: IQuestionForm) => question(data),
-    [question]
+    (body: IQuestionForm) => question({ ...body, ...coords }),
+    [question, coords]
   );
 
   // 2022/03/27 - 게시글 생성 완료 시 페이지 이동 - 1-blue

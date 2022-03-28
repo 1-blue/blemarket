@@ -50,6 +50,8 @@ export interface IUploadForm {
 }
 export interface IQuestionForm {
   question: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 export interface IAnswerForm {
   answer: string;

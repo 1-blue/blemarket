@@ -13,6 +13,9 @@ import Icon from "@src/components/common/Icon";
 import SideButton from "@src/components/SideButton";
 import CommunityItem from "@src/components/CommunityItem";
 
+// util
+import useCoords from "@src/libs/client/useCoords";
+
 export interface IPostWithEtc extends Post {
   user: {
     name: string;
@@ -28,7 +31,12 @@ interface IPostResponse extends IMutationResult {
 }
 
 const Community: NextPage = () => {
-  const { data } = useSWR<IPostResponse>("/api/posts");
+  const { latitude, longitude } = useCoords();
+  const { data } = useSWR<IPostResponse>(
+    latitude && longitude
+      ? `/api/posts?latitude=${latitude}&longitude=${longitude}`
+      : null
+  );
 
   return (
     <div className="px-4 space-y-8">

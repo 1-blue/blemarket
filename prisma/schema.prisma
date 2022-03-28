@@ -68,9 +68,11 @@ model Favorite {
 
 model Post {
   id        Int      @id @default(autoincrement())
+  question  String   @db.MediumText
+  latitude  Float?
+  longitude Float?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  question  String   @db.MediumText
 
   answers         Answer[]
   recommendations Recommendation[]

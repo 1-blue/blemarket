@@ -10,14 +10,26 @@ async function handler(
   res: NextApiResponse<IResponseType>
 ) {
   const {
-    body: { question },
+    body: { question, latitude, longitude },
     session: { user },
     method,
   } = req;
+  const parsedLatitude = parseFloat(req.query.latitude.toString());
+  const parsedLongitue = parseFloat(req.query.longitude.toString());
 
   try {
     if (method === "GET") {
       const posts = await prisma.post.findMany({
+        where: {
+          latitude: {
+            gte: parsedLatitude - 0.01,
+            lte: parsedLatitude + 0.01,
+          },
+          longitude: {
+            gte: parsedLongitue - 0.01,
+            lte: parsedLongitue + 0.01,
+          },
+        },
         include: {
           user: {
             select: {
@@ -42,6 +54,8 @@ async function handler(
       const createdPost = await prisma.post.create({
         data: {
           question,
+          latitude,
+          longitude,
           user: {
             connect: {
               id: user?.id,
