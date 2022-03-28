@@ -3,6 +3,7 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 // type
 import {
@@ -59,7 +60,8 @@ const CommunityPostDetail: NextPage = () => {
 
   // 2022/03/27 - 궁금해요 클릭 - by 1-blue
   const onClickRecommendation = useCallback(() => {
-    if (recommendationLoading) return;
+    if (recommendationLoading)
+      return toast.error("이미 궁금해요를 처리중입니다.");
 
     mutate(
       (prev) =>

@@ -12,6 +12,7 @@ import Button from "@src/components/common/Button";
 import Textarea from "@src/components/common/Textarea";
 import useMutation from "@src/libs/client/useMutation";
 import useCoords from "@src/libs/client/useCoords";
+import { toast } from "react-toastify";
 
 interface IWriteResponse extends IMutationResult {
   post: Post;
@@ -34,6 +35,7 @@ const Write: NextPage = () => {
   useEffect(() => {
     if (!data?.ok) return;
 
+    toast.success("게시글을 생성했습니다.", { autoClose: 3000 });
     router.replace(`/community/${data.post.id}`);
   }, [data, router]);
 

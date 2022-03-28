@@ -16,6 +16,7 @@ import Textarea from "@src/components/common/Textarea";
 
 // util
 import useMutation from "@src/libs/client/useMutation";
+import { toast } from "react-toastify";
 
 interface IProductResult extends IMutationResult {
   product: Product;
@@ -41,7 +42,10 @@ const Upload: NextPage = () => {
 
   // 2022/03/25 - 상품 업로드 완료 후 리다이렉트 - by 1-blue
   useEffect(() => {
-    if (data?.ok) router.push(`/products/${data.product.id}`);
+    if (!data?.ok) return;
+
+    toast.success("상품을 등록했습니다.", { autoClose: 3000 });
+    router.push(`/products/${data.product.id}`);
   }, [data, router]);
 
   return (

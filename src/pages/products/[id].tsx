@@ -3,6 +3,7 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
+import { toast } from "react-toastify";
 
 // type
 import { ICON_SHAPE, IMutationResult } from "@src/types";
@@ -42,7 +43,7 @@ const ProductsDatail: NextPage = () => {
 
   // 2022/03/26 - 좋아요 토글 이벤트 - by 1-blue
   const onClickFavorite = useCallback(() => {
-    if (loading) return;
+    if (loading) return toast.error("이미 좋아요 처리중입니다.");
 
     mutate((prev) => prev && { ...prev, isFavorite: !prev.isFavorite }, false);
 
@@ -104,19 +105,6 @@ const ProductsDatail: NextPage = () => {
           ))}
         </div>
       </div>
-
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path
-          fillRule="evenodd"
-          d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-          clipRule="evenodd"
-        />
-      </svg>
     </>
   );
 };
