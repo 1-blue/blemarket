@@ -27,7 +27,7 @@ interface IProductsResponse extends IMutationResult {
 }
 
 const Home: NextPage = () => {
-  const {} = useUser("/api/users/me");
+  const {} = useUser();
   const { data } = useSWR<IProductsResponse>("/api/products");
 
   return (

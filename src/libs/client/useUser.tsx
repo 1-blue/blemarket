@@ -17,9 +17,9 @@ export interface IUserResponse {
   error?: any;
 }
 
-const useUser = (url: string) => {
+const useUser = () => {
   const router = useRouter();
-  const { data, error } = useSWR<IUserResponse>(url);
+  const { data, error } = useSWR<IUserResponse>("/api/users/me");
 
   useEffect(() => {
     if (data && !data?.ok) router.replace("/enter");

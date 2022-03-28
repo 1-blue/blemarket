@@ -1,8 +1,10 @@
 // type
 import { SimpleUser } from "@src/types";
-import { Answer as AnswerType } from "@prisma/client";
 
-interface AnswerWithUser extends AnswerType {
+interface AnswerWithUser {
+  id: number;
+  answer: string;
+  updatedAt: string;
   user: SimpleUser;
 }
 

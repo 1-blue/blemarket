@@ -11,7 +11,12 @@ import {
   IMutationResult,
   SimpleUser,
 } from "@src/types";
-import { Answer as AnswerType, Post } from "@prisma/client";
+import { Post } from "@prisma/client";
+
+// util
+import { combineClassNames } from "@src/libs/client/util";
+import useMutation from "@src/libs/client/useMutation";
+import useUser from "@src/libs/client/useUser";
 
 // common-component
 import Icon from "@src/components/common/Icon";
@@ -19,10 +24,11 @@ import Button from "@src/components/common/Button";
 import Profile from "@src/components/common/Profile";
 import Textarea from "@src/components/common/Textarea";
 import Answer from "@src/components/common/Answer";
-import { combineClassNames } from "@src/libs/client/util";
-import useMutation from "@src/libs/client/useMutation";
 
-interface AnswerWithUser extends AnswerType {
+interface AnswerWithUser {
+  id: number;
+  answer: string;
+  updatedAt: string;
   user: SimpleUser;
 }
 interface IPostWithEtc extends Post {
@@ -39,17 +45,21 @@ interface IPostResponse extends IMutationResult {
 
 const CommunityPostDetail: NextPage = () => {
   const router = useRouter();
+  const { user } = useUser();
   const { data, mutate } = useSWR<IPostResponse>(
     router.query.id ? `/api/posts/${router.query.id}` : null
   );
-  const [recommendation, { data: recommendationData, loading }] = useMutation(
+  const [recommendation, { loading: recommendationLoading }] = useMutation(
     `/api/posts/${router.query.id}/recommendation`
   );
-  const { register, handleSubmit } = useForm<IAnswerForm>();
+  const [answer, { loading: answerLoading }] = useMutation(
+    `/api/posts/${router.query.id}/answer`
+  );
+  const { register, handleSubmit, reset } = useForm<IAnswerForm>();
 
   // 2022/03/27 - 궁금해요 클릭 - by 1-blue
   const onClickRecommendation = useCallback(() => {
-    if (loading) return;
+    if (recommendationLoading) return;
 
     mutate(
       (prev) =>
@@ -69,12 +79,43 @@ const CommunityPostDetail: NextPage = () => {
     );
 
     recommendation(null);
-  }, [loading, mutate, recommendation]);
+  }, [recommendationLoading, mutate, recommendation]);
 
   // 2022/03/27 - 답변 추가 - by 1-blue
-  const onValid = useCallback((x: IAnswerForm) => {
-    console.log(x);
-  }, []);
+  const onValid = useCallback(
+    (body: IAnswerForm) => {
+      if (answerLoading) return;
+
+      mutate(
+        (prev) =>
+          prev && {
+            ...prev,
+            post: {
+              ...prev.post,
+              answers: [
+                ...prev.post.answers,
+                {
+                  id: 0,
+                  answer: body.answer!,
+                  updatedAt: Date.now().toString(),
+                  user: {
+                    id: user?.id!,
+                    name: user?.name!,
+                    avatar: user?.avatar!,
+                  },
+                },
+              ],
+            },
+          },
+        false
+      );
+
+      answer(body);
+
+      reset();
+    },
+    [answerLoading, mutate, user, answer, reset]
+  );
 
   return (
     <>
@@ -117,11 +158,17 @@ const CommunityPostDetail: NextPage = () => {
       ))}
       <form className="px-4 mt-5" onSubmit={handleSubmit(onValid)}>
         <Textarea
-          register={register("answer")}
+          register={register("answer", { required: true })}
           rows={6}
           placeholder="Answer this question!"
         />
-        <Button type="submit" text="Reply" $primary className="w-full mt-2" />
+        <Button
+          type="submit"
+          text="Reply"
+          $primary
+          $loading={answerLoading}
+          className="w-full mt-2"
+        />
       </form>
     </>
   );
