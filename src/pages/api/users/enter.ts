@@ -15,6 +15,12 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
 ) {
+  if (req.session.user)
+    return res.status(401).json({
+      ok: false,
+      message: "이미 로그인한 상태입니다.\n로그아웃후에 다시 시도해주세요.",
+    });
+
   const { email, phone } = req.body;
   const userData = {
     ...(email && { email }),

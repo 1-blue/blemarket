@@ -49,9 +49,9 @@ async function handler(
         },
       });
 
-      res.status(200).json({
+      res.status(201).json({
         ok: true,
-        message: `"${name}"게시글을 생성했습니다.`,
+        message: `"${name}"을 등록했습니다.`,
         product: createdProduct,
       });
     }

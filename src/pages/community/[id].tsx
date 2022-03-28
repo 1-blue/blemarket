@@ -50,9 +50,10 @@ const CommunityPostDetail: NextPage = () => {
   const { data, mutate } = useSWR<IPostResponse>(
     router.query.id ? `/api/posts/${router.query.id}` : null
   );
-  const [recommendation, { loading: recommendationLoading }] = useMutation(
-    `/api/posts/${router.query.id}/recommendation`
-  );
+  const [addRecommendation, { loading: addRecommendationLoading }] =
+    useMutation(`/api/posts/${router.query.id}/recommendation`);
+  const [removeRecommendation, { loading: removeRecommendationLoading }] =
+    useMutation(`/api/posts/${router.query.id}/recommendation`, "DELETE");
   const [answer, { loading: answerLoading }] = useMutation(
     `/api/posts/${router.query.id}/answer`
   );
@@ -60,8 +61,10 @@ const CommunityPostDetail: NextPage = () => {
 
   // 2022/03/27 - 궁금해요 클릭 - by 1-blue
   const onClickRecommendation = useCallback(() => {
-    if (recommendationLoading)
-      return toast.error("이미 궁금해요를 처리중입니다.");
+    if (addRecommendationLoading)
+      return toast.error("이미 궁금해요 추가 처리중입니다.");
+    if (removeRecommendationLoading)
+      return toast.error("이미 궁금해요 제거 처리중입니다.");
 
     mutate(
       (prev) =>
@@ -80,8 +83,16 @@ const CommunityPostDetail: NextPage = () => {
       false
     );
 
-    recommendation(null);
-  }, [recommendationLoading, mutate, recommendation]);
+    if (data?.isRecommendation) removeRecommendation(null);
+    else addRecommendation(null);
+  }, [
+    addRecommendationLoading,
+    removeRecommendationLoading,
+    mutate,
+    data,
+    addRecommendation,
+    removeRecommendation,
+  ]);
 
   // 2022/03/27 - 답변 추가 - by 1-blue
   const onValid = useCallback(

@@ -27,7 +27,10 @@ type UseMutationResult<T> = [
 ];
 
 // 2022/03/21 - API함수 및 유용한 변수들을 반환하는 hook - by 1-blue
-export default function useMutation<T>(url: string): UseMutationResult<T> {
+export default function useMutation<T>(
+  url: string,
+  method = "POST"
+): UseMutationResult<T> {
   const [state, setState] = useState<IUseMutationState<T>>({
     loading: false,
     data: null,
@@ -45,7 +48,7 @@ export default function useMutation<T>(url: string): UseMutationResult<T> {
   ) => {
     setState((prev) => ({ ...prev, loading: true }));
     fetch(url, {
-      method: "POST",
+      method,
       headers: {
         "Content-Type": "application/json",
       },

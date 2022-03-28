@@ -37,18 +37,27 @@ const ProductsDatail: NextPage = () => {
   const { data, mutate } = useSWR<IProductWithUserResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
-  const [toggleFavorite, { loading }] = useMutation<IMutationResult>(
+  const [addFavorite, { loading: addLoading }] = useMutation<IMutationResult>(
     `/api/products/${data?.product.id}/favorite`
   );
+  const [removeFavorite, { loading: removeLoading }] =
+    useMutation<IMutationResult>(
+      `/api/products/${data?.product.id}/favorite`,
+      "DELETE"
+    );
 
   // 2022/03/26 - 좋아요 토글 이벤트 - by 1-blue
   const onClickFavorite = useCallback(() => {
-    if (loading) return toast.error("이미 좋아요 처리중입니다.");
+    if (addLoading) return toast.error("이미 좋아요 추가 처리중입니다.");
+    if (removeLoading) return toast.error("이미 좋아요 제거 처리중입니다.");
 
     mutate((prev) => prev && { ...prev, isFavorite: !prev.isFavorite }, false);
 
-    toggleFavorite(null);
-  }, [loading, mutate, toggleFavorite]);
+    console.log(data?.isFavorite);
+
+    if (data?.isFavorite) removeFavorite(null);
+    else addFavorite(null);
+  }, [addLoading, removeLoading, mutate, data, addFavorite, removeFavorite]);
 
   return (
     <>

@@ -13,8 +13,22 @@ async function handler(
 ) {
   const { user } = req.session;
   const productId = +req.query.id;
+  const { method } = req;
 
   try {
+    const exProduct = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+    });
+
+    // 존재하지 않는 상품에 좋아요 요청
+    if (!exProduct)
+      return res.status(404).json({
+        ok: false,
+        message: "존재하지 않는 상품입니다.",
+      });
+
     const exFavorite = await prisma.favorite.findFirst({
       where: {
         productId,
@@ -22,13 +36,15 @@ async function handler(
       },
     });
 
-    if (exFavorite) {
-      await prisma.favorite.delete({
-        where: {
-          id: exFavorite.id,
-        },
-      });
-    } else {
+    // 좋아요 추가
+    if (method === "POST") {
+      // 좋아요 누른 상태에서 좋아요 추가 요청
+      if (exFavorite)
+        return res.status(409).json({
+          ok: false,
+          message: "이미 좋아요를 눌렀습니다.\n잠시후에 다시 시도해주세요",
+        });
+
       await prisma.favorite.create({
         data: {
           user: {
@@ -44,10 +60,27 @@ async function handler(
         },
       });
     }
+    // 좋아요 제거
+    else if (method === "DELETE") {
+      // 좋아요 누르지 않은 상태에서 좋아요 제거 요청
+      if (!exFavorite)
+        return res.status(409).json({
+          ok: false,
+          message:
+            "이미 좋아요를 누르지 않은 상태입니다.\n잠시후에 다시 시도해주세요",
+        });
+
+      await prisma.favorite.delete({
+        where: {
+          id: exFavorite?.id,
+        },
+      });
+    }
+
     res.status(200).json({
       ok: true,
-      message: exFavorite ? "좋아요를 취소했습니다." : "좋아요를 눌렀습니다.",
-      isFavorite: !!exFavorite,
+      message:
+        method === "POST" ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.",
     });
   } catch (error) {
     console.error("/api/products error >> ", error);
@@ -60,4 +93,6 @@ async function handler(
   }
 }
 
-export default withApiSession(withHandler({ methods: ["POST"], handler }));
+export default withApiSession(
+  withHandler({ methods: ["POST", "DELETE"], handler })
+);

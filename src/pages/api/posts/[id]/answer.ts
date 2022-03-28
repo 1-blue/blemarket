@@ -16,6 +16,18 @@ async function handler(
   } = req;
 
   try {
+    const exPost = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+
+    if (!exPost)
+      return res.status(404).json({
+        ok: false,
+        message: "존재하지 않는 게시글에 댓글을 달았습니다.",
+      });
+
     await prisma.answer.create({
       data: {
         user: {
@@ -32,7 +44,7 @@ async function handler(
       },
     });
 
-    res.status(200).json({
+    res.status(201).json({
       ok: true,
       message: "답변을 생성했습니다.",
     });
