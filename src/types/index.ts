@@ -13,6 +13,8 @@ export enum ICON_SHAPE {
   CART,
   BAG,
   PHOTO,
+  TWITTER,
+  GITHUB,
 }
 
 // 검색 조건
@@ -21,24 +23,24 @@ export enum SEARCH_CONDITION {
   AROUND,
 }
 
-// api 리턴 값 ( 인터페이스... 상속으로 사용하기 )
-export interface IMutationResult {
-  ok: boolean;
-  message: string;
-}
-
 // 로그인 방식
 export enum LOGIN_TYPE {
   EMAIL = "email",
   PHONE = "phone",
 }
 
+// api 리턴 값 ( 인터페이스... 상속으로 사용하기 )
+export type ApiResponse = {
+  ok: boolean;
+  message: string;
+};
+
 // 간단한 유저 타입
-export interface SimpleUser {
+export type SimpleUser = {
   id: number;
   name: string;
   avatar: string;
-}
+};
 
 // 폼 전송 데이터
 export interface IEnterForm {

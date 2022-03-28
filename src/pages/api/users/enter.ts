@@ -15,7 +15,7 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
 ) {
-  if (req.session.user)
+  if (req.session?.user)
     return res.status(401).json({
       ok: false,
       message: "이미 로그인한 상태입니다.\n로그아웃후에 다시 시도해주세요.",
@@ -29,7 +29,7 @@ async function handler(
   const payload = Math.floor(10000 + Math.random() * 90000) + "";
 
   try {
-    const token = await prisma.token.create({
+    await prisma.token.create({
       data: {
         payload,
         user: {

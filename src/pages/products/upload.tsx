@@ -2,9 +2,10 @@ import { useCallback, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 // type
-import { ICON_SHAPE, IMutationResult, IUploadForm } from "@src/types";
+import { ICON_SHAPE, ApiResponse, IUploadForm } from "@src/types";
 import { Product } from "@prisma/client";
 
 // common-component
@@ -14,11 +15,10 @@ import Input from "@src/components/common/Input";
 import Notice from "@src/components/common/Notice";
 import Textarea from "@src/components/common/Textarea";
 
-// util
+// hook
 import useMutation from "@src/libs/client/useMutation";
-import { toast } from "react-toastify";
 
-interface IProductResult extends IMutationResult {
+interface IProductResponse extends ApiResponse {
   product: Product;
 }
 
@@ -30,7 +30,7 @@ const Upload: NextPage = () => {
     formState: { errors },
   } = useForm<IUploadForm>({ mode: "onBlur" });
   const [upload, { data, loading }] =
-    useMutation<IProductResult>("/api/products");
+    useMutation<IProductResponse>("/api/products");
 
   // 2022/03/25 - upload form 제출 - by 1-blue
   const onValid = useCallback(

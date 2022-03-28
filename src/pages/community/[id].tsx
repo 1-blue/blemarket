@@ -6,12 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 // type
-import {
-  IAnswerForm,
-  ICON_SHAPE,
-  IMutationResult,
-  SimpleUser,
-} from "@src/types";
+import { IAnswerForm, ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
 import { Post } from "@prisma/client";
 
 // util
@@ -26,20 +21,20 @@ import Profile from "@src/components/common/Profile";
 import Textarea from "@src/components/common/Textarea";
 import Answer from "@src/components/common/Answer";
 
-interface AnswerWithUser {
+interface IAnswerWithUser {
   id: number;
   answer: string;
   updatedAt: string;
   user: SimpleUser;
 }
 interface IPostWithEtc extends Post {
-  answers: AnswerWithUser[];
+  answers: IAnswerWithUser[];
   user: SimpleUser;
   _count: {
     recommendations: number;
   };
 }
-interface IPostResponse extends IMutationResult {
+interface IPostResponse extends ApiResponse {
   post: IPostWithEtc;
   isRecommendation: boolean;
 }
@@ -47,13 +42,17 @@ interface IPostResponse extends IMutationResult {
 const CommunityPostDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
+  // 게시글 상세 정보 요청
   const { data, mutate } = useSWR<IPostResponse>(
     router.query.id ? `/api/posts/${router.query.id}` : null
   );
+  // 궁금해요 추가
   const [addRecommendation, { loading: addRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`);
+  // 궁금해요 제거
   const [removeRecommendation, { loading: removeRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`, "DELETE");
+  // 답변 추가
   const [answer, { loading: answerLoading }] = useMutation(
     `/api/posts/${router.query.id}/answer`
   );

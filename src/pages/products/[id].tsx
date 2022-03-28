@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { toast } from "react-toastify";
 
 // type
-import { ICON_SHAPE, IMutationResult } from "@src/types";
+import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
 import { Product } from "@prisma/client";
 
 // util
@@ -19,14 +19,10 @@ import Profile from "@src/components/common/Profile";
 import useMutation from "@src/libs/client/useMutation";
 
 interface IProductWithUser extends Product {
-  user: {
-    id: number;
-    name: string;
-    avatar: string;
-  };
+  user: SimpleUser;
 }
 
-interface IProductWithUserResponse extends IMutationResult {
+interface IProductWithEtcResponse extends ApiResponse {
   product: IProductWithUser;
   relatedProducts: Product[];
   isFavorite: boolean;
@@ -34,17 +30,16 @@ interface IProductWithUserResponse extends IMutationResult {
 
 const ProductsDatail: NextPage = () => {
   const router = useRouter();
-  const { data, mutate } = useSWR<IProductWithUserResponse>(
+  const { data, mutate } = useSWR<IProductWithEtcResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
-  const [addFavorite, { loading: addLoading }] = useMutation<IMutationResult>(
+  const [addFavorite, { loading: addLoading }] = useMutation<ApiResponse>(
     `/api/products/${data?.product.id}/favorite`
   );
-  const [removeFavorite, { loading: removeLoading }] =
-    useMutation<IMutationResult>(
-      `/api/products/${data?.product.id}/favorite`,
-      "DELETE"
-    );
+  const [removeFavorite, { loading: removeLoading }] = useMutation<ApiResponse>(
+    `/api/products/${data?.product.id}/favorite`,
+    "DELETE"
+  );
 
   // 2022/03/26 - 좋아요 토글 이벤트 - by 1-blue
   const onClickFavorite = useCallback(() => {
@@ -52,8 +47,6 @@ const ProductsDatail: NextPage = () => {
     if (removeLoading) return toast.error("이미 좋아요 제거 처리중입니다.");
 
     mutate((prev) => prev && { ...prev, isFavorite: !prev.isFavorite }, false);
-
-    console.log(data?.isFavorite);
 
     if (data?.isFavorite) removeFavorite(null);
     else addFavorite(null);
