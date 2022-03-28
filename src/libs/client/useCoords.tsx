@@ -12,9 +12,8 @@ export default function useCoords() {
   });
 
   const onSuccess = useCallback(
-    ({ coords: { latitude, longitude } }: GeolocationPosition) => {
-      setCoords({ latitude, longitude });
-    },
+    ({ coords: { latitude, longitude } }: GeolocationPosition) =>
+      setCoords({ latitude, longitude }),
     []
   );
   const onFailure = useCallback((error: GeolocationPositionError) => {

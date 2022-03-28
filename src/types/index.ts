@@ -15,6 +15,12 @@ export enum ICON_SHAPE {
   PHOTO,
 }
 
+// 검색 조건
+export enum SEARCH_CONDITION {
+  ALL,
+  AROUND,
+}
+
 // api 리턴 값 ( 인터페이스... 상속으로 사용하기 )
 export interface IMutationResult {
   ok: boolean;

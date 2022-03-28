@@ -14,22 +14,30 @@ async function handler(
     session: { user },
     method,
   } = req;
-  const parsedLatitude = parseFloat(req.query.latitude.toString());
-  const parsedLongitue = parseFloat(req.query.longitude.toString());
 
   try {
     if (method === "GET") {
-      const posts = await prisma.post.findMany({
-        where: {
+      let where = {};
+      // 인근 게시글 검색 시 실행
+      if (req.query.distance) {
+        const distance = +req.query.distance;
+        const parsedLatitude = parseFloat(req.query.latitude.toString());
+        const parsedLongitue = parseFloat(req.query.longitude.toString());
+
+        where = {
           latitude: {
-            gte: parsedLatitude - 0.01,
-            lte: parsedLatitude + 0.01,
+            gte: parsedLatitude - 0.008 * distance,
+            lte: parsedLatitude + 0.008 * distance,
           },
           longitude: {
-            gte: parsedLongitue - 0.01,
-            lte: parsedLongitue + 0.01,
+            gte: parsedLongitue - 0.008 * distance,
+            lte: parsedLongitue + 0.008 * distance,
           },
-        },
+        };
+      }
+
+      const posts = await prisma.post.findMany({
+        where,
         include: {
           user: {
             select: {
@@ -47,7 +55,7 @@ async function handler(
 
       res.status(200).json({
         ok: true,
-        message: "모든 질문을 가져왔습니다.",
+        message: "게시글들을 가져왔습니다.",
         posts,
       });
     } else if (method === "POST") {
