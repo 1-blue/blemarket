@@ -29,10 +29,11 @@ async function handler(
         message: "존재하지 않는 상품입니다.",
       });
 
-    const exFavorite = await prisma.favorite.findFirst({
+    const exFavorite = await prisma.record.findFirst({
       where: {
         productId,
         userId: user?.id,
+        kinds: "Favorite",
       },
     });
 
@@ -45,8 +46,9 @@ async function handler(
           message: "이미 좋아요를 눌렀습니다.\n잠시후에 다시 시도해주세요",
         });
 
-      await prisma.favorite.create({
+      await prisma.record.create({
         data: {
+          kinds: "Favorite",
           user: {
             connect: {
               id: user?.id,
@@ -70,7 +72,7 @@ async function handler(
             "이미 좋아요를 누르지 않은 상태입니다.\n잠시후에 다시 시도해주세요",
         });
 
-      await prisma.favorite.delete({
+      await prisma.record.delete({
         where: {
           id: exFavorite?.id,
         },

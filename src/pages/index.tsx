@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import useSWR from "swr";
 
 // type
-import { ICON_SHAPE, ApiResponse } from "@src/types";
+import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
 import { Product } from "@prisma/client";
 
 // common-component
@@ -16,14 +16,12 @@ import Link from "next/link";
 // hook
 import useUser from "@src/libs/client/useUser";
 
-interface ProductWithFavoriteCount extends Product {
-  _count: {
-    favorites: number;
-  };
+interface ProductWithFavoriteUsers extends Product {
+  records: SimpleUser[];
 }
 
 interface IProductsResponse extends ApiResponse {
-  products: ProductWithFavoriteCount[];
+  products: ProductWithFavoriteUsers[];
 }
 
 const Home: NextPage = () => {
@@ -39,7 +37,7 @@ const Home: NextPage = () => {
           name={product.name}
           description={product.description}
           price={product.price}
-          favoriteCount={product._count.favorites}
+          favoriteUsers={product.records}
         />
       ))}
       <Link href="/products/upload">

@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
 // type
-import { IMutationResult, IQuestionForm } from "@src/types";
+import { ApiResponse, IQuestionForm } from "@src/types";
 import { Post } from "@prisma/client";
 
 // common-component
@@ -14,7 +14,7 @@ import useMutation from "@src/libs/client/useMutation";
 import useCoords from "@src/libs/client/useCoords";
 import { toast } from "react-toastify";
 
-interface IWriteResponse extends IMutationResult {
+interface IWriteResponse extends ApiResponse {
   post: Post;
 }
 

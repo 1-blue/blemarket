@@ -29,6 +29,13 @@ export enum LOGIN_TYPE {
   PHONE = "phone",
 }
 
+//
+export enum RECORD {
+  FAVORITE = "favorite",
+  SALE = "sale",
+  PURCHASE = "purchase",
+}
+
 // api 리턴 값 ( 인터페이스... 상속으로 사용하기 )
 export type ApiResponse = {
   ok: boolean;

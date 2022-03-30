@@ -44,10 +44,11 @@ async function handler(
       },
     });
 
-    const isFavorite = await prisma.favorite.findFirst({
+    const isFavorite = await prisma.record.findFirst({
       where: {
         userId,
         productId,
+        kinds: "Favorite",
       },
     });
 
@@ -59,7 +60,7 @@ async function handler(
       isFavorite: !!isFavorite,
     });
   } catch (error) {
-    console.error("/api/products error >> ", error);
+    console.error("/api/products/[id] error >> ", error);
 
     res.status(500).json({
       ok: false,

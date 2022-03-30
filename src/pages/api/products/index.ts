@@ -20,9 +20,18 @@ async function handler(
     if (req.method === "GET") {
       const findProducts = await prisma.product.findMany({
         include: {
-          _count: {
+          records: {
+            where: {
+              kinds: "Favorite",
+            },
             select: {
-              favorites: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  avatar: true,
+                },
+              },
             },
           },
         },

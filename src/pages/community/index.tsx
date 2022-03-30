@@ -4,7 +4,7 @@ import Link from "next/link";
 import useSWR from "swr";
 
 // type
-import { ICON_SHAPE, IMutationResult, SEARCH_CONDITION } from "@src/types";
+import { ICON_SHAPE, ApiResponse, SEARCH_CONDITION } from "@src/types";
 import { Post } from "@prisma/client";
 
 // common-component
@@ -27,7 +27,7 @@ export interface IPostWithEtc extends Post {
   };
 }
 
-interface IPostResponse extends IMutationResult {
+interface IPostResponse extends ApiResponse {
   posts: IPostWithEtc[];
 }
 
