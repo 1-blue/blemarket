@@ -13,6 +13,7 @@ export enum ICON_SHAPE {
   CART,
   BAG,
   PHOTO,
+  STAR,
   TWITTER,
   GITHUB,
 }

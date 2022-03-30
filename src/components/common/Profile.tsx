@@ -3,7 +3,7 @@ import Link from "next/link";
 interface IProps {
   id: number | undefined;
   name: string | undefined;
-  avatar: string | undefined;
+  avatar: string | undefined | null;
 }
 
 const Profile = ({ id, name }: IProps) => {
