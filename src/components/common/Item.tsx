@@ -16,7 +16,7 @@ interface IProps {
 
 const Item = ({ id, name, description, price, favoriteUsers }: IProps) => {
   return (
-    <Link href={`products/${id}`}>
+    <Link href={`/products/${id}`}>
       <a className="flex justify-between px-4 pt-4 first:pt-0">
         <div className="flex space-x-4 flex-1">
           {/* 이미지 */}

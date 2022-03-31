@@ -32,7 +32,24 @@ async function handler(
             select: {
               id: true,
               updatedAt: true,
-              product: true,
+              product: {
+                include: {
+                  records: {
+                    where: {
+                      kinds: "Favorite",
+                    },
+                    include: {
+                      user: {
+                        select: {
+                          id: true,
+                          name: true,
+                          avatar: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
           return res.status(200).json({
@@ -49,7 +66,24 @@ async function handler(
             select: {
               id: true,
               updatedAt: true,
-              product: true,
+              product: {
+                include: {
+                  records: {
+                    where: {
+                      kinds: "Favorite",
+                    },
+                    include: {
+                      user: {
+                        select: {
+                          id: true,
+                          name: true,
+                          avatar: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
           return res.status(200).json({
@@ -66,7 +100,24 @@ async function handler(
             select: {
               id: true,
               updatedAt: true,
-              product: true,
+              product: {
+                include: {
+                  records: {
+                    where: {
+                      kinds: "Favorite",
+                    },
+                    include: {
+                      user: {
+                        select: {
+                          id: true,
+                          name: true,
+                          avatar: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
           return res.status(200).json({

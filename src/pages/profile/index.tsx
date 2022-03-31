@@ -36,7 +36,7 @@ const Profile: NextPage = () => {
       />
       <ul className="flex justify-around items-center pt-4">
         <li>
-          <Link href="/profile/bought">
+          <Link href="/profile/sale">
             <a className="flex-1 group flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-8 focus:rounded-sm">
               <div className="flex justify-center items-center bg-orange-400 w-16 h-16 rounded-full text-white mb-2 group-hover:bg-orange-500 ">
                 <Icon shape={ICON_SHAPE.CART} />
@@ -46,7 +46,7 @@ const Profile: NextPage = () => {
           </Link>
         </li>
         <li>
-          <Link href="/profile/bought">
+          <Link href="/profile/purchase">
             <a className="flex-1 group flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-8 focus:rounded-sm">
               <div className="flex justify-center items-center bg-orange-400 w-16 h-16 rounded-full text-white mb-2 group-hover:bg-orange-500">
                 <Icon shape={ICON_SHAPE.BAG} />
@@ -56,7 +56,7 @@ const Profile: NextPage = () => {
           </Link>
         </li>
         <li>
-          <Link href="/profile/loved">
+          <Link href="/profile/favorite">
             <a className="flex-1 group flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-8 focus:rounded-sm">
               <div className="flex justify-center items-center bg-orange-400 w-16 h-16 rounded-full text-white mb-2 group-hover:bg-orange-500">
                 <Icon shape={ICON_SHAPE.HEART} />
