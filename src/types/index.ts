@@ -16,6 +16,7 @@ export enum ICON_SHAPE {
   STAR,
   TWITTER,
   GITHUB,
+  SEARCH,
 }
 
 // 검색 조건

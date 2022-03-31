@@ -54,7 +54,6 @@ const ProductsDatail: NextPage = () => {
 
   return (
     <>
-      {/* >> 로딩 스피너 추가 */}
       <div className="px-4 pb-8 mb-8 border-b">
         {/* 상품 이미지 */}
         <div className="h-96 w-full bg-slate-300" />
@@ -71,6 +70,16 @@ const ProductsDatail: NextPage = () => {
           <p className="text-gray-900 mb-4 whitespace-pre">
             {data?.product.description}
           </p>
+          <ul className="flex space-x-2 mb-4 flex-wrap">
+            {data?.product.keywords.split(" ").map((keyword) => (
+              <li
+                key={keyword}
+                className="p-2 bg-slate-200 rounded-lg text-orange-400 font-semibold text-sm cursor-pointer"
+              >
+                {keyword}
+              </li>
+            ))}
+          </ul>
           <div className="flex justify-between space-x-2  ">
             <Button
               text="Talk to seller"

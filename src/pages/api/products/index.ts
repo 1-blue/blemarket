@@ -18,6 +18,40 @@ async function handler(
 
   try {
     if (req.method === "GET") {
+      const { keyword } = req.query;
+
+      if (keyword) {
+        const findKeywordProducts = await prisma.product.findMany({
+          where: {
+            keywords: {
+              contains: keyword as string,
+            },
+          },
+          include: {
+            records: {
+              where: {
+                kinds: "Favorite",
+              },
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        return res.status(200).json({
+          ok: true,
+          message: `${keyword}인 상품들을 검색했습니다.`,
+          products: findKeywordProducts,
+        });
+      }
+
       const findProducts = await prisma.product.findMany({
         include: {
           records: {

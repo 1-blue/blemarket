@@ -220,7 +220,28 @@ interface ReviewWithWriter extends Review {
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
-### 2.2 POST /api/products
+### 2.2 GET /api/products?keyword
++ 역할: 특정 키워드를 포함하는 상품 검색
++ 전송 데이터 ( `query` )
+```
+{
+  keyword: string
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  products: IProductsWithEtc[]
+}
+```
++ 응답 상태 코드
+  1. `200`: 특정 키워드를 포함하는 상품들 조회 성공
+  2. `401`: 비로그인 상태에서 접근
+  3. `500`: 서버측 에러 발생
+
+### 2.3 POST /api/products
 + 역할: 상품 생성
 + 전송 데이터 ( `body` )
 ```typescript
@@ -245,7 +266,7 @@ interface ReviewWithWriter extends Review {
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
-### 2.3 GET /api/products/[id]
+### 2.4 GET /api/products/[id]
 + 역할: 특정 상품에 대한 상세 정보 요청 ( + 연관 상품, 본인 좋아요 여부 )
 + 전송 데이터 ( `query` )
 ```typescript
@@ -268,7 +289,7 @@ interface ReviewWithWriter extends Review {
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
-### 2.4 POST /api/products/[id]/favorite
+### 2.5 POST /api/products/[id]/favorite
 + 역할: 특정 상품에 좋아요 추가
 + 전송 데이터 ( `query` )
 ```typescript
@@ -290,7 +311,7 @@ interface ReviewWithWriter extends Review {
   3. `409`: 좋아요 누른 상태에서 좋아요 추가 요청
   3. `500`: 서버측 에러 발생
 
-### 2.5 DELETE /api/products/[id]/favorite
+### 2.6 DELETE /api/products/[id]/favorite
 + 역할: 특정 상품에 좋아요 제거
 + 전송 데이터 ( `query` )
 ```typescript
