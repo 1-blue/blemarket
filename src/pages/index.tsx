@@ -13,9 +13,6 @@ import Item from "@src/components/common/Item";
 import SideButton from "@src/components/SideButton";
 import Link from "next/link";
 
-// hook
-import useUser from "@src/libs/client/useUser";
-
 interface ProductWithFavoriteUsers extends Product {
   records: SimpleUser[];
 }
@@ -25,7 +22,6 @@ interface IProductsResponse extends ApiResponse {
 }
 
 const Home: NextPage = () => {
-  const {} = useUser();
   const { data } = useSWR<IProductsResponse>("/api/products");
 
   return (

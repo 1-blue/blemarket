@@ -6,6 +6,7 @@ import {
   IUploadForm,
   IQuestionForm,
   IAnswerForm,
+  IUpdateForm,
 } from "@src/types";
 
 interface IUseMutationState<T> {
@@ -21,6 +22,7 @@ type UseMutationResult<T> = [
       | IUploadForm
       | IQuestionForm
       | IAnswerForm
+      | IUpdateForm
       | null
   ) => void,
   IUseMutationState<T>
@@ -44,6 +46,7 @@ export default function useMutation<T>(
       | IUploadForm
       | IQuestionForm
       | IAnswerForm
+      | IUpdateForm
       | null
   ) => {
     setState((prev) => ({ ...prev, loading: true }));

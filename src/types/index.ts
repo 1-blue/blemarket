@@ -72,3 +72,8 @@ export interface IQuestionForm {
 export interface IAnswerForm {
   answer: string;
 }
+export interface IUpdateForm {
+  name?: string;
+  email?: string;
+  phone?: string;
+}

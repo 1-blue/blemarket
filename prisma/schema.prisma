@@ -20,7 +20,7 @@ enum KINDS {
 
 model User {
   id        Int      @id @default(autoincrement())
-  name      String
+  name      String   @unique
   phone     String?  @unique
   email     String?  @unique
   avatar    String?

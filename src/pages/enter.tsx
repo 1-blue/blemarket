@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 // type
 import {
@@ -60,7 +61,13 @@ const Enter = () => {
 
   // 2022/03/24 - 로그인 완료 시 페이지 이동 - by 1-blue
   useEffect(() => {
-    if (tokenData?.ok) router.push("/");
+    if (tokenData?.ok === false) toast.error("토큰이 일치하지 않습니다.");
+
+    if (tokenData?.ok) {
+      toast.success(`로그인에 성공했습니다.
+      메인 페이지로 이동합니다.`);
+      router.push("/");
+    }
   }, [router, tokenData]);
 
   return (
@@ -83,10 +90,7 @@ const Enter = () => {
               placeholder="ex) 96012"
             />
             {tokenData?.ok === false && (
-              <Notice
-                text="토큰이 일치하지 않습니다. ( >> 여기는 나중에 toast로 변경할 예정 )"
-                $error
-              />
+              <Notice text="토큰이 일치하지 않습니다." $error />
             )}
           </div>
           <Button

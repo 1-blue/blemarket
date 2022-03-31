@@ -39,7 +39,7 @@ async function handler(
             },
             create: {
               ...userData,
-              name: "테스트 유저",
+              name: "유저" + payload,
             },
           },
         },
