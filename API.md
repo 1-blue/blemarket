@@ -114,6 +114,9 @@ interface IStreamWithEtc extends Stream {
   user: SimpleUser;
   messages: Message[];
 }
+interface IMessageWithUser extends Message {
+  user: SimpleUser;
+}
 ```
 
 ## 1. users
@@ -550,4 +553,28 @@ interface IStreamWithEtc extends Stream {
 + 응답 상태 코드
   1. `200`: 특정 스트림 가져오기 성공
   2. `401`: 비로그인 상태에서 접근
-  3. `500`: 서버측 에러 발생
+  3. `404`: 존재하지 않은 스트림에 메시지 생성 요청
+  4. `500`: 서버측 에러 발생
+
+### 5.4 POST /api/streams/[id]/message
++ 역할: 메시지 생성 요청
++ 전송 데이터 ( `query`, `body` )
+```typescript
+{
+  id: number;
+  message: string;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  messageWithUser: IMessageWithUser
+}
+```
++ 응답 상태 코드
+  1. `201`: 메시지 생성 성공
+  2. `401`: 비로그인 상태에서 접근
+  3. `404`: 존재하지 않은 스트림에 메시지 생성 요청
+  4. `500`: 서버측 에러 발생

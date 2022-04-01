@@ -40,6 +40,12 @@ async function handler(
       },
     });
 
+    if (!stream)
+      return res.status(404).json({
+        ok: false,
+        message: "존재하지 않은 스트림을 요청했습니다.",
+      });
+
     res.status(200).json({
       ok: true,
       message: "특정 스트림에 대한 정보입니다.",

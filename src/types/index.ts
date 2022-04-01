@@ -83,3 +83,6 @@ export interface IStramForm {
   price: number;
   description: string;
 }
+export interface IMessageForm {
+  message: string;
+}
