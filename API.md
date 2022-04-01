@@ -92,6 +92,28 @@ interface Review {
 interface ReviewWithWriter extends Review {
   createdBy: SimpleUser;
 }
+
+type Stream = {
+  id: number
+  title: string
+  description: string
+  price: number
+  createdAt: Date
+  updatedAt: Date
+  userId: number
+}
+type Message = {
+  id: number
+  message: string
+  createdAt: Date
+  updatedAt: Date
+  userId: number
+  streamId: number
+}
+interface IStreamWithEtc extends Stream {
+  user: SimpleUser;
+  messages: Message[];
+}
 ```
 
 ## 1. users
@@ -462,5 +484,70 @@ interface ReviewWithWriter extends Review {
 ```
 + 응답 상태 코드
   1. `200`: 모든 상품들 조회 성공
+  2. `401`: 비로그인 상태에서 접근
+  3. `500`: 서버측 에러 발생
+
+## 5. streams
+### 5.1 POST /api/streams
++ 역할: 스트림 생성
++ 전송 데이터
+```typescript
+{
+  title: string;
+  price: number;
+  description: string;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  stream: Stream
+}
+```
++ 응답 상태 코드
+  1. `201`: 스트림 생성 완료
+  2. `401`: 비로그인 상태에서 접근
+  3. `500`: 서버측 에러 발생
+
+### 5.2 GET /api/streams
++ 역할: 스트림들 가져오기
++ 전송 데이터 `none`
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  streams: {
+    id: number;
+    title: string;
+    user: SimpleUser;
+  }[]
+}
+```
++ 응답 상태 코드
+  1. `200`: 스트림들 가져오기 성공
+  2. `401`: 비로그인 상태에서 접근
+  3. `500`: 서버측 에러 발생
+
+### 5.3 GET /api/streams/[id]
++ 역할: 스트림들 가져오기
++ 전송 데이터 ( `query` )
+```typescript
+{
+  id: number;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  stream: IStreamWithEtc
+}
+```
++ 응답 상태 코드
+  1. `200`: 특정 스트림 가져오기 성공
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생

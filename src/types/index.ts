@@ -78,3 +78,8 @@ export interface IUpdateForm {
   email?: string;
   phone?: string;
 }
+export interface IStramForm {
+  title: string;
+  price: number;
+  description: string;
+}

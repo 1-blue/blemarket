@@ -35,6 +35,8 @@ model User {
   writtenReviews  Review[]         @relation(name: "writtenReviews")
   receivedReviews Review[]         @relation(name: "receivedReviews")
   records         Record[]
+  streams         Stream[]
+  messages        Message[]
 }
 
 model Token {
@@ -125,6 +127,32 @@ model Record {
   userId    Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
+}
+
+model Stream {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(40)
+  description String   @db.MediumText
+  price       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages Message[]
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  streamId Int
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
 }
 
 // 추후에 구현할 것

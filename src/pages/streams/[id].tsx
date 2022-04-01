@@ -1,12 +1,38 @@
 import React from "react";
 import type { NextPage } from "next";
+import useSWR from "swr";
+import { useRouter } from "next/router";
+
+// type
+import { ApiResponse, SimpleUser } from "@src/types";
+import { Message, Stream } from "@prisma/client";
+
+interface IStreamWithEtc extends Stream {
+  user: SimpleUser;
+  messages: Message[];
+}
+
+interface IStreamResponse extends ApiResponse {
+  stream: IStreamWithEtc;
+}
 
 const StreamDetail: NextPage = () => {
+  const router = useRouter();
+  const { data } = useSWR<IStreamResponse>(
+    router.query.id ? `/api/streams/${router.query.id}` : null
+  );
+
   return (
     <>
-      <div className="px-4">
+      <div className="px-4 space-y-2 mb-4">
         <div className="w-full aspect-video bg-slate-300 rounded-md mb-2" />
-        <h3 className="text-gray-700 font-semibold text-2xl">video title</h3>
+        <h1 className="text-gray-700 font-semibold text-2xl">
+          {data?.stream.title}
+        </h1>
+        <span className="inline-block">{data?.stream.price}원</span>
+        <p className="whitespace-pre p-2 bg-slate-200 rounded-lg">
+          {data?.stream.description}
+        </p>
       </div>
 
       <div className="px-4 mb-24 space-y-4 h-[50vh] overflow-y-auto">
