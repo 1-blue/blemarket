@@ -49,7 +49,7 @@ const Live: NextPage = () => {
       <Pagination
         page={page}
         setPage={setPage}
-        max={Math.floor((data?.streamCount as number) / offset)}
+        max={Math.ceil((data?.streamCount as number) / offset)}
       />
 
       <Link href="/streams/create">

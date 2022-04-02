@@ -229,15 +229,22 @@ interface IMessageWithUser extends Message {
   3. `500`: 서버측 에러 발생
 
 ## 2. products
-### 2.1 GET /api/products
-+ 역할: 모든 상품들 요청 ( >> 추후에 페이지네이션 적용 )
-+ 전송 데이터: `none`
+### 2.1 GET /api/products?page={}&offset={}
++ 역할: 모든 상품들 요청
++ 전송 데이터 ( `none` )
+```typescript
+{
+  page: number;
+  offset: number;
+}
+```
 + 응답 데이터
 ```typescript
 {
   ok: boolean,
   message: string,
-  products: IProductsWithEtc[]
+  products: IProductsWithEtc[],
+  productCount: number
 }
 ```
 + 응답 상태 코드
@@ -245,12 +252,14 @@ interface IMessageWithUser extends Message {
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
-### 2.2 GET /api/products?keyword
+### 2.2 GET /api/products?keyword={}&page={}&offset={}
 + 역할: 특정 키워드를 포함하는 상품 검색
 + 전송 데이터 ( `query` )
 ```
 {
-  keyword: string
+  keyword: string;
+  page: number;
+  offset: number;
 }
 ```
 + 응답 데이터
@@ -258,7 +267,8 @@ interface IMessageWithUser extends Message {
 {
   ok: boolean,
   message: string,
-  products: IProductsWithEtc[]
+  products: IProductsWithEtc[],
+  productCount: number
 }
 ```
 + 응답 상태 코드

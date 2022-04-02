@@ -18,10 +18,14 @@ async function handler(
 
   try {
     if (req.method === "GET") {
+      const page = +req.query.page - 1;
+      const offset = +req.query.offset;
       const { keyword } = req.query;
 
       if (keyword) {
         const findKeywordProducts = await prisma.product.findMany({
+          take: offset,
+          skip: page * offset,
           where: {
             keywords: {
               contains: keyword as string,
@@ -43,16 +47,32 @@ async function handler(
               },
             },
           },
+          orderBy: [
+            {
+              createdAt: "desc",
+            },
+          ],
+        });
+
+        const productCount = await prisma.product.count({
+          where: {
+            keywords: {
+              contains: keyword as string,
+            },
+          },
         });
 
         return res.status(200).json({
           ok: true,
           message: `${keyword}인 상품들을 검색했습니다.`,
           products: findKeywordProducts,
+          productCount,
         });
       }
 
       const findProducts = await prisma.product.findMany({
+        take: offset,
+        skip: page * offset,
         include: {
           records: {
             where: {
@@ -69,12 +89,20 @@ async function handler(
             },
           },
         },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
       });
+
+      const productCount = await prisma.product.count();
 
       res.status(200).json({
         ok: true,
         message: "모든 상품들을 가져왔습니다.",
         products: findProducts,
+        productCount,
       });
     } else if (req.method === "POST") {
       const createdProduct = await prisma.product.create({

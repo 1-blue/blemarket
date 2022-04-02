@@ -12,20 +12,17 @@ interface IProps {
 const PageButton = ({
   page,
   $point,
+  $hidden,
   onClick,
-  max,
 }: {
   page: string | number;
   $point?: boolean;
+  $hidden?: boolean;
   onClick: () => void;
-  max?: number;
 }) => {
   return (
     <li
-      className={combineClassNames(
-        "flex-1 text-center",
-        max && max < page ? "hidden" : ""
-      )}
+      className={combineClassNames("text-center w-11", $hidden ? "hidden" : "")}
     >
       <button
         type="button"
@@ -64,11 +61,11 @@ const Pagination = ({ page, setPage, max }: IProps) => {
         .fill(page)
         .map((v, i) => (
           <PageButton
-            key={i + page - 2}
-            page={i + page - 2}
-            $point={i + page - 2 === page}
-            onClick={onClick(i + page - 2)}
-            max={max}
+            key={i + 1}
+            page={i + 1}
+            $point={i + 1 === page}
+            onClick={onClick(i + 1)}
+            $hidden={i + 1 > max || max < page}
           />
         ));
     }
@@ -83,7 +80,7 @@ const Pagination = ({ page, setPage, max }: IProps) => {
             page={i + 1}
             $point={1 === i + 1}
             onClick={onClick(i + 1)}
-            max={max}
+            $hidden={max < page}
           />
         ));
     }
@@ -97,7 +94,7 @@ const Pagination = ({ page, setPage, max }: IProps) => {
             page={i + 1}
             $point={2 === i + 1}
             onClick={onClick(i + 1)}
-            max={max}
+            $hidden={max < page}
           />
         ));
     }
@@ -110,9 +107,9 @@ const Pagination = ({ page, setPage, max }: IProps) => {
           <PageButton
             key={max - (5 - i - 1)}
             page={max - (5 - i - 1)}
-            $point={i + 1 === max}
+            $point={i === 4}
             onClick={onClick(max - (5 - i - 1))}
-            max={max}
+            $hidden={max < page}
           />
         ));
     }
@@ -124,9 +121,9 @@ const Pagination = ({ page, setPage, max }: IProps) => {
           <PageButton
             key={max - (5 - i - 1)}
             page={max - (5 - i - 1)}
-            $point={i + 1 === max - 1}
+            $point={i === 3}
             onClick={onClick(max - (5 - i - 1))}
-            max={max}
+            $hidden={max < page}
           />
         ));
     }
@@ -140,13 +137,13 @@ const Pagination = ({ page, setPage, max }: IProps) => {
           page={i + page - 2}
           $point={i + page - 2 === page}
           onClick={onClick(i + page - 2)}
-          max={max}
+          $hidden={max < page}
         />
       ));
   }, [page, max, onClick]);
 
   return (
-    <ul className="w-2/3 mx-auto flex justify-between space-x-1">
+    <ul className="mx-auto flex justify-center space-x-1 mt-6 mb-4">
       <PageButton page="<" onClick={onClickPrevious} />
       {getPageButton()}
       <PageButton page=">" onClick={onClickNext} />

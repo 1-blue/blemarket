@@ -17,11 +17,11 @@ async function handler(
   } = req;
 
   try {
-    const page = +req.query.page;
-    const offset = +req.query.offset;
-
     // 스트림 가져오기
     if (method === "GET") {
+      const page = +req.query.page - 1;
+      const offset = +req.query.offset;
+
       const streams = await prisma.stream.findMany({
         take: offset,
         skip: page * offset,
@@ -38,7 +38,7 @@ async function handler(
         },
         orderBy: [
           {
-            createdAt: "asc",
+            createdAt: "desc",
           },
         ],
       });
