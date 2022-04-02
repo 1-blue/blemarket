@@ -17,9 +17,14 @@ async function handler(
   } = req;
 
   try {
+    const page = +req.query.page;
+    const offset = +req.query.offset;
+
     // 스트림 가져오기
     if (method === "GET") {
       const streams = await prisma.stream.findMany({
+        take: offset,
+        skip: page * offset,
         select: {
           id: true,
           title: true,
@@ -31,12 +36,19 @@ async function handler(
             },
           },
         },
+        orderBy: [
+          {
+            createdAt: "asc",
+          },
+        ],
       });
+      const streamCount = await prisma.stream.count();
 
       res.status(200).json({
         ok: true,
         message: "스트림들을 가져왔습니다.",
         streams,
+        streamCount,
       });
     }
     // 스트림 생성

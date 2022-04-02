@@ -514,9 +514,15 @@ interface IMessageWithUser extends Message {
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
-### 5.2 GET /api/streams
+### 5.2 GET /api/streams?page={}&offset={}
 + 역할: 스트림들 가져오기
-+ 전송 데이터 `none`
++ 전송 데이터 ( `query` )
+```typescript
+{
+  page: number;
+  offset: number;
+}
+```
 + 응답 데이터
 ```typescript
 {
@@ -527,6 +533,7 @@ interface IMessageWithUser extends Message {
     title: string;
     user: SimpleUser;
   }[]
+  streamCount: number
 }
 ```
 + 응답 상태 코드
