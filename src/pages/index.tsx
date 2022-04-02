@@ -28,7 +28,7 @@ interface IProductsResponse extends ApiResponse {
 
 const Home: NextPage = () => {
   const [page, setPage] = useState<number>(1);
-  const [offset] = useState<number>(2);
+  const [offset] = useState<number>(10);
 
   const { data: productsData } = useSWR<IProductsResponse>(
     `/api/products?page=${page}&offset=${offset}`

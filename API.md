@@ -370,7 +370,7 @@ interface IMessageWithUser extends Message {
 
 ## 3. posts
 ### 3.1 GET /api/posts
-+ 역할: 모든 게시글들 요청 ( >> 추후에 페이지네이션 적용 )
++ 역할: 모든 게시글들 요청
 + 전송 데이터 ( `query` )
 ```typescript
 // 전달된 인자에 따라서 거리에 의해 게시글을 검색할지 판단함
@@ -378,6 +378,8 @@ interface IMessageWithUser extends Message {
   distance?: number;
   latitude?: number;
   longitude?: number;
+  page: number;
+  offset: number;
 }
 ```
 + 응답 데이터
@@ -385,7 +387,8 @@ interface IMessageWithUser extends Message {
 {
   ok: boolean,
   message: string,
-  products: IPostWithEtc[]
+  products: IPostWithEtc[],
+  postCount: number
 }
 ```
 + 응답 상태 코드

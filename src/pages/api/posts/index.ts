@@ -17,6 +17,9 @@ async function handler(
 
   try {
     if (method === "GET") {
+      const page = +req.query.page - 1;
+      const offset = +req.query.offset;
+
       let where = {};
       // 인근 게시글 검색 시 실행
       if (req.query.distance) {
@@ -37,6 +40,8 @@ async function handler(
       }
 
       const posts = await prisma.post.findMany({
+        take: offset,
+        skip: page * offset,
         where,
         include: {
           user: {
@@ -51,12 +56,22 @@ async function handler(
             },
           },
         },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+      });
+
+      const postCount = await prisma.post.count({
+        where,
       });
 
       res.status(200).json({
         ok: true,
         message: "게시글들을 가져왔습니다.",
         posts,
+        postCount,
       });
     } else if (method === "POST") {
       const createdPost = await prisma.post.create({

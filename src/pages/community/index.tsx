@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import type { NextPage } from "next";
 import Link from "next/link";
 import useSWR from "swr";
@@ -16,6 +16,7 @@ import CommunityItem from "@src/components/CommunityItem";
 
 // util
 import useCoords from "@src/libs/client/useCoords";
+import Pagination from "@src/components/common/Pagination";
 
 export interface IPostWithEtc extends Post {
   user: {
@@ -29,9 +30,13 @@ export interface IPostWithEtc extends Post {
 
 interface IPostResponse extends ApiResponse {
   posts: IPostWithEtc[];
+  postCount: number;
 }
 
 const Community: NextPage = () => {
+  const [page, setPage] = useState<number>(1);
+  const [offset] = useState<number>(10);
+
   const { latitude, longitude } = useCoords();
   const [distance, setDistance] = useState(10);
   const [condition, setCondition] = useState<SEARCH_CONDITION>(
@@ -39,8 +44,8 @@ const Community: NextPage = () => {
   );
   const { data } = useSWR<IPostResponse>(
     +condition === SEARCH_CONDITION.AROUND && latitude && longitude
-      ? `/api/posts?latitude=${latitude}&longitude=${longitude}&distance=${distance}`
-      : "/api/posts"
+      ? `/api/posts?latitude=${latitude}&longitude=${longitude}&distance=${distance}&page=${page}&offset=${offset}`
+      : `/api/posts?page=${page}&offset=${offset}`
   );
 
   // 2022/03/28 - 검색 조건 변경 - by 1-blue
@@ -98,6 +103,12 @@ const Community: NextPage = () => {
           </li>
         ))}
       </ul>
+
+      <Pagination
+        page={page}
+        setPage={setPage}
+        max={Math.ceil((data?.postCount as number) / offset)}
+      />
 
       <Link href="/community/write">
         <a>
