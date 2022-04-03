@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -20,30 +21,53 @@ import Message from "@src/components/Message";
 import useMutation from "@src/libs/client/useMutation";
 import useUser from "@src/libs/client/useUser";
 
-interface IMessageWithUser extends MessageType {
+interface IStreamWithUser extends Stream {
   user: SimpleUser;
-}
-interface IStreamWithEtc extends Stream {
-  user: SimpleUser;
-  messages: IMessageWithUser[];
 }
 interface IStreamResponse extends ApiResponse {
-  stream: IStreamWithEtc;
+  stream: IStreamWithUser;
+  messageCount: number;
 }
 
 interface IMessageResponse extends ApiResponse {
-  messageWithUser: IMessageWithUser;
+  createdMessage: MessageType;
+}
+
+interface IGetMessageResponse extends ApiResponse {
+  messages: {
+    id: number;
+    message: string;
+    updatedAt: Date;
+    user: SimpleUser;
+  }[];
 }
 
 const StreamDetail: NextPage = () => {
   const router = useRouter();
-  const { data: streamData, mutate } = useSWR<IStreamResponse>(
+  const { user } = useUser();
+  // 스트림 상세 정보 요청
+  const { data: streamData } = useSWR<IStreamResponse>(
     router.query.id ? `/api/streams/${router.query.id}` : null
   );
   const { register, handleSubmit, reset } = useForm<IMessageForm>();
   const [createMessage, { data: messageData, loading }] =
     useMutation<IMessageResponse>(`/api/streams/${router.query.id}/messages`);
-  const { user } = useUser();
+  const [offset] = useState(10);
+  // 채팅들 요청
+  const {
+    data: getMessageData,
+    size,
+    setSize,
+    mutate: getMessageMutate,
+  } = useSWRInfinite<IGetMessageResponse>(
+    router.query.id
+      ? (pageIndex, previousPageData) => {
+          if (previousPageData && !previousPageData.messages.length)
+            return null;
+          return `/api/streams/${router.query.id}/messages?page=${pageIndex}&offset=${offset}`;
+        }
+      : () => null
+  );
 
   // 2022/04/01 - 메시지 생성 - by 1-blue
   const onValid = useCallback(
@@ -64,21 +88,33 @@ const StreamDetail: NextPage = () => {
   // 2022/04/01 - 메시지 뮤테이션 - by 1-blue
   useEffect(() => {
     if (messageData?.ok) {
-      mutate(
+      getMessageMutate(
         (prev) =>
-          prev && {
+          prev && [
             ...prev,
-            stream: {
-              ...prev?.stream,
-              messages: [...prev?.stream.messages, messageData.messageWithUser],
+            {
+              ok: true,
+              message: "getMessageMutate로 메시지 추가!",
+              messages: [
+                {
+                  id: Date.now(),
+                  message: messageData.createdMessage.message,
+                  updatedAt: Date.now() as any,
+                  user: {
+                    id: user?.id!,
+                    name: user?.name!,
+                    avatar: user?.avatar!,
+                  },
+                },
+              ],
             },
-          },
+          ],
         false
       );
 
       reset();
     }
-  }, [messageData, mutate, reset]);
+  }, [messageData, getMessageMutate, reset, user]);
 
   return (
     <>
@@ -99,18 +135,32 @@ const StreamDetail: NextPage = () => {
         <h3 className="text-sm text-center bg-indigo-300 p-2 rounded-md font-bold text-white">
           첫 번째 메시지입니다.
         </h3>
-        {streamData?.stream.messages.map((message) => (
-          <Message
-            key={message.id}
-            message={message.message}
-            updatedAt={message.updatedAt}
-            userName={message.user.name}
-            $reversed={user?.id === message.user.id}
+        {/* 댓글들 */}
+        {getMessageData?.map((messages) =>
+          messages.messages.map((message) => (
+            <Message
+              key={message.id}
+              message={message.message}
+              updatedAt={message.updatedAt}
+              userName={message.user.name}
+              $reversed={user?.id === message.user.id}
+            />
+          ))
+        )}
+        {/* 댓글 불러오기 버튼 */}
+        {Math.ceil(streamData?.messageCount! / offset) > size ? (
+          <Button
+            onClick={() => setSize((prev) => prev + 1)}
+            text={`메시지 ${
+              streamData?.messageCount! - offset * size
+            }개 더 불러오기`}
+            $primary
+            className="block mx-auto px-4"
+            $loading={typeof getMessageData?.[size - 1] === "undefined"}
           />
-        ))}
-        {!messageData?.ok && (
+        ) : (
           <h3 className="text-sm text-center bg-indigo-300 p-2 rounded-md font-bold text-white">
-            채팅방에 입장하셨습니다.
+            더 이상 불러올 댓글이 존재하지 않습니다.
           </h3>
         )}
 

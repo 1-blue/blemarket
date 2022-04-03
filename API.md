@@ -110,9 +110,8 @@ type Message = {
   userId: number
   streamId: number
 }
-interface IStreamWithEtc extends Stream {
+interface IStreamWithUser extends Stream {
   user: SimpleUser;
-  messages: Message[];
 }
 interface IMessageWithUser extends Message {
   user: SimpleUser;
@@ -532,7 +531,7 @@ interface IMessageWithUser extends Message {
 }
 ```
 + 응답 상태 코드
-  1. `200`: 답변들 가져오기 성공
+  1. `200`: 답변들 가져오기
   2. `401`: 비로그인 상태에서 접근
   3. `404`: 존재하지 않는 게시글 요청
   4. `500`: 서버측 에러 발생
@@ -606,11 +605,11 @@ interface IMessageWithUser extends Message {
   3. `500`: 서버측 에러 발생
 
 ### 5.3 GET /api/streams/[id]
-+ 역할: 스트림들 가져오기
++ 역할: 특정 스트림 가져오기
 + 전송 데이터 ( `query` )
 ```typescript
 {
-  id: number;
+  streamId: number;
 }
 ```
 + 응답 데이터
@@ -618,7 +617,8 @@ interface IMessageWithUser extends Message {
 {
   ok: boolean,
   message: string,
-  stream: IStreamWithEtc
+  stream: IStreamWithUser,
+  messageCount: number,
 }
 ```
 + 응답 상태 코드
@@ -632,7 +632,7 @@ interface IMessageWithUser extends Message {
 + 전송 데이터 ( `query`, `body` )
 ```typescript
 {
-  id: number;
+  streamId: number;
   message: string;
 }
 ```
@@ -646,6 +646,35 @@ interface IMessageWithUser extends Message {
 ```
 + 응답 상태 코드
   1. `201`: 메시지 생성 성공
+  2. `401`: 비로그인 상태에서 접근
+  3. `404`: 존재하지 않은 스트림에 메시지 생성 요청
+  4. `500`: 서버측 에러 발생
+
+### 5.5 GET /api/streams/[id]/message?page={}&offset={}
++ 역할: 메시지들 요청
++ 전송 데이터 ( `query`, `body` )
+```typescript
+{
+  streamId: number;
+  page: number;
+  offset: number;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  messages: {
+    id: number;
+    message: string;
+    updatedAt: Date;
+    user: SimpleUser;
+  }[],
+}
+```
++ 응답 상태 코드
+  1. `200`: 메시지 생성 성공
   2. `401`: 비로그인 상태에서 접근
   3. `404`: 존재하지 않은 스트림에 메시지 생성 요청
   4. `500`: 서버측 에러 발생

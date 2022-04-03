@@ -11,12 +11,12 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
 ) {
-  const id = +req.query.id as number;
+  const streamId = +req.query.id as number;
 
   try {
     const stream = await prisma.stream.findUnique({
       where: {
-        id,
+        id: streamId,
       },
       include: {
         user: {
@@ -24,17 +24,6 @@ async function handler(
             id: true,
             name: true,
             avatar: true,
-          },
-        },
-        messages: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true,
-              },
-            },
           },
         },
       },
@@ -46,10 +35,17 @@ async function handler(
         message: "존재하지 않은 스트림을 요청했습니다.",
       });
 
+    const messageCount = await prisma.message.count({
+      where: {
+        streamId,
+      },
+    });
+
     res.status(200).json({
       ok: true,
       message: "특정 스트림에 대한 정보입니다.",
       stream,
+      messageCount,
     });
   } catch (error) {
     console.error("/api/streams/[id] error >> ", error);
