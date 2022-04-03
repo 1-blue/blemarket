@@ -12,7 +12,7 @@ async function handler(
   const postId = +req.query.id;
   const {
     session: { user },
-    body: { answer },
+    method,
   } = req;
 
   try {
@@ -22,32 +22,73 @@ async function handler(
       },
     });
 
-    if (!exPost)
-      return res.status(404).json({
-        ok: false,
-        message: "존재하지 않는 게시글에 댓글을 달았습니다.",
+    if (method === "GET") {
+      if (!exPost)
+        return res.status(404).json({
+          ok: false,
+          message: "존재하지 않는 게시글에 댓글들을 요청했습니다.",
+        });
+
+      const page = +req.query.page;
+      const offset = +req.query.offset;
+
+      const answers = await prisma.answer.findMany({
+        take: offset,
+        skip: page * offset,
+        select: {
+          id: true,
+          answer: true,
+          updatedAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
       });
 
-    await prisma.answer.create({
-      data: {
-        user: {
-          connect: {
-            id: user?.id,
-          },
-        },
-        post: {
-          connect: {
-            id: postId,
-          },
-        },
-        answer,
-      },
-    });
+      return res.status(201).json({
+        ok: true,
+        message: "답변들을 가져왔습니다.",
+        answers,
+      });
+    } else if (method === "POST") {
+      if (!exPost)
+        return res.status(404).json({
+          ok: false,
+          message: "존재하지 않는 게시글에 댓글을 달았습니다.",
+        });
 
-    res.status(201).json({
-      ok: true,
-      message: "답변을 생성했습니다.",
-    });
+      const { answer } = req.body;
+
+      await prisma.answer.create({
+        data: {
+          user: {
+            connect: {
+              id: user?.id,
+            },
+          },
+          post: {
+            connect: {
+              id: postId,
+            },
+          },
+          answer,
+        },
+      });
+
+      return res.status(201).json({
+        ok: true,
+        message: "답변을 생성했습니다.",
+      });
+    }
   } catch (error) {
     console.error("/api/posts/[id]/answer error >> ", error);
 
@@ -59,4 +100,6 @@ async function handler(
   }
 }
 
-export default withApiSession(withHandler({ methods: ["POST"], handler }));
+export default withApiSession(
+  withHandler({ methods: ["GET", "POST"], handler })
+);

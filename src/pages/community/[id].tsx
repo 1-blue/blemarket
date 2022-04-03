@@ -1,7 +1,8 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -21,14 +22,7 @@ import Profile from "@src/components/common/Profile";
 import Textarea from "@src/components/common/Textarea";
 import Answer from "@src/components/common/Answer";
 
-interface IAnswerWithUser {
-  id: number;
-  answer: string;
-  updatedAt: string;
-  user: SimpleUser;
-}
 interface IPostWithEtc extends Post {
-  answers: IAnswerWithUser[];
   user: SimpleUser;
   _count: {
     recommendations: number;
@@ -37,14 +31,40 @@ interface IPostWithEtc extends Post {
 interface IPostResponse extends ApiResponse {
   post: IPostWithEtc;
   isRecommendation: boolean;
+  answerCount: number;
+}
+
+interface IAnswerWithUser {
+  id: number;
+  answer: string;
+  updatedAt: string;
+  user: SimpleUser;
+}
+interface IAnswerResponse extends ApiResponse {
+  answers: IAnswerWithUser[];
 }
 
 const CommunityPostDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
   // 게시글 상세 정보 요청
-  const { data, mutate } = useSWR<IPostResponse>(
+  const { data, mutate: postMutate } = useSWR<IPostResponse>(
     router.query.id ? `/api/posts/${router.query.id}` : null
+  );
+  const [offset] = useState(5);
+  // 댓글들 요청
+  const {
+    data: answersData,
+    size,
+    setSize,
+    mutate: answerMutate,
+  } = useSWRInfinite<IAnswerResponse>(
+    router.query.id
+      ? (pageIndex, previousPageData) => {
+          if (previousPageData && !previousPageData.answers.length) return null;
+          return `/api/posts/${router.query.id}/answer?page=${pageIndex}&offset=${offset}`;
+        }
+      : () => null
   );
   // 궁금해요 추가
   const [addRecommendation, { loading: addRecommendationLoading }] =
@@ -53,10 +73,11 @@ const CommunityPostDetail: NextPage = () => {
   const [removeRecommendation, { loading: removeRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`, "DELETE");
   // 답변 추가
-  const [answer, { loading: answerLoading }] = useMutation(
+  const [createAnswer, { loading: answerLoading }] = useMutation(
     `/api/posts/${router.query.id}/answer`
   );
   const { register, handleSubmit, reset } = useForm<IAnswerForm>();
+  const [toggleAnswer, setToggleAnswer] = useState(true);
 
   // 2022/03/27 - 궁금해요 클릭 - by 1-blue
   const onClickRecommendation = useCallback(() => {
@@ -65,7 +86,7 @@ const CommunityPostDetail: NextPage = () => {
     if (removeRecommendationLoading)
       return toast.error("이미 궁금해요 제거 처리중입니다.");
 
-    mutate(
+    postMutate(
       (prev) =>
         prev && {
           ...prev,
@@ -87,7 +108,7 @@ const CommunityPostDetail: NextPage = () => {
   }, [
     addRecommendationLoading,
     removeRecommendationLoading,
-    mutate,
+    postMutate,
     data,
     addRecommendation,
     removeRecommendation,
@@ -98,16 +119,17 @@ const CommunityPostDetail: NextPage = () => {
     (body: IAnswerForm) => {
       if (answerLoading) return;
 
-      mutate(
+      // 임시로 작성 댓글 추가
+      answerMutate(
         (prev) =>
-          prev && {
+          prev && [
             ...prev,
-            post: {
-              ...prev.post,
+            {
+              ok: true,
+              message: "answerMutate로 댓글 추가!",
               answers: [
-                ...prev.post.answers,
                 {
-                  id: 0,
+                  id: Date.now(),
                   answer: body.answer!,
                   updatedAt: Date.now().toString(),
                   user: {
@@ -118,15 +140,21 @@ const CommunityPostDetail: NextPage = () => {
                 },
               ],
             },
-          },
+          ],
         false
       );
 
-      answer(body);
+      // 임시로 댓글 개수 + 1
+      postMutate(
+        (prev) => prev && { ...prev, answerCount: prev.answerCount + 1 },
+        false
+      );
+
+      createAnswer(body);
 
       reset();
     },
-    [answerLoading, mutate, user, answer, reset]
+    [answerLoading, answerMutate, postMutate, user, createAnswer, reset]
   );
 
   return (
@@ -140,6 +168,7 @@ const CommunityPostDetail: NextPage = () => {
         name={data?.post.user.name}
         avatar={data?.post.user.avatar}
       />
+
       {/* 게시글 내용, 궁금해요와 답변아이콘 및 개수 */}
       <div>
         <div className="flex mt-2 px-4 text-gray-700">
@@ -158,16 +187,46 @@ const CommunityPostDetail: NextPage = () => {
             <Icon shape={ICON_SHAPE.CHECK} width={16} height={16} />
             <span>궁금해요 {data?.post._count.recommendations}</span>
           </button>
-          <span className="flex space-x-2 items-center text-sm">
+          <button
+            type="button"
+            className={combineClassNames(
+              "flex space-x-2 items-center text-sm",
+              toggleAnswer ? "text-orange-500 font-semibold" : ""
+            )}
+            onClick={() => setToggleAnswer((prev) => !prev)}
+          >
             <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
-            <span>답변 {data?.post.answers.length}</span>
-          </span>
+            <span>답변 {data?.answerCount}</span>
+          </button>
         </div>
       </div>
-      {/* 답변 */}
-      {data?.post.answers.map((answer) => (
-        <Answer key={answer.id} answer={answer} />
-      ))}
+
+      {toggleAnswer && (
+        <>
+          {/* 댓글들 */}
+          {answersData?.map((answers) =>
+            answers.answers.map((answer) => (
+              <Answer key={answer.id} answer={answer} />
+            ))
+          )}
+          {/* 댓글 불러오기 버튼 */}
+          {Math.ceil(data?.answerCount! / offset) > size ? (
+            <Button
+              onClick={() => setSize((prev) => prev + 1)}
+              text={`댓글 ${data?.answerCount! - offset * size}개 더 불러오기`}
+              $primary
+              className="block mx-auto px-4"
+              $loading={typeof answersData?.[size - 1] === "undefined"}
+            />
+          ) : (
+            <div className="text-center text-sm font-semibold">
+              더 이상 불러올 댓글이 존재하지 않습니다.
+            </div>
+          )}
+        </>
+      )}
+
+      {/* 댓글 제출 폼 */}
       <form className="px-4 mt-5" onSubmit={handleSubmit(onValid)}>
         <Textarea
           register={register("answer", { required: true })}

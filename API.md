@@ -424,7 +424,7 @@ interface IMessageWithUser extends Message {
 + 전송 데이터 ( `query` )
 ```typescript
 {
-  id: number;
+  postId: number;
 }
 ```
 + 응답 데이터
@@ -442,12 +442,12 @@ interface IMessageWithUser extends Message {
   3. `404`: 존재하지 않는 게시글 요청
   4. `500`: 서버측 에러 발생
 
-### 3.4 POST /api/posts/[id]/answer
+### 3.4 POST /api/posts/[id]/recommendation
 + 역할: 특정 게시글에 궁금해요 추가 요청
 + 전송 데이터 ( `query` )
 ```typescript
 {
-  id: number;
+  postId: number;
 }
 ```
 + 응답 데이터
@@ -458,18 +458,41 @@ interface IMessageWithUser extends Message {
 }
 ```
 + 응답 상태 코드
-  1. `201`: 답변 생성 성공
+  1. `201`: 궁금해요 추가 성공
   2. `401`: 비로그인 상태에서 접근
   3. `404`: 존재하지 않는 게시글 요청
   4. `409`: 이미 궁금해요를 누른 상태
   5. `500`: 서버측 에러 발생
 
-### 3.5 DELETE /api/posts/[id]/answer
+### 3.5 DELETE /api/posts/[id]/recommendation
 + 역할: 특정 게시글에 궁금해요 제거 요청
 + 전송 데이터 ( `query` )
 ```typescript
 {
-  id: number;
+  postId: number;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+}
+```
++ 응답 상태 코드
+  1. `200`: 궁금해요 제거 성공
+  2. `401`: 비로그인 상태에서 접근
+  3. `404`: 존재하지 않는 게시글 요청
+  4. `409`: 이미 궁금해요를 누른 상태
+  5. `500`: 서버측 에러 발생
+
+### 3.6 POST /api/posts/[id]/answer
++ 역할: 특정 게시글에 댓글 추가 요청
++ 전송 데이터 ( `query` )
+```typescript
+{
+  postId: number;
+  answer: string;
 }
 ```
 + 응답 데이터
@@ -483,8 +506,36 @@ interface IMessageWithUser extends Message {
   1. `201`: 답변 생성 성공
   2. `401`: 비로그인 상태에서 접근
   3. `404`: 존재하지 않는 게시글 요청
-  4. `409`: 이미 궁금해요를 누른 상태
-  5. `500`: 서버측 에러 발생
+  4. `500`: 서버측 에러 발생
+
+### 3.7 GET /api/posts/[id]/answer?page={}&offset={}
++ 역할: 특정 게시글에 댓글들 요청
++ 전송 데이터 ( `query` )
+```typescript
+{
+  postId: number;
+  page: number;
+  offset: number;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  answers: {
+    id: number;
+    answer: string;
+    updatedAt: string;
+    user: SimpleUser;
+  }[];
+}
+```
++ 응답 상태 코드
+  1. `200`: 답변들 가져오기 성공
+  2. `401`: 비로그인 상태에서 접근
+  3. `404`: 존재하지 않는 게시글 요청
+  4. `500`: 서버측 에러 발생
 
 ## 4. reviews
 ### 4.1 GET /api/reviews

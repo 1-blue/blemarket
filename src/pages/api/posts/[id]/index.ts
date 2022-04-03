@@ -24,20 +24,6 @@ async function handler(
             avatar: true,
           },
         },
-        answers: {
-          select: {
-            id: true,
-            answer: true,
-            updatedAt: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true,
-              },
-            },
-          },
-        },
         _count: {
           select: {
             recommendations: true,
@@ -60,12 +46,18 @@ async function handler(
         id: true,
       },
     });
+    const answerCount = await prisma.answer.count({
+      where: {
+        postId,
+      },
+    });
 
     res.status(200).json({
       ok: true,
       message: "특정 게시글을 가져왔습니다.",
       post: postWithAnswer,
       isRecommendation: !!isRecommendation,
+      answerCount,
     });
   } catch (error) {
     console.error("/api/posts/[id] error >> ", error);

@@ -20,7 +20,7 @@ const Answer = ({ answer }: { answer: AnswerWithUser }) => {
           <span className="text-xs text-gray-500 block ">
             {answer.updatedAt}
           </span>
-          <p className="text-gray-700 mt-2">{answer.answer}</p>
+          <p className="text-gray-700 mt-2 whitespace-pre">{answer.answer}</p>
         </div>
       </div>
     </div>
