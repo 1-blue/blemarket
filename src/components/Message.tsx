@@ -1,13 +1,19 @@
-import { combineClassNames } from "@src/libs/client/util";
+// type
+import { SimpleUser } from "@src/types";
+
+// util
+import { combineClassNames, combinePhotoUrl } from "@src/libs/client/util";
+import Image from "next/image";
+import Avatar from "./common/Avatar";
 
 interface IProps {
-  userName: string;
   message: string;
   updatedAt: Date;
+  user: SimpleUser;
   $reversed?: boolean;
 }
 
-const Message = ({ userName, message, updatedAt, $reversed }: IProps) => {
+const Message = ({ message, updatedAt, user, $reversed }: IProps) => {
   return (
     <div
       className={combineClassNames(
@@ -16,7 +22,8 @@ const Message = ({ userName, message, updatedAt, $reversed }: IProps) => {
       )}
     >
       {/* 프사 */}
-      <div className="w-12 h-12 rounded-full bg-slate-400 flex-shrink-0" />
+      <Avatar user={user} className="flex-shrink-0" />
+
       {/* 유저명과 채팅내용 */}
       <div
         className={combineClassNames(
@@ -24,7 +31,7 @@ const Message = ({ userName, message, updatedAt, $reversed }: IProps) => {
           $reversed ? "items-end" : ""
         )}
       >
-        <span className="text-sm">{userName}</span>
+        <span className="text-sm">{user.name}</span>
         <div className="border-2 bg-orange-400 text-white rounded-md px-4 py-2">
           {message}
         </div>

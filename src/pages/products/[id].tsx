@@ -58,11 +58,7 @@ const ProductsDatail: NextPage = () => {
         {/* 상품 이미지 */}
         <div className="h-96 w-full bg-slate-300" />
         {/* 게시글 작성자 프사, 이름 */}
-        <Profile
-          id={data?.product.user.id}
-          name={data?.product.user.name}
-          avatar={data?.product.user.avatar}
-        />
+        <Profile user={data?.product.user!} />
         {/* 상품 이름, 가격, 설명, 채팅, 좋아요 */}
         <div className="flex flex-col">
           <h1 className="font-bold text-3xl mb-1">{data?.product.name}</h1>

@@ -26,14 +26,15 @@ interface IMeResponse extends ApiResponse {
 const Profile: NextPage = () => {
   const { data: reviews } = useSWR<IReviewResponse>("/api/reviews");
   const { data: me } = useSWR<IMeResponse>("/api/users/me");
+  const user: SimpleUser = {
+    id: me?.user.id!,
+    name: me?.user.name!,
+    avatar: me?.user.avatar!,
+  };
 
   return (
     <div className="px-4 divide-y-2 space-y-4">
-      <UserProfile
-        id={me?.user.id}
-        name={me?.user.name}
-        avatar={me?.user.avatar}
-      />
+      <UserProfile user={user} />
       <ul className="flex justify-around items-center pt-4">
         <li>
           <Link href="/profile/sale">

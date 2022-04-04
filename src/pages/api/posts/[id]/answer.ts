@@ -35,6 +35,9 @@ async function handler(
       const answers = await prisma.answer.findMany({
         take: offset,
         skip: page * offset,
+        where: {
+          postId,
+        },
         select: {
           id: true,
           answer: true,

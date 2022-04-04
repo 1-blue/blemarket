@@ -142,7 +142,7 @@ const StreamDetail: NextPage = () => {
               key={message.id}
               message={message.message}
               updatedAt={message.updatedAt}
-              userName={message.user.name}
+              user={message.user}
               $reversed={user?.id === message.user.id}
             />
           ))

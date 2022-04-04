@@ -163,11 +163,7 @@ const CommunityPostDetail: NextPage = () => {
         동네질문
       </span>
       {/* 게시글 작성자 */}
-      <Profile
-        id={data?.post.user.id}
-        name={data?.post.user.name}
-        avatar={data?.post.user.avatar}
-      />
+      <Profile user={data?.post.user} />
 
       {/* 게시글 내용, 궁금해요와 답변아이콘 및 개수 */}
       <div>
@@ -219,7 +215,7 @@ const CommunityPostDetail: NextPage = () => {
               $loading={typeof answersData?.[size - 1] === "undefined"}
             />
           ) : (
-            <div className="text-center text-sm font-semibold">
+            <div className="text-center text-sm font-semibold my-2">
               더 이상 불러올 댓글이 존재하지 않습니다.
             </div>
           )}
