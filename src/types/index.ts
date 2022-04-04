@@ -74,9 +74,11 @@ export interface IAnswerForm {
   answer: string;
 }
 export interface IUpdateForm {
+  avatar?: FileList;
   name?: string;
   email?: string;
   phone?: string;
+  photo?: string;
 }
 export interface IStramForm {
   title: string;

@@ -165,6 +165,7 @@ interface IMessageWithUser extends Message {
 + 전송 데이터 ( `body` )
 ```
 {
+  photo?:string;
   name: string;
   email: string;
   phone: string;

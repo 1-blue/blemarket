@@ -10,6 +10,9 @@ import { withApiSession } from "@src/libs/server/withSession";
 // type
 import { RECORD } from "@src/types";
 
+// aws s3
+import S3 from "@src/libs/server/s3";
+
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
@@ -147,6 +150,7 @@ async function handler(
     }
 
     if (method === "POST") {
+      const photo = req.body.photo as string;
       const name = req.body.name as string;
       const email = req.body.email as string;
       const phone = req.body.phone as string;
@@ -185,7 +189,6 @@ async function handler(
           },
         });
       }
-
       // 이메일 변경
       if (email && exUser?.email !== email) {
         const isOverlapEmail = await prisma.user.findFirst({
@@ -214,7 +217,6 @@ async function handler(
           },
         });
       }
-
       // 휴대폰번호 변경
       if (phone && exUser?.phone !== phone) {
         const isOverlapPhone = await prisma.user.findFirst({
@@ -240,6 +242,29 @@ async function handler(
           },
           data: {
             phone,
+          },
+        });
+      }
+
+      if (photo) {
+        // 이미 multer-s3를 이용해서 이미지를 넣어놓은 상태임
+        // 기존 이미지 지우기
+        if (exUser?.avatar) {
+          S3.deleteObject(
+            {
+              Bucket: "blemarket",
+              Key: exUser.avatar,
+            },
+            (error) => console.error(error)
+          );
+        }
+
+        await prisma.user.update({
+          where: {
+            id: user?.id,
+          },
+          data: {
+            avatar: photo,
           },
         });
       }
