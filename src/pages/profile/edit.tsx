@@ -1,20 +1,23 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import type { NextPage } from "next";
 import { useForm } from "react-hook-form";
+import Image from "next/image";
 import { toast } from "react-toastify";
 
 // common-component
 import Button from "@src/components/common/Button";
 import Input from "@src/components/common/Input";
 import Notice from "@src/components/common/Notice";
+import Avatar from "@src/components/common/Avatar";
 
 // type
 import { ApiResponse, IUpdateForm } from "@src/types";
 
 // hook
-import useUser from "@src/libs/client/useUser";
-import useMutation from "@src/libs/client/useMutation";
-import { combinePhotoUrl } from "@src/libs/client/util";
+import useUser from "@src/libs/hooks/useUser";
+import useMutation from "@src/libs/hooks/useMutation";
+import useBlobPhoto from "@src/libs/hooks/useBlobPhoto";
+import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 const ProfileEdit: NextPage = () => {
   const { user, loading: userLoading } = useUser();
@@ -31,8 +34,8 @@ const ProfileEdit: NextPage = () => {
   // 2022/03/31 - 유저의 본래 정보 기입 - by 1-blue
   useEffect(() => {
     setValue("name", user?.name);
-    setValue("email", user?.email);
-    setValue("phone", user?.phone);
+    if (user?.email) setValue("email", user.email);
+    if (user?.phone) setValue("phone", user.phone);
   }, [setValue, user]);
 
   // 2022/03/31 - 프로필 업데이트 - 1-blue
@@ -73,35 +76,24 @@ const ProfileEdit: NextPage = () => {
     [loading, updateProfile]
   );
 
-  // 2022/03/31 - 유저 정보 변경 메시지 - 1-blue
-  useEffect(() => {
-    if (data && !data.ok) {
-      toast.error(data.message);
-    } else if (data && data.ok) {
-      toast.success("정보를 변경했습니다! 🐲");
-    }
-  }, [data]);
-
-  const [avatarLink, setAvatarLink] = useState("");
-  const avatar = watch("avatar");
-  // 2022/04/03 - 아바타 변경 - by 1-blue
-  useEffect(() => {
-    if (avatar?.length! > 0) {
-      setAvatarLink(URL.createObjectURL(avatar?.[0]!));
-    }
-  }, [avatar, setAvatarLink]);
+  useResponseToast({ response: data, successMessage: "정보를 변경했습니다!" });
+  const [avatarLink] = useBlobPhoto(watch("avatar"));
 
   return (
     <form className="px-4 space-y-4" onSubmit={handleSubmit(onValid)}>
       {/* 프로필 이미지 */}
       <div className="flex items-center space-x-3">
         {avatarLink ? (
-          <img src={avatarLink} className="w-14 h-14 rounded-full" />
+          <figure className="relative w-14 h-14">
+            <Image
+              src={avatarLink}
+              className="rounded-full object-cover"
+              layout="fill"
+              alt="업로드한 이미지"
+            />
+          </figure>
         ) : (
-          <img
-            src={combinePhotoUrl(user?.avatar!)}
-            className="w-14 h-14 rounded-full bg-slate-500"
-          />
+          <Avatar user={user} className="w-14 h-14" />
         )}
         <label
           htmlFor="picture"

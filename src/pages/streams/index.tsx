@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import type { NextPage } from "next";
 import Link from "next/link";
-import useSWR from "swr";
 
 // type
 import { ApiResponse, ICON_SHAPE, SimpleUser } from "@src/types";
@@ -11,7 +10,10 @@ import Icon from "@src/components/common/Icon";
 import Pagination from "@src/components/common/Pagination";
 
 // component
-import SideButton from "@src/components/SideButton";
+import SideButton from "@src/components/common/SideButton";
+
+// hook
+import usePagination from "@src/libs/hooks/usePagination";
 
 interface IStreamResponse extends ApiResponse {
   streams: {
@@ -23,42 +25,41 @@ interface IStreamResponse extends ApiResponse {
 }
 
 const Live: NextPage = () => {
-  const [page, setPage] = useState<number>(1);
-  const [offset] = useState<number>(10);
-  const { data } = useSWR<IStreamResponse>(
-    `/api/streams?page=${page}&offset=${offset}`
-  );
-  // 2022/04/02 - 다음 페이지 미리 패치하기 - by 1-blue
-  useSWR(`/api/streams?page=${page + 1}&offset=${offset}`);
+  // 2022/04/05 - 스트림 패치 - by 1-blue
+  const [{ data }, { page, setPage }, { offset }] =
+    usePagination<IStreamResponse>("/api/streams", {});
 
   return (
     <>
-      <div className="divide-y-2">
-        {data?.streams.map((stream) => (
-          <Link key={stream.id} href={`/streams/${stream.id}`}>
-            <a className="flex flex-col space-y-2 p-4">
-              <div className="w-full aspect-video bg-slate-300 rounded-md" />
-              <h3 className="text-gray-700 font-semibold text-sm">
-                {stream.title}
-              </h3>
-            </a>
-          </Link>
-        ))}
-      </div>
+      <article>
+        <ul className="divide-y-2">
+          {data?.streams.map((stream) => (
+            <li key={stream.id}>
+              <Link href={`/streams/${stream.id}`}>
+                <a className="flex flex-col space-y-2 p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:rounded-sm">
+                  <div className="w-full aspect-video bg-slate-300 rounded-md" />
+                  <h3 className="text-gray-700 font-semibold text-sm">
+                    {stream.title}
+                  </h3>
+                </a>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </article>
 
       <Pagination
+        url="/api/streams"
         page={page}
+        offset={offset}
         setPage={setPage}
         max={Math.ceil((data?.streamCount as number) / offset)}
       />
 
-      <Link href="/streams/create">
-        <a>
-          <SideButton>
-            <Icon shape={ICON_SHAPE.CAMERA} />
-          </SideButton>
-        </a>
-      </Link>
+      <SideButton
+        url="/streams/create"
+        contents={<Icon shape={ICON_SHAPE.CAMERA} />}
+      />
     </>
   );
 };

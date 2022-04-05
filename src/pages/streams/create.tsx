@@ -14,7 +14,7 @@ import { ApiResponse, IStramForm } from "@src/types";
 import { Stream } from "@prisma/client";
 
 // hook
-import useMutation from "@src/libs/client/useMutation";
+import useMutation from "@src/libs/hooks/useMutation";
 import { toast } from "react-toastify";
 
 interface IStreamResponse extends ApiResponse {

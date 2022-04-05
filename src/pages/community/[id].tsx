@@ -12,8 +12,8 @@ import { Post } from "@prisma/client";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
-import useMutation from "@src/libs/client/useMutation";
-import useUser from "@src/libs/client/useUser";
+import useMutation from "@src/libs/hooks/useMutation";
+import useUser from "@src/libs/hooks/useUser";
 
 // common-component
 import Icon from "@src/components/common/Icon";
@@ -163,7 +163,7 @@ const CommunityPostDetail: NextPage = () => {
         동네질문
       </span>
       {/* 게시글 작성자 */}
-      <Profile user={data?.post.user} />
+      {data?.post.user && <Profile user={data.post.user} />}
 
       {/* 게시글 내용, 궁금해요와 답변아이콘 및 개수 */}
       <div>

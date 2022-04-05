@@ -14,7 +14,7 @@ import {
 
 // utils
 import { combineClassNames } from "@src/libs/client/util";
-import useMutation from "@src/libs/client/useMutation";
+import useMutation from "@src/libs/hooks/useMutation";
 
 // common-component
 import Button from "@src/components/common/Button";

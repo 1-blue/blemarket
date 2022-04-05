@@ -3,18 +3,13 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 
+// type
+import { User } from "@prisma/client";
+
 export interface IUserResponse {
   ok: boolean;
   message: string;
-  user?: {
-    id: number;
-    name: string;
-    phone?: string;
-    email?: string;
-    avatar?: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+  user?: User;
   error?: any;
 }
 

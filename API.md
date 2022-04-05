@@ -250,6 +250,7 @@ interface IMessageWithUser extends Message {
 + 응답 상태 코드
   1. `200`: 모든 상품들 조회 성공
   2. `401`: 비로그인 상태에서 접근
+  2. `404`: 존재하지 않은 페이지 정보 요청
   3. `500`: 서버측 에러 발생
 
 ### 2.2 GET /api/products?keyword={}&page={}&offset={}

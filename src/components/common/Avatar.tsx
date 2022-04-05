@@ -2,19 +2,20 @@ import Image from "next/image";
 
 // type
 import { SimpleUser } from "@src/types";
+import { User } from "@prisma/client";
 
 // util
 import { combineClassNames, combinePhotoUrl } from "@src/libs/client/util";
 
 interface IProps {
-  user: SimpleUser;
+  user?: SimpleUser | User;
   className?: string;
 }
 
 const Avatar = ({ user, className }: IProps) => {
   return (
     <>
-      {user.avatar ? (
+      {user?.avatar ? (
         <figure
           className={combineClassNames(
             "relative w-12 h-12",
@@ -22,14 +23,14 @@ const Avatar = ({ user, className }: IProps) => {
           )}
         >
           <Image
-            src={combinePhotoUrl(user.avatar)}
+            src={combinePhotoUrl(user?.avatar)}
             layout="fill"
-            className="rounded-full object-contain"
-            alt={`${user.name}님의 프로필 이미지`}
+            className="rounded-full object-cover"
+            alt={`${user?.name}님의 프로필 이미지`}
           />
         </figure>
       ) : (
-        <div
+        <figure
           className={combineClassNames(
             "w-12 h-12 rounded-full bg-slate-400",
             className ? className : ""

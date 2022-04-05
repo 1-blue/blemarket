@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
-import useSWR from "swr";
+import { toast } from "react-toastify";
 
 // type
 import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
@@ -9,38 +9,36 @@ import { Product } from "@prisma/client";
 // common-component
 import Icon from "@src/components/common/Icon";
 import Item from "@src/components/common/Item";
-
-// component
-import SideButton from "@src/components/SideButton";
-import Link from "next/link";
 import Button from "@src/components/common/Button";
-import { toast } from "react-toastify";
 import Pagination from "@src/components/common/Pagination";
+import SideButton from "@src/components/common/SideButton";
+
+// hook
+import usePagination from "@src/libs/hooks/usePagination";
 
 interface ProductWithFavoriteUsers extends Product {
   records: SimpleUser[];
 }
 
-interface IProductsResponse extends ApiResponse {
+interface IResponseOfProducts extends ApiResponse {
   products: ProductWithFavoriteUsers[];
   productCount: number;
 }
 
 const Home: NextPage = () => {
-  const [page, setPage] = useState<number>(1);
-  const [offset] = useState<number>(10);
+  // 2022/04/05 - 전체 상품 요청 - by 1-blue
+  const [{ data: responseOfProducts }, { page, setPage }, { offset }] =
+    usePagination<IResponseOfProducts>("/api/products", {});
 
-  const { data: productsData } = useSWR<IProductsResponse>(
-    `/api/products?page=${page}&offset=${offset}`
-  );
+  // 2022/04/05 - 검색 상품 요청 - by 1-blue
   const [keyword, setKeyword] = useState("");
   const [search, setSearch] = useState({ keyword: "", isFirst: true });
-  const { data: searchProductsData, error: searchProductsError } =
-    useSWR<IProductsResponse>(
-      search.keyword
-        ? `/api/products?keyword=${search.keyword}&page=${page}&offset=${offset}`
-        : null
-    );
+  const [
+    { data: responseOfSearchProducts, error: responseOfSearchProductsError },
+  ] = usePagination<IResponseOfProducts>(
+    search.keyword ? `/api/products?keyword=${search.keyword}` : null,
+    {}
+  );
 
   // 2022/04/01 - 키워드 검색 onchange이벤트 - by 1-blue
   const onChangeKeyword = useCallback(
@@ -48,7 +46,7 @@ const Home: NextPage = () => {
     [setKeyword]
   );
 
-  // 2022/04/01 - 키워드 검색 요청 - by 1-blue
+  // 2022/04/01 - 키워드를 이용한 상품 검색 요청 - by 1-blue
   const onSumbitKeyowrd = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -60,42 +58,47 @@ const Home: NextPage = () => {
 
   // 2022/04/01 - 키워드 검색 완료 시 실행 - by 1-blue
   useEffect(() => {
-    if (searchProductsData?.ok && search.isFirst) {
+    if (responseOfSearchProducts?.ok && search.isFirst) {
       toast.success(
-        `키워드가 "${keyword}"인 상품들을 ${searchProductsData.productCount}개 검색했습니다.`,
+        `키워드가 "${keyword}"인 상품들을 ${responseOfSearchProducts.productCount}개 검색했습니다.`,
         { autoClose: 4000 }
       );
       setKeyword("");
       setSearch((prev) => ({ ...prev, isFirst: false }));
     }
-  }, [searchProductsData, setKeyword, keyword, search]);
-
+  }, [responseOfSearchProducts, setKeyword, keyword, search]);
+  // space-y-5 divide-y
   return (
     <>
-      <div className="flex flex-col space-y-5 divide-y">
-        <form className="flex" onSubmit={onSumbitKeyowrd}>
-          <input
-            type="search"
-            className="peer flex-1 rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400"
-            placeholder="🚀 키워드를 검색해보세요! 🚀"
-            onChange={onChangeKeyword}
-            value={keyword}
-          />
-          <Button
-            type="submit"
-            text={<Icon shape={ICON_SHAPE.SEARCH} />}
-            className="peer-focus:ring-1 bg-orange-400 px-3 text-white rounded-r-md ring-orange-400 hover:bg-orange-500"
-            $loading={
-              !!search.keyword &&
-              search.isFirst &&
-              !searchProductsData &&
-              !searchProductsError
-            }
-          />
-        </form>
+      <article className="flex flex-col divide-y">
+        {/* 상품 검색 폼 */}
+        <section>
+          <form className="flex" onSubmit={onSumbitKeyowrd}>
+            <input
+              type="search"
+              className="peer flex-1 rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400"
+              placeholder="🚀 키워드를 검색해보세요! 🚀"
+              onChange={onChangeKeyword}
+              value={keyword}
+            />
+            <Button
+              type="submit"
+              text={<Icon shape={ICON_SHAPE.SEARCH} />}
+              className="peer-focus:ring-1 bg-orange-400 px-3 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500"
+              $loading={
+                !!search.keyword &&
+                search.isFirst &&
+                !responseOfSearchProducts &&
+                !responseOfSearchProductsError
+              }
+            />
+          </form>
+        </section>
 
-        {searchProductsData?.products
-          ? searchProductsData.products.map((product) => (
+        {/* 상품 리스트 */}
+        <div className="mt-4" />
+        {responseOfSearchProducts?.products
+          ? responseOfSearchProducts.products.map((product) => (
               <Item
                 key={product.id}
                 id={product.id}
@@ -105,7 +108,7 @@ const Home: NextPage = () => {
                 favoriteUsers={product.records}
               />
             ))
-          : productsData?.products?.map((product) => (
+          : responseOfProducts?.products?.map((product) => (
               <Item
                 key={product.id}
                 id={product.id}
@@ -115,27 +118,33 @@ const Home: NextPage = () => {
                 favoriteUsers={product.records}
               />
             ))}
-
         <div />
-      </div>
+      </article>
 
+      {/* 페이지네이션 컴포넌트 */}
       <Pagination
+        url={
+          search.keyword
+            ? `/api/products?keyword=${search.keyword}`
+            : "/api/products"
+        }
         page={page}
+        offset={offset}
         setPage={setPage}
         max={
-          searchProductsData?.products
-            ? Math.ceil((searchProductsData?.productCount as number) / offset)
-            : Math.ceil((productsData?.productCount as number) / offset)
+          responseOfSearchProducts?.products
+            ? Math.ceil(
+                (responseOfSearchProducts?.productCount as number) / offset
+              )
+            : Math.ceil((responseOfProducts?.productCount as number) / offset)
         }
       />
 
-      <Link href="/products/upload">
-        <a>
-          <SideButton>
-            <Icon shape={ICON_SHAPE.PLUS} />
-          </SideButton>
-        </a>
-      </Link>
+      {/* 상품 업로드 버튼 */}
+      <SideButton
+        url="/products/upload"
+        contents={<Icon shape={ICON_SHAPE.PLUS} />}
+      />
     </>
   );
 };

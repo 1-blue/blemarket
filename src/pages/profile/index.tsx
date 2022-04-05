@@ -67,9 +67,11 @@ const Profile: NextPage = () => {
           </Link>
         </li>
       </ul>
-      {reviews?.reviews.map((review) => (
-        <UserReview key={review.id} review={review} />
-      ))}
+      <ul>
+        {reviews?.reviews.map((review) => (
+          <UserReview key={review.id} review={review} />
+        ))}
+      </ul>
     </div>
   );
 };

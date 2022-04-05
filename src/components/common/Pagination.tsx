@@ -1,10 +1,13 @@
-import { Dispatch, SetStateAction, useCallback } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
+import useSWR from "swr";
 
 interface IProps {
+  url: string;
   page: number;
+  offset: number;
   setPage: Dispatch<SetStateAction<number>>;
   max: number;
 }
@@ -14,11 +17,13 @@ const PageButton = ({
   $point,
   $hidden,
   onClick,
+  onHover,
 }: {
   page: string | number;
   $point?: boolean;
   $hidden?: boolean;
   onClick: () => void;
+  onHover?: () => void;
 }) => {
   return (
     <li
@@ -27,10 +32,11 @@ const PageButton = ({
       <button
         type="button"
         className={combineClassNames(
-          "w-full h-full  py-2 text-sm font-semibold rounded-md hover:bg-orange-400 hover:text-white",
+          "w-full h-full py-2 text-sm font-semibold rounded-md hover:bg-orange-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2",
           $point ? "bg-orange-400 text-white" : ""
         )}
         onClick={onClick}
+        onMouseEnter={onHover}
       >
         {page}
       </button>
@@ -38,7 +44,24 @@ const PageButton = ({
   );
 };
 
-const Pagination = ({ page, setPage, max }: IProps) => {
+const Pagination = ({ url, page, offset, setPage, max }: IProps) => {
+  // 2022/04/05 - 페이지 링크위에 마우스 올리면 패치 시작 - by 1-blue
+  const [preFetchPageNumber, setPreFetchPageNumber] = useState<null | number>(
+    null
+  );
+  // 2022/04/05 - 미래 패치할 페이지 번호 지정 - by 1-blue
+  const onPreFetch = useCallback(
+    (pageNumber) => () => setPreFetchPageNumber(pageNumber),
+    [setPreFetchPageNumber]
+  );
+  useSWR(
+    url === null || preFetchPageNumber === null
+      ? null
+      : url.includes("?")
+      ? `${url}&page=${preFetchPageNumber}&offset=${offset}`
+      : `${url}?page=${preFetchPageNumber}&offset=${offset}`
+  );
+
   // 2022/04/02 - 페이지 버튼 클릭 - by 1-blue
   const onClick = useCallback(
     (pageNumber) => () => setPage(pageNumber),
@@ -66,6 +89,7 @@ const Pagination = ({ page, setPage, max }: IProps) => {
             $point={i + 1 === page}
             onClick={onClick(i + 1)}
             $hidden={i + 1 > max || max < page}
+            onHover={onPreFetch(i + 1)}
           />
         ));
     }
@@ -81,6 +105,7 @@ const Pagination = ({ page, setPage, max }: IProps) => {
             $point={1 === i + 1}
             onClick={onClick(i + 1)}
             $hidden={max < page}
+            onHover={onPreFetch(i + 1)}
           />
         ));
     }
@@ -95,6 +120,7 @@ const Pagination = ({ page, setPage, max }: IProps) => {
             $point={2 === i + 1}
             onClick={onClick(i + 1)}
             $hidden={max < page}
+            onHover={onPreFetch(i + 1)}
           />
         ));
     }
@@ -110,6 +136,7 @@ const Pagination = ({ page, setPage, max }: IProps) => {
             $point={i === 4}
             onClick={onClick(max - (5 - i - 1))}
             $hidden={max < page}
+            onHover={onPreFetch(max - (5 - i - 1))}
           />
         ));
     }
@@ -124,6 +151,7 @@ const Pagination = ({ page, setPage, max }: IProps) => {
             $point={i === 3}
             onClick={onClick(max - (5 - i - 1))}
             $hidden={max < page}
+            onHover={onPreFetch(max - (5 - i - 1))}
           />
         ));
     }
@@ -138,16 +166,19 @@ const Pagination = ({ page, setPage, max }: IProps) => {
           $point={i + page - 2 === page}
           onClick={onClick(i + page - 2)}
           $hidden={max < page}
+          onHover={onPreFetch(i + page - 2)}
         />
       ));
-  }, [page, max, onClick]);
+  }, [page, max, onClick, onPreFetch]);
 
   return (
-    <ul className="mx-auto flex justify-center space-x-1 mt-6 mb-4">
-      <PageButton page="<" onClick={onClickPrevious} />
-      {getPageButton()}
-      <PageButton page=">" onClick={onClickNext} />
-    </ul>
+    <article>
+      <ul className="mx-auto flex justify-center space-x-2 mt-6 mb-4">
+        <PageButton page="<" onClick={onClickPrevious} />
+        {getPageButton()}
+        <PageButton page=">" onClick={onClickNext} />
+      </ul>
+    </article>
   );
 };
 

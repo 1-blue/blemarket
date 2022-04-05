@@ -7,7 +7,7 @@ import { ToastContainer } from "react-toastify";
 import Layout from "@src/components/layout";
 
 // hook
-import useUser from "@src/libs/client/useUser";
+import useUser from "@src/libs/hooks/useUser";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 

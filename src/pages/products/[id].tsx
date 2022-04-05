@@ -16,7 +16,7 @@ import { combineClassNames } from "@src/libs/client/util";
 import Icon from "@src/components/common/Icon";
 import Button from "@src/components/common/Button";
 import Profile from "@src/components/common/Profile";
-import useMutation from "@src/libs/client/useMutation";
+import useMutation from "@src/libs/hooks/useMutation";
 
 interface IProductWithUser extends Product {
   user: SimpleUser;

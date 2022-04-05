@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
 // type
@@ -10,16 +9,17 @@ import { Post } from "@prisma/client";
 // common-component
 import Button from "@src/components/common/Button";
 import Textarea from "@src/components/common/Textarea";
-import useMutation from "@src/libs/client/useMutation";
-import useCoords from "@src/libs/client/useCoords";
-import { toast } from "react-toastify";
+import useMutation from "@src/libs/hooks/useMutation";
+import useCoords from "@src/libs/hooks/useCoords";
+
+// hook
+import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 interface IWriteResponse extends ApiResponse {
   post: Post;
 }
 
 const Write: NextPage = () => {
-  const router = useRouter();
   const { register, handleSubmit } = useForm<IQuestionForm>();
   const [question, { loading, data }] =
     useMutation<IWriteResponse>("/api/posts");
@@ -32,12 +32,11 @@ const Write: NextPage = () => {
   );
 
   // 2022/03/27 - 게시글 생성 완료 시 페이지 이동 - 1-blue
-  useEffect(() => {
-    if (!data?.ok) return;
-
-    toast.success("게시글을 생성했습니다.", { autoClose: 3000 });
-    router.replace(`/community/${data.post.id}`);
-  }, [data, router]);
+  useResponseToast({
+    response: data,
+    successMessage: "게시글을 생성했습니다!",
+    move: data?.post.id ? `/community/${data.post.id}` : "",
+  });
 
   return (
     <form className="px-4" onSubmit={handleSubmit(onValid)}>

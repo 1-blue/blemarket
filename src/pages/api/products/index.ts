@@ -23,6 +23,20 @@ async function handler(
       const { keyword } = req.query;
 
       if (keyword) {
+        const productCount = await prisma.product.count({
+          where: {
+            keywords: {
+              contains: keyword as string,
+            },
+          },
+        });
+        if (productCount < page * offset) {
+          return res.status(404).json({
+            ok: false,
+            message: "존재하지 않은 페이지입니다.",
+          });
+        }
+
         const findKeywordProducts = await prisma.product.findMany({
           take: offset,
           skip: page * offset,
@@ -54,19 +68,19 @@ async function handler(
           ],
         });
 
-        const productCount = await prisma.product.count({
-          where: {
-            keywords: {
-              contains: keyword as string,
-            },
-          },
-        });
-
         return res.status(200).json({
           ok: true,
           message: `${keyword}인 상품들을 검색했습니다.`,
           products: findKeywordProducts,
           productCount,
+        });
+      }
+
+      const productCount = await prisma.product.count();
+      if (productCount < page * offset) {
+        return res.status(404).json({
+          ok: false,
+          message: "존재하지 않은 페이지입니다.",
         });
       }
 
@@ -95,8 +109,6 @@ async function handler(
           },
         ],
       });
-
-      const productCount = await prisma.product.count();
 
       res.status(200).json({
         ok: true,

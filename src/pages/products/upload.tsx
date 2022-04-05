@@ -1,8 +1,6 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
 
 // type
 import { ICON_SHAPE, ApiResponse, IUploadForm } from "@src/types";
@@ -16,14 +14,14 @@ import Notice from "@src/components/common/Notice";
 import Textarea from "@src/components/common/Textarea";
 
 // hook
-import useMutation from "@src/libs/client/useMutation";
+import useMutation from "@src/libs/hooks/useMutation";
+import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 interface IProductResponse extends ApiResponse {
   product: Product;
 }
 
 const Upload: NextPage = () => {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -33,20 +31,14 @@ const Upload: NextPage = () => {
     useMutation<IProductResponse>("/api/products");
 
   // 2022/03/25 - upload form 제출 - by 1-blue
-  const onValid = useCallback(
-    (data: IUploadForm) => {
-      upload(data);
-    },
-    [upload]
-  );
+  const onValid = useCallback((data: IUploadForm) => upload(data), [upload]);
 
   // 2022/03/25 - 상품 업로드 완료 후 리다이렉트 - by 1-blue
-  useEffect(() => {
-    if (!data?.ok) return;
-
-    toast.success("상품을 등록했습니다.", { autoClose: 3000 });
-    router.push(`/products/${data.product.id}`);
-  }, [data, router]);
+  useResponseToast({
+    response: data,
+    successMessage: "상품을 등록했습니다!",
+    move: data?.product.id ? `/products/${data.product.id}` : "",
+  });
 
   return (
     <form className="px-4 space-y-4" onSubmit={handleSubmit(onValid)}>

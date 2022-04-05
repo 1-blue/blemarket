@@ -40,7 +40,7 @@ const Layout = ({ children, hasTabBar }: IProps) => {
         <button
           type="button"
           onClick={goBack}
-          className="absolute w-10 h-10 top-3 left-4 rounded-full text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-4 00 focus:ring-offset-2"
+          className="absolute w-10 h-10 top-3 left-4 rounded-full text-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:ring-offset-1"
         >
           <Icon shape={ICON_SHAPE.BACK} width={40} height={40} />
         </button>

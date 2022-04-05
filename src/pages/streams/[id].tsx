@@ -18,8 +18,8 @@ import Button from "@src/components/common/Button";
 import Message from "@src/components/Message";
 
 // hooks
-import useMutation from "@src/libs/client/useMutation";
-import useUser from "@src/libs/client/useUser";
+import useMutation from "@src/libs/hooks/useMutation";
+import useUser from "@src/libs/hooks/useUser";
 
 interface IStreamWithUser extends Stream {
   user: SimpleUser;
