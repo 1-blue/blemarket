@@ -4,10 +4,11 @@ import { Review } from "@prisma/client";
 
 // common-component
 import Icon from "@src/components/common/Icon";
+import Avatar from "@src/components/common/Avatar";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
-import Avatar from "./common/Avatar";
+import { timeFormat } from "@src/libs/client/dateFormat";
 
 interface IReviewWithWriter extends Review {
   createdBy: SimpleUser;
@@ -41,7 +42,9 @@ const Review = ({ review }: IProps) => {
               ))}
           </div>
         </div>
-        <div>{review.createdAt}</div>
+        <span className="font-semibold text-xs">
+          ( {timeFormat(review.createdAt)} )
+        </span>
       </div>
       <p className="text-sm px-4 py-2 rounded-md bg-gray-200 whitespace-pre">
         {review.review}

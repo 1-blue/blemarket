@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
+import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 
 // type
@@ -8,10 +9,12 @@ import { Product } from "@prisma/client";
 
 // common-component
 import Icon from "@src/components/common/Icon";
-import Item from "@src/components/common/Item";
 import Button from "@src/components/common/Button";
 import Pagination from "@src/components/common/Pagination";
 import SideButton from "@src/components/common/SideButton";
+
+// component
+import ProductItem from "@src/components/ProductItem";
 
 // hook
 import usePagination from "@src/libs/hooks/usePagination";
@@ -26,20 +29,21 @@ interface IResponseOfProducts extends ApiResponse {
 }
 
 const Home: NextPage = () => {
+  const router = useRouter();
   // 2022/04/05 - 전체 상품 요청 - by 1-blue
   const [{ data: responseOfProducts }, { page, setPage }, { offset }] =
     usePagination<IResponseOfProducts>("/api/products", {});
-
-  // 2022/04/05 - 검색 상품 요청 - by 1-blue
-  const [keyword, setKeyword] = useState("");
-  const [search, setSearch] = useState({ keyword: "", isFirst: true });
   const [
     { data: responseOfSearchProducts, error: responseOfSearchProductsError },
   ] = usePagination<IResponseOfProducts>(
-    search.keyword ? `/api/products?keyword=${search.keyword}` : null,
+    router.query.keyword
+      ? `/api/products?keyword=${router.query.keyword}`
+      : null,
     {}
   );
 
+  // 2022/04/05 - 검색 상품 요청 - by 1-blue
+  const [keyword, setKeyword] = useState("");
   // 2022/04/01 - 키워드 검색 onchange이벤트 - by 1-blue
   const onChangeKeyword = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value),
@@ -50,24 +54,22 @@ const Home: NextPage = () => {
   const onSumbitKeyowrd = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      setSearch({ keyword, isFirst: true });
-      setPage(1);
+      router.push(`?keyword=${keyword}`);
     },
-    [setSearch, keyword, setPage]
+    [keyword, router]
   );
 
   // 2022/04/01 - 키워드 검색 완료 시 실행 - by 1-blue
   useEffect(() => {
-    if (responseOfSearchProducts?.ok && search.isFirst) {
+    if (responseOfSearchProducts?.ok && router.query.keyword) {
       toast.success(
-        `키워드가 "${keyword}"인 상품들을 ${responseOfSearchProducts.productCount}개 검색했습니다.`,
+        `키워드가 "${router.query.keyword}"인 상품들을 ${responseOfSearchProducts.productCount}개 검색했습니다.`,
         { autoClose: 4000 }
       );
       setKeyword("");
-      setSearch((prev) => ({ ...prev, isFirst: false }));
     }
-  }, [responseOfSearchProducts, setKeyword, keyword, search]);
-  // space-y-5 divide-y
+  }, [responseOfSearchProducts, setKeyword, router]);
+
   return (
     <>
       <article className="flex flex-col divide-y">
@@ -86,8 +88,7 @@ const Home: NextPage = () => {
               text={<Icon shape={ICON_SHAPE.SEARCH} />}
               className="peer-focus:ring-1 bg-orange-400 px-3 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500"
               $loading={
-                !!search.keyword &&
-                search.isFirst &&
+                !!router.query.keyword &&
                 !responseOfSearchProducts &&
                 !responseOfSearchProductsError
               }
@@ -99,7 +100,7 @@ const Home: NextPage = () => {
         <div className="mt-4" />
         {responseOfSearchProducts?.products
           ? responseOfSearchProducts.products.map((product) => (
-              <Item
+              <ProductItem
                 key={product.id}
                 id={product.id}
                 name={product.name}
@@ -109,7 +110,7 @@ const Home: NextPage = () => {
               />
             ))
           : responseOfProducts?.products?.map((product) => (
-              <Item
+              <ProductItem
                 key={product.id}
                 id={product.id}
                 name={product.name}
@@ -124,8 +125,8 @@ const Home: NextPage = () => {
       {/* 페이지네이션 컴포넌트 */}
       <Pagination
         url={
-          search.keyword
-            ? `/api/products?keyword=${search.keyword}`
+          router.query.keyword
+            ? `/api/products?keyword=${router.query.keyword}`
             : "/api/products"
         }
         page={page}

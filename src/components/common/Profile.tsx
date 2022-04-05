@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-// util
-import Avatar from "./Avatar";
-
 // type
 import { SimpleUser } from "@src/types";
+
+// common-component
+import Avatar from "@src/components/common/Avatar";
 
 interface IProps {
   user: SimpleUser;

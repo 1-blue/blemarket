@@ -1,16 +1,14 @@
 import React from "react";
 import type { NextPage } from "next";
 import useSWR from "swr";
+import { useRouter } from "next/router";
 
 // type
-import { ApiResponse, ICON_SHAPE, SimpleUser } from "@src/types";
+import { ApiResponse, SimpleUser } from "@src/types";
 import { Product } from "@prisma/client";
 
 // component
-import Item from "@src/components/common/Item";
-import Icon from "@src/components/common/Icon";
-import SideButton from "@src/components/common/SideButton";
-import { useRouter } from "next/router";
+import ProductItem from "@src/components/ProductItem";
 
 interface IProductWithWriter extends Product {
   records: SimpleUser[];
@@ -33,7 +31,7 @@ const Kinds: NextPage = () => {
   return (
     <article className="flex flex-col space-y-5">
       {data?.products.map((product) => (
-        <Item
+        <ProductItem
           key={product.id}
           id={product.product.id}
           name={product.product.name}

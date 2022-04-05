@@ -6,6 +6,9 @@ import { ICON_SHAPE, SimpleUser } from "@src/types";
 // common-component
 import Icon from "@src/components/common/Icon";
 
+// util
+import { priceWithCommas } from "@src/libs/client/util";
+
 interface IProps {
   id: number;
   name: string;
@@ -14,7 +17,13 @@ interface IProps {
   favoriteUsers: SimpleUser[];
 }
 
-const Item = ({ id, name, description, price, favoriteUsers }: IProps) => {
+const ProductItem = ({
+  id,
+  name,
+  description,
+  price,
+  favoriteUsers,
+}: IProps) => {
   return (
     <section>
       <Link href={`/products/${id}`}>
@@ -30,7 +39,7 @@ const Item = ({ id, name, description, price, favoriteUsers }: IProps) => {
                 {description}
               </span>
               <span className="font-medium text-sm text-gray-900">
-                {price}원
+                {priceWithCommas(price)}원
               </span>
             </li>
           </ul>
@@ -51,4 +60,4 @@ const Item = ({ id, name, description, price, favoriteUsers }: IProps) => {
   );
 };
 
-export default Item;
+export default ProductItem;

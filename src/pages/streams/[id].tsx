@@ -21,6 +21,10 @@ import Message from "@src/components/Message";
 import useMutation from "@src/libs/hooks/useMutation";
 import useUser from "@src/libs/hooks/useUser";
 
+// util
+import { timeFormat } from "@src/libs/client/dateFormat";
+import { priceWithCommas } from "@src/libs/client/util";
+
 interface IStreamWithUser extends Stream {
   user: SimpleUser;
 }
@@ -45,11 +49,11 @@ interface IGetMessageResponse extends ApiResponse {
 const StreamDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
+  const { register, handleSubmit, reset } = useForm<IMessageForm>();
   // 스트림 상세 정보 요청
   const { data: streamData } = useSWR<IStreamResponse>(
     router.query.id ? `/api/streams/${router.query.id}` : null
   );
-  const { register, handleSubmit, reset } = useForm<IMessageForm>();
   const [createMessage, { data: messageData, loading }] =
     useMutation<IMessageResponse>(`/api/streams/${router.query.id}/messages`);
   const [offset] = useState(10);
@@ -119,34 +123,43 @@ const StreamDetail: NextPage = () => {
   return (
     <>
       {/* 비디오, 제목, 가격, 설명 */}
-      <div className="px-4 space-y-2 mb-16">
+      <article className="px-4 space-y-4 mb-10">
         <div className="w-full aspect-video bg-slate-300 rounded-md mb-2" />
         <h1 className="text-gray-700 font-semibold text-2xl">
           {streamData?.stream.title}
         </h1>
-        <span className="inline-block">{streamData?.stream.price}원</span>
-        <p className="whitespace-pre p-2 bg-slate-200 rounded-lg">
+        <p className="whitespace-pre p-4 bg-slate-200 rounded-lg">
           {streamData?.stream.description}
         </p>
-      </div>
+        <div className="flex justify-between items-baseline">
+          <span className="inline-block font-semibold text-base">
+            {priceWithCommas(streamData?.stream.price!)}원
+          </span>
+          <span className="text-xs font-semibold">
+            ( {timeFormat(streamData?.stream.updatedAt!)}부터 시작 )
+          </span>
+        </div>
+      </article>
 
       {/* 메시지들 */}
-      <div className="p-4 mb-24 space-y-4 h-[50vh] overflow-y-auto bg-slate-200 sm:rounded-lg ">
+      <article className="p-4 mb-24 space-y-4 h-[60vh] overflow-y-auto bg-slate-200 sm:rounded-lg shadow-md">
         <h3 className="text-sm text-center bg-indigo-300 p-2 rounded-md font-bold text-white">
           첫 번째 메시지입니다.
         </h3>
         {/* 댓글들 */}
-        {getMessageData?.map((messages) =>
-          messages.messages.map((message) => (
-            <Message
-              key={message.id}
-              message={message.message}
-              updatedAt={message.updatedAt}
-              user={message.user}
-              $reversed={user?.id === message.user.id}
-            />
-          ))
-        )}
+        <ul>
+          {getMessageData?.map((messages) =>
+            messages.messages.map((message) => (
+              <Message
+                key={message.id}
+                message={message.message}
+                updatedAt={message.updatedAt}
+                user={message.user}
+                $reversed={user?.id === message.user.id}
+              />
+            ))
+          )}
+        </ul>
         {/* 댓글 불러오기 버튼 */}
         {Math.ceil(streamData?.messageCount! / offset) > size ? (
           <Button
@@ -189,7 +202,7 @@ const StreamDetail: NextPage = () => {
             $loading={loading}
           />
         </form>
-      </div>
+      </article>
     </>
   );
 };

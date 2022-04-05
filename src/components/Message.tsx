@@ -1,10 +1,12 @@
 // type
 import { SimpleUser } from "@src/types";
 
+// common-component
+import Avatar from "@src/components/common/Avatar";
+
 // util
-import { combineClassNames, combinePhotoUrl } from "@src/libs/client/util";
-import Image from "next/image";
-import Avatar from "./common/Avatar";
+import { combineClassNames } from "@src/libs/client/util";
+import { timeFormat } from "@src/libs/client/dateFormat";
 
 interface IProps {
   message: string;
@@ -15,7 +17,7 @@ interface IProps {
 
 const Message = ({ message, updatedAt, user, $reversed }: IProps) => {
   return (
-    <div
+    <li
       className={combineClassNames(
         "flex space-x-2",
         $reversed ? "flex-row-reverse space-x-reverse" : ""
@@ -32,15 +34,15 @@ const Message = ({ message, updatedAt, user, $reversed }: IProps) => {
         )}
       >
         <span className="text-sm">{user.name}</span>
-        <div className="border-2 bg-orange-400 text-white rounded-md px-4 py-2">
+        <p className="border-2 bg-orange-400 text-white rounded-md px-4 py-2 max-w-[240px]">
           {message}
-        </div>
+        </p>
       </div>
       {/* 채팅 작성 시간 */}
-      <span className="text-sm text-gray-500 self-end basis-1/4">
-        {updatedAt}
+      <span className="text-sm text-gray-500 self-end text-right">
+        {timeFormat(updatedAt)}
       </span>
-    </div>
+    </li>
   );
 };
 

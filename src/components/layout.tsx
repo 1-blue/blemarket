@@ -22,7 +22,12 @@ const Layout = ({ children, hasTabBar }: IProps) => {
   const goBack = useCallback(() => router.back(), [router]);
 
   const getTitle = useCallback((asPath: string) => {
-    if (asPath === "/" || asPath.includes("/products")) return "홈";
+    if (
+      asPath === "/" ||
+      asPath.includes("/?keyword=") ||
+      asPath.includes("/products")
+    )
+      return "홈";
     if (asPath.includes("/community")) return "동네생활";
     if (asPath.includes("/chats")) return "채팅";
     if (asPath.includes("/streams")) return "라이브";
@@ -33,7 +38,7 @@ const Layout = ({ children, hasTabBar }: IProps) => {
 
   return (
     <>
-      <header className="fixed w-full max-w-lg inset-x-0 mx-auto border-b-2 py-4 bg-white shadow-lg">
+      <header className="fixed w-full max-w-lg inset-x-0 mx-auto border-b-2 py-4 bg-white shadow-lg z-50">
         <h1 className="text-xl font-bold text-center">
           {getTitle(router.asPath)}
         </h1>

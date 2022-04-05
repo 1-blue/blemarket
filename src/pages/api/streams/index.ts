@@ -28,6 +28,7 @@ async function handler(
         select: {
           id: true,
           title: true,
+          updatedAt: true,
           user: {
             select: {
               id: true,

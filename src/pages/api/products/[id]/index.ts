@@ -42,6 +42,10 @@ async function handler(
           },
         },
       },
+      take: 8,
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
 
     const isFavorite = await prisma.record.findFirst({

@@ -10,17 +10,22 @@ import { toast } from "react-toastify";
 import { IAnswerForm, ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
 import { Post } from "@prisma/client";
 
-// util
-import { combineClassNames } from "@src/libs/client/util";
-import useMutation from "@src/libs/hooks/useMutation";
-import useUser from "@src/libs/hooks/useUser";
-
 // common-component
 import Icon from "@src/components/common/Icon";
 import Button from "@src/components/common/Button";
 import Profile from "@src/components/common/Profile";
 import Textarea from "@src/components/common/Textarea";
-import Answer from "@src/components/common/Answer";
+
+// component
+import Answer from "@src/components/Answer";
+
+// util
+import { combineClassNames } from "@src/libs/client/util";
+
+// hook
+import useMutation from "@src/libs/hooks/useMutation";
+import useUser from "@src/libs/hooks/useUser";
+import { dateFormat } from "@src/libs/client/dateFormat";
 
 interface IPostWithEtc extends Post {
   user: SimpleUser;
@@ -37,7 +42,7 @@ interface IPostResponse extends ApiResponse {
 interface IAnswerWithUser {
   id: number;
   answer: string;
-  updatedAt: string;
+  updatedAt: Date | number;
   user: SimpleUser;
 }
 interface IAnswerResponse extends ApiResponse {
@@ -66,13 +71,13 @@ const CommunityPostDetail: NextPage = () => {
         }
       : () => null
   );
-  // 궁금해요 추가
+  // 궁금해요 추가 메서드
   const [addRecommendation, { loading: addRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`);
-  // 궁금해요 제거
+  // 궁금해요 제거 메서드
   const [removeRecommendation, { loading: removeRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`, "DELETE");
-  // 답변 추가
+  // 답변 추가 메서드
   const [createAnswer, { loading: answerLoading }] = useMutation(
     `/api/posts/${router.query.id}/answer`
   );
@@ -131,7 +136,7 @@ const CommunityPostDetail: NextPage = () => {
                 {
                   id: Date.now(),
                   answer: body.answer!,
-                  updatedAt: Date.now().toString(),
+                  updatedAt: Date.now(),
                   user: {
                     id: user?.id!,
                     name: user?.name!,
@@ -159,19 +164,24 @@ const CommunityPostDetail: NextPage = () => {
 
   return (
     <>
-      <span className="inline-flex my-3 ml-4 items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-        동네질문
-      </span>
-      {/* 게시글 작성자 */}
-      {data?.post.user && <Profile user={data.post.user} />}
-
-      {/* 게시글 내용, 궁금해요와 답변아이콘 및 개수 */}
-      <div>
-        <div className="flex mt-2 px-4 text-gray-700">
-          <span className="text-orange-500 font-medium mr-2">Q</span>
+      {/* 게시글 작성자, 내용, 궁금해요와 답변아이콘 버튼 */}
+      <article>
+        <section>
+          <div className="flex justify-between items-baseline">
+            <span className="inline-flex my-3 ml-4 items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              동네질문
+            </span>
+            <span className="font-semibold text-xs">
+              ( {dateFormat(data?.post.updatedAt!, "YYYY/MM/DD hh:mm:ss")} )
+            </span>
+          </div>
+          {data?.post.user && <Profile user={data.post.user} />}
+        </section>
+        <section className="flex mt-2 px-4 text-gray-700">
+          <span className="text-orange-500 font-medium mr-2">Q .</span>
           <span className="whitespace-pre">{data?.post.question}</span>
-        </div>
-        <div className="flex px-4 space-x-5 mt-3 text-gray-700 py-2.5 border-t border-b-[2px]  w-full">
+        </section>
+        <section className="flex px-4 space-x-5 mt-3 text-gray-700 py-2.5 border-t border-b-[2px]  w-full">
           <button
             className={combineClassNames(
               "flex space-x-2 items-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-4 focus:rounded-sm",
@@ -186,7 +196,7 @@ const CommunityPostDetail: NextPage = () => {
           <button
             type="button"
             className={combineClassNames(
-              "flex space-x-2 items-center text-sm",
+              "flex space-x-2 items-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-4 focus:rounded-sm",
               toggleAnswer ? "text-orange-500 font-semibold" : ""
             )}
             onClick={() => setToggleAnswer((prev) => !prev)}
@@ -194,49 +204,58 @@ const CommunityPostDetail: NextPage = () => {
             <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
             <span>답변 {data?.answerCount}</span>
           </button>
-        </div>
-      </div>
+        </section>
+      </article>
 
+      {/* 댓글과 댓글 불러오기 버튼 */}
       {toggleAnswer && (
-        <>
-          {/* 댓글들 */}
-          {answersData?.map((answers) =>
-            answers.answers.map((answer) => (
-              <Answer key={answer.id} answer={answer} />
-            ))
-          )}
-          {/* 댓글 불러오기 버튼 */}
-          {Math.ceil(data?.answerCount! / offset) > size ? (
-            <Button
-              onClick={() => setSize((prev) => prev + 1)}
-              text={`댓글 ${data?.answerCount! - offset * size}개 더 불러오기`}
-              $primary
-              className="block mx-auto px-4"
-              $loading={typeof answersData?.[size - 1] === "undefined"}
-            />
-          ) : (
-            <div className="text-center text-sm font-semibold my-2">
-              더 이상 불러올 댓글이 존재하지 않습니다.
-            </div>
-          )}
-        </>
+        <article>
+          <section>
+            <ul>
+              {answersData?.map((answers) =>
+                answers.answers.map((answer) => (
+                  <Answer key={answer.id} answer={answer} />
+                ))
+              )}
+            </ul>
+          </section>
+          <section>
+            {Math.ceil(data?.answerCount! / offset) > size ? (
+              <Button
+                onClick={() => setSize((prev) => prev + 1)}
+                text={`댓글 ${
+                  data?.answerCount! - offset * size
+                }개 더 불러오기`}
+                $primary
+                className="block mx-auto px-4"
+                $loading={typeof answersData?.[size - 1] === "undefined"}
+              />
+            ) : (
+              <span className="block text-center text-sm font-semibold my-2">
+                더 이상 불러올 댓글이 존재하지 않습니다.
+              </span>
+            )}
+          </section>
+        </article>
       )}
 
       {/* 댓글 제출 폼 */}
-      <form className="px-4 mt-5" onSubmit={handleSubmit(onValid)}>
-        <Textarea
-          register={register("answer", { required: true })}
-          rows={6}
-          placeholder="Answer this question!"
-        />
-        <Button
-          type="submit"
-          text="Reply"
-          $primary
-          $loading={answerLoading}
-          className="w-full mt-2"
-        />
-      </form>
+      <article>
+        <form className="px-4 mt-5" onSubmit={handleSubmit(onValid)}>
+          <Textarea
+            register={register("answer", { required: true })}
+            rows={6}
+            placeholder="Answer this question!"
+          />
+          <Button
+            type="submit"
+            text="Reply"
+            $primary
+            $loading={answerLoading}
+            className="w-full mt-2"
+          />
+        </form>
+      </article>
     </>
   );
 };

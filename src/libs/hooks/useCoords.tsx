@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 interface ICoordsState {
   latitude: number | null;
   longitude: number | null;
 }
 
-export default function useCoords() {
+export default function useCoords(warningText: string) {
   const [coords, setCoords] = useState<ICoordsState>({
     latitude: null,
     longitude: null,
@@ -16,10 +17,10 @@ export default function useCoords() {
       setCoords({ latitude, longitude }),
     []
   );
-  const onFailure = useCallback((error: GeolocationPositionError) => {
-    console.log("실패 >> ", error);
-    // Toast 보여주기
-  }, []);
+  const onFailure = useCallback(
+    (error: GeolocationPositionError) => toast.warning(warningText),
+    [warningText]
+  );
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(onSuccess, onFailure);

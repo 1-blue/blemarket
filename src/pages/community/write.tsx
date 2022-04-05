@@ -20,10 +20,12 @@ interface IWriteResponse extends ApiResponse {
 }
 
 const Write: NextPage = () => {
+  const coords = useCoords(
+    "GPS를 허용하지 않아서 위치기반 검색결과에서 제외됩니다."
+  );
   const { register, handleSubmit } = useForm<IQuestionForm>();
   const [question, { loading, data }] =
     useMutation<IWriteResponse>("/api/posts");
-  const coords = useCoords();
 
   // 2022/03/27 - 질문 생성 - by 1-blue
   const onValid = useCallback(
@@ -48,7 +50,7 @@ const Write: NextPage = () => {
       />
       <Button
         type="submit"
-        text="Submit"
+        text="생성"
         $primary
         $loading={loading}
         className="w-full mt-2"

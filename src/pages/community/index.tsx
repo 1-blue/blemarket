@@ -33,10 +33,12 @@ interface IPostResponse extends ApiResponse {
 }
 
 const Community: NextPage = () => {
-  const { latitude, longitude } = useCoords();
+  const { latitude, longitude } = useCoords(
+    "GPS를 허용하지 않아서 위치기반 검색을 할 수 없습니다."
+  );
   const [distance, setDistance] = useState(10);
   const [condition, setCondition] = useState<SEARCH_CONDITION>(
-    SEARCH_CONDITION.AROUND
+    SEARCH_CONDITION.ALL
   );
   const [{ data }, { page, setPage }, { offset }] =
     usePagination<IPostResponse>(
@@ -70,7 +72,12 @@ const Community: NextPage = () => {
             className="rounded-md focus:ring-orange-500 focus:ring-2 focus:border-orange-500"
           >
             <option value={SEARCH_CONDITION.ALL}>모든 게시글 검색</option>
-            <option value={SEARCH_CONDITION.AROUND}>주변 게시글 검색</option>
+            <option
+              value={SEARCH_CONDITION.AROUND}
+              disabled={!(latitude && longitude)}
+            >
+              주변 게시글 검색
+            </option>
           </select>
 
           {/* 검색 거리 */}

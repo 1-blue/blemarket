@@ -10,12 +10,15 @@ import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
 import { Product } from "@prisma/client";
 
 // util
-import { combineClassNames } from "@src/libs/client/util";
+import { combineClassNames, priceWithCommas } from "@src/libs/client/util";
+import { dateFormat } from "@src/libs/client/dateFormat";
 
 // common-component
 import Icon from "@src/components/common/Icon";
 import Button from "@src/components/common/Button";
 import Profile from "@src/components/common/Profile";
+
+// hook
 import useMutation from "@src/libs/hooks/useMutation";
 
 interface IProductWithUser extends Product {
@@ -30,14 +33,18 @@ interface IProductWithEtcResponse extends ApiResponse {
 
 const ProductsDatail: NextPage = () => {
   const router = useRouter();
-  const { data, mutate } = useSWR<IProductWithEtcResponse>(
+
+  // 상품 상세 정보
+  const { data: responseOfProduct, mutate } = useSWR<IProductWithEtcResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
+  // 좋아요 추가 요청 메서드
   const [addFavorite, { loading: addLoading }] = useMutation<ApiResponse>(
-    `/api/products/${data?.product.id}/favorite`
+    `/api/products/${responseOfProduct?.product.id}/favorite`
   );
+  // 좋아요 제거 요청 메서드
   const [removeFavorite, { loading: removeLoading }] = useMutation<ApiResponse>(
-    `/api/products/${data?.product.id}/favorite`,
+    `/api/products/${responseOfProduct?.product.id}/favorite`,
     "DELETE"
   );
 
@@ -48,35 +55,58 @@ const ProductsDatail: NextPage = () => {
 
     mutate((prev) => prev && { ...prev, isFavorite: !prev.isFavorite }, false);
 
-    if (data?.isFavorite) removeFavorite(null);
+    if (responseOfProduct?.isFavorite) removeFavorite(null);
     else addFavorite(null);
-  }, [addLoading, removeLoading, mutate, data, addFavorite, removeFavorite]);
+  }, [
+    addLoading,
+    removeLoading,
+    mutate,
+    responseOfProduct,
+    addFavorite,
+    removeFavorite,
+  ]);
 
   return (
     <>
-      <div className="px-4 pb-8 mb-8 border-b">
-        {/* 상품 이미지 */}
-        <div className="h-96 w-full bg-slate-300" />
-        {/* 게시글 작성자 프사, 이름 */}
-        <Profile user={data?.product.user!} />
-        {/* 상품 이름, 가격, 설명, 채팅, 좋아요 */}
-        <div className="flex flex-col">
-          <h1 className="font-bold text-3xl mb-1">{data?.product.name}</h1>
-          <p className="font-semibold text-xl mb-4">{data?.product.price}원</p>
-          <p className="text-gray-900 mb-4 whitespace-pre">
-            {data?.product.description}
+      {/* 상품 이미지, 유저 프로필, 이름, 설명, 가격, 키워드, 좋아요 */}
+      <article className="px-4 pb-8 mb-8 border-b">
+        <section className="h-96 w-full bg-slate-300" />
+        <section>
+          <Profile user={responseOfProduct?.product.user!} />
+        </section>
+        <section className="flex flex-col space-y-3">
+          <h2 className="font-bold text-3xl">
+            {responseOfProduct?.product.name}
+          </h2>
+          <p className="text-gray-900 p-4 rounded-md bg-gray-200 whitespace-pre">
+            {responseOfProduct?.product.description}
           </p>
+          <div className="flex justify-between items-baseline">
+            <span className="font-semibold text-lg">
+              {priceWithCommas(responseOfProduct?.product.price!)}원
+            </span>
+            <span className="font-semibold text-xs">
+              ({" "}
+              {dateFormat(
+                responseOfProduct?.product.updatedAt!,
+                "YYYY/MM/DD hh:mm:ss"
+              )}{" "}
+              )
+            </span>
+          </div>
           <ul className="flex space-x-2 mb-4 flex-wrap">
-            {data?.product.keywords.split(" ").map((keyword) => (
+            {responseOfProduct?.product.keywords.split(" ").map((keyword) => (
               <li
                 key={keyword}
                 className="p-2 bg-slate-200 rounded-lg text-orange-400 font-semibold text-sm cursor-pointer"
               >
-                {keyword}
+                <Link href={`/?keyword=${keyword}`}>
+                  <a>{keyword}</a>
+                </Link>
               </li>
             ))}
           </ul>
-          <div className="flex justify-between space-x-2  ">
+          <div className="flex justify-between space-x-2">
             <Button
               text="Talk to seller"
               type="button"
@@ -87,31 +117,40 @@ const ProductsDatail: NextPage = () => {
               onClick={onClickFavorite}
               className={combineClassNames(
                 "p-3 rounded-md focus:outline-none focus:ring-2",
-                data?.isFavorite
+                responseOfProduct?.isFavorite
                   ? "bg-red-100 text-red-500 hover:bg-red-200 focus:ring-red-500"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200 focus:ring-gray-500"
               )}
               text={
-                <Icon shape={ICON_SHAPE.HEART} $fill={!!data?.isFavorite} />
+                <Icon
+                  shape={ICON_SHAPE.HEART}
+                  $fill={!!responseOfProduct?.isFavorite}
+                />
               }
             />
           </div>
-        </div>
-      </div>
-      <div className="px-4">
-        <h2 className="font-bold text-2xl mb-6">Similar items</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {data?.relatedProducts.map((product) => (
-            <Link key={product.id} href={`/products/${product.id}`}>
-              <a>
-                <div className="h-56 w-full bg-slate-300 mb-2" />
-                <h3 className="text-gray-700">{product.name}</h3>
-                <p className="text-gray-900 font-semibold">{product.price}원</p>
-              </a>
-            </Link>
+        </section>
+      </article>
+
+      {/* 유사 상품들 */}
+      <article className="px-4">
+        <h3 className="font-bold text-2xl mb-6">유사한 상품들</h3>
+        <ul className="grid grid-cols-2 gap-4">
+          {responseOfProduct?.relatedProducts.map((product) => (
+            <li key={product.id}>
+              <Link href={`/products/${product.id}`}>
+                <a>
+                  <div className="h-56 w-full bg-slate-300 mb-2" />
+                  <h3 className="text-gray-700">{product.name}</h3>
+                  <p className="text-gray-900 font-semibold">
+                    {product.price}원
+                  </p>
+                </a>
+              </Link>
+            </li>
           ))}
-        </div>
-      </div>
+        </ul>
+      </article>
     </>
   );
 };

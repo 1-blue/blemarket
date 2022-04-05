@@ -15,10 +15,14 @@ import SideButton from "@src/components/common/SideButton";
 // hook
 import usePagination from "@src/libs/hooks/usePagination";
 
+// util
+import { timeFormat } from "@src/libs/client/dateFormat";
+
 interface IStreamResponse extends ApiResponse {
   streams: {
     id: number;
     title: string;
+    updatedAt: Date;
     user: SimpleUser;
   }[];
   streamCount: number;
@@ -38,9 +42,14 @@ const Live: NextPage = () => {
               <Link href={`/streams/${stream.id}`}>
                 <a className="flex flex-col space-y-2 p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:rounded-sm">
                   <div className="w-full aspect-video bg-slate-300 rounded-md" />
-                  <h3 className="text-gray-700 font-semibold text-sm">
-                    {stream.title}
-                  </h3>
+                  <div className="flex justify-between items-baseline">
+                    <h3 className="text-gray-700 font-semibold text-base">
+                      {stream.title}
+                    </h3>
+                    <span className="text-xs font-semibold">
+                      ( {timeFormat(stream.updatedAt)}부터 시작 )
+                    </span>
+                  </div>
                 </a>
               </Link>
             </li>

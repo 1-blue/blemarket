@@ -6,6 +6,7 @@ import { IPostWithEtc } from "@src/pages/community";
 
 // common-component
 import Icon from "@src/components/common/Icon";
+import { dateFormat, timeFormat } from "@src/libs/client/dateFormat";
 
 const CommunityItem = ({ post }: { post: IPostWithEtc }) => {
   return (
@@ -24,7 +25,7 @@ const CommunityItem = ({ post }: { post: IPostWithEtc }) => {
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-500 text-sm">{post.user.name}</span>
             <span className="text-gray-500 text-sm font-semibold">
-              {post.updatedAt}
+              {dateFormat(post.updatedAt, "YYYY/MM/DD")}
             </span>
           </div>
           <div className="flex py-2 border-y border-b-2 space-x-4">

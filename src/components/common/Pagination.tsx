@@ -16,12 +16,14 @@ const PageButton = ({
   page,
   $point,
   $hidden,
+  $disabled,
   onClick,
   onHover,
 }: {
   page: string | number;
   $point?: boolean;
   $hidden?: boolean;
+  $disabled?: boolean;
   onClick: () => void;
   onHover?: () => void;
 }) => {
@@ -33,9 +35,10 @@ const PageButton = ({
         type="button"
         className={combineClassNames(
           "w-full h-full py-2 text-sm font-semibold rounded-md hover:bg-orange-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2",
-          $point ? "bg-orange-400 text-white" : ""
+          $point ? "bg-orange-400 text-white" : "",
+          $disabled ? "text-gray-400" : ""
         )}
-        onClick={onClick}
+        onClick={$disabled ? () => {} : onClick}
         onMouseEnter={onHover}
       >
         {page}
@@ -174,9 +177,13 @@ const Pagination = ({ url, page, offset, setPage, max }: IProps) => {
   return (
     <article>
       <ul className="mx-auto flex justify-center space-x-2 mt-6 mb-4">
-        <PageButton page="<" onClick={onClickPrevious} />
+        <PageButton
+          page="⮜"
+          onClick={onClickPrevious}
+          $disabled={1 > page - 1}
+        />
         {getPageButton()}
-        <PageButton page=">" onClick={onClickNext} />
+        <PageButton page="⮞" onClick={onClickNext} $disabled={max < page + 1} />
       </ul>
     </article>
   );
