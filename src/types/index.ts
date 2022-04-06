@@ -60,6 +60,7 @@ export interface ITokenForm {
   token: string;
 }
 export interface IUploadForm {
+  photo?: FileList;
   name: string;
   price: number;
   description: string;

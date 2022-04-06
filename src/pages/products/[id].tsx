@@ -17,6 +17,7 @@ import { dateFormat } from "@src/libs/client/dateFormat";
 import Icon from "@src/components/common/Icon";
 import Button from "@src/components/common/Button";
 import Profile from "@src/components/common/Profile";
+import Photo from "@src/components/common/Photo";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
@@ -70,7 +71,14 @@ const ProductsDatail: NextPage = () => {
     <>
       {/* 상품 이미지, 유저 프로필, 이름, 설명, 가격, 키워드, 좋아요 */}
       <article className="px-4 pb-8 mb-8 border-b">
-        <section className="h-96 w-full bg-slate-300" />
+        <section>
+          <Photo
+            photo={responseOfProduct?.product.image}
+            className="h-96 w-full"
+            $contain
+          />
+        </section>
+        {/* <section className="h-96 w-full bg-slate-300" /> */}
         <section>
           <Profile user={responseOfProduct?.product.user!} />
         </section>
@@ -83,7 +91,7 @@ const ProductsDatail: NextPage = () => {
           </p>
           <div className="flex justify-between items-baseline">
             <span className="font-semibold text-lg">
-              {priceWithCommas(responseOfProduct?.product.price!)}원
+              {priceWithCommas(responseOfProduct?.product.price)}원
             </span>
             <span className="font-semibold text-xs">
               ({" "}
@@ -140,7 +148,7 @@ const ProductsDatail: NextPage = () => {
             <li key={product.id}>
               <Link href={`/products/${product.id}`}>
                 <a>
-                  <div className="h-56 w-full bg-slate-300 mb-2" />
+                  <Photo photo={product.image} className="h-56 w-full mb-2" />
                   <h3 className="text-gray-700">{product.name}</h3>
                   <p className="text-gray-900 font-semibold">
                     {product.price}원

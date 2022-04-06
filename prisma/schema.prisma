@@ -54,7 +54,7 @@ model Product {
   name        String   @db.VarChar(30)
   price       Int
   description String   @db.MediumText
-  image       String
+  image       String?
   keywords    String   @db.VarChar(40)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

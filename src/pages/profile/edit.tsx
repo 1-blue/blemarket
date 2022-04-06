@@ -16,7 +16,7 @@ import { ApiResponse, IUpdateForm } from "@src/types";
 // hook
 import useUser from "@src/libs/hooks/useUser";
 import useMutation from "@src/libs/hooks/useMutation";
-import useBlobPhoto from "@src/libs/hooks/useBlobPhoto";
+import usePreview from "@src/libs/hooks/usePreview";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 const ProfileEdit: NextPage = () => {
@@ -77,16 +77,16 @@ const ProfileEdit: NextPage = () => {
   );
 
   useResponseToast({ response: data, successMessage: "정보를 변경했습니다!" });
-  const [avatarLink] = useBlobPhoto(watch("avatar"));
+  const [preview] = usePreview(watch("avatar"));
 
   return (
     <form className="px-4 space-y-4" onSubmit={handleSubmit(onValid)}>
       {/* 프로필 이미지 */}
       <div className="flex items-center space-x-3">
-        {avatarLink ? (
+        {preview ? (
           <figure className="relative w-14 h-14">
             <Image
-              src={avatarLink}
+              src={preview}
               className="rounded-full object-cover"
               layout="fill"
               alt="업로드한 이미지"

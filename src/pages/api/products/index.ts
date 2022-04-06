@@ -12,7 +12,7 @@ async function handler(
   res: NextApiResponse<IResponseType>
 ) {
   const {
-    body: { name, price, description, keywords },
+    body: { name, price, description, keywords, photo },
     session: { user },
   } = req;
 
@@ -122,7 +122,7 @@ async function handler(
           name,
           price: +price,
           description,
-          image: "추후에 추가",
+          image: photo ? photo : null,
           keywords,
           user: {
             connect: {

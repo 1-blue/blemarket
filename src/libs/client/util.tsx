@@ -7,5 +7,7 @@ export const combinePhotoUrl = (photo: string) =>
   `https://blemarket.s3.ap-northeast-2.amazonaws.com/${photo}`;
 
 // 2022/04/06 - 금액에 구분자 넣어주는 헬퍼함수 - by 1-blue
-export const priceWithCommas = (price: number) =>
-  price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+export const priceWithCommas = (price: number | null | undefined) =>
+  typeof price === "number"
+    ? price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    : 0;

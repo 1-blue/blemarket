@@ -5,6 +5,7 @@ import { ICON_SHAPE, SimpleUser } from "@src/types";
 
 // common-component
 import Icon from "@src/components/common/Icon";
+import Photo from "@src/components/common/Photo";
 
 // util
 import { priceWithCommas } from "@src/libs/client/util";
@@ -14,6 +15,7 @@ interface IProps {
   name: string;
   description: string;
   price: number;
+  image: string | null;
   favoriteUsers: SimpleUser[];
 }
 
@@ -22,6 +24,7 @@ const ProductItem = ({
   name,
   description,
   price,
+  image,
   favoriteUsers,
 }: IProps) => {
   return (
@@ -31,7 +34,10 @@ const ProductItem = ({
           {/* 상품 이미지, 이름, 설명, 가격 */}
           <ul className="flex space-x-4 flex-1">
             {/* 이미지 */}
-            <li className="w-20 h-20 bg-gray-400 rounded-md" />
+            <li>
+              <Photo photo={image} className="w-20 h-20" $cover />
+            </li>
+
             {/* 이름, 설명, 가격 */}
             <li className="flex-1 flex flex-col pt-2">
               <h3 className="text-base font-semibold text-gray-900">{name}</h3>
