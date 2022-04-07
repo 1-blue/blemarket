@@ -30,7 +30,7 @@ const Kinds: NextPage = () => {
 
   return (
     <article className="flex flex-col space-y-5">
-      {data?.products.map((product) => (
+      {data?.products.map((product, index) => (
         <ProductItem
           key={product.id}
           id={product.product.id}
@@ -38,6 +38,8 @@ const Kinds: NextPage = () => {
           description={product.product.description}
           price={product.product.price}
           favoriteUsers={product.product.records}
+          image={product.product.image}
+          index={index}
         />
       ))}
     </article>

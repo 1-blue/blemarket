@@ -8,11 +8,13 @@ const Photo = ({
   className,
   $cover,
   $contain,
+  $priority,
 }: {
   photo?: string | null;
   className?: string;
   $cover?: boolean;
   $contain?: boolean;
+  $priority?: boolean;
 }) => {
   return (
     <>
@@ -32,6 +34,7 @@ const Photo = ({
               $contain ? "object-contain" : ""
             )}
             alt="이미지"
+            priority={$priority}
           />
         </figure>
       ) : (

@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import type { NextPage } from "next";
+import React, { useCallback, useEffect, useState } from "react";
+import type { GetStaticProps, NextPage } from "next";
 
 // type
 import { ICON_SHAPE, ApiResponse, SEARCH_CONDITION } from "@src/types";
@@ -16,6 +16,7 @@ import CommunityItem from "@src/components/CommunityItem";
 // hook
 import useCoords from "@src/libs/hooks/useCoords";
 import usePagination from "@src/libs/hooks/usePagination";
+import prisma from "@src/libs/client/prisma";
 
 export interface IPostWithEtc extends Post {
   user: {
@@ -32,7 +33,7 @@ interface IPostResponse extends ApiResponse {
   postCount: number;
 }
 
-const Community: NextPage = () => {
+const Community: NextPage<IPostResponse> = (props) => {
   const { latitude, longitude } = useCoords(
     "GPS를 허용하지 않아서 위치기반 검색을 할 수 없습니다."
   );
@@ -60,6 +61,14 @@ const Community: NextPage = () => {
       setDistance(+e.currentTarget.value),
     []
   );
+
+  // 2022/04/07 - 랜더링할 게시글 - by 1-blue
+  const [targetPosts, setTargetPost] = useState<IPostResponse>(props);
+
+  useEffect(() => {
+    if (!data) return;
+    setTargetPost(data);
+  }, [setTargetPost, data]);
 
   return (
     <>
@@ -106,7 +115,7 @@ const Community: NextPage = () => {
         {/* 아이템 */}
         <section>
           <ul className="space-y-8">
-            {data?.posts.map((post) => (
+            {targetPosts.posts.map((post) => (
               <CommunityItem key={post.id} post={post} />
             ))}
           </ul>
@@ -122,7 +131,7 @@ const Community: NextPage = () => {
         page={page}
         offset={offset}
         setPage={setPage}
-        max={Math.ceil((data?.postCount as number) / offset!)}
+        max={Math.ceil((targetPosts.postCount as number) / offset!)}
       />
 
       <SideButton
@@ -131,6 +140,43 @@ const Community: NextPage = () => {
       />
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps = async () => {
+  // GPS관계없이, 최신 게시글 10개
+  const posts = await prisma.post.findMany({
+    take: 10,
+    skip: 0,
+    include: {
+      user: {
+        select: {
+          name: true,
+        },
+      },
+      _count: {
+        select: {
+          answers: true,
+          recommendations: true,
+        },
+      },
+    },
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+  // 게시글 개수
+  const postCount = await prisma.post.count();
+
+  return {
+    props: {
+      ok: true,
+      message: "최신 게시글 10개를 가져왔습니다.",
+      posts: JSON.parse(JSON.stringify(posts)),
+      postCount,
+    },
+  };
 };
 
 export default Community;

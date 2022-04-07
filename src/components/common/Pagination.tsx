@@ -36,7 +36,9 @@ const PageButton = ({
         className={combineClassNames(
           "w-full h-full py-2 text-sm font-semibold rounded-md hover:bg-orange-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 border shadow-sm",
           $point ? "bg-orange-400 text-white" : "",
-          $disabled ? "text-gray-400" : ""
+          $disabled
+            ? "text-gray-400 cursor-not-allowed focus:ring-transparent hover:bg-transparent"
+            : ""
         )}
         onClick={$disabled ? () => {} : onClick}
         onMouseEnter={onHover}

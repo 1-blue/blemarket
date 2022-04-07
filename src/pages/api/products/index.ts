@@ -132,6 +132,9 @@ async function handler(
         },
       });
 
+      // "/"의 getStaticProps 재실행
+      await res.unstable_revalidate("/");
+
       res.status(201).json({
         ok: true,
         message: `"${name}"을 등록했습니다.`,

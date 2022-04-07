@@ -66,17 +66,8 @@ interface IAnswer = {
   postId: number
 }
 
-interface IPostWithAnswer extends IPost {
+interface IPostWithUser extends IPost {
   user: ISimpleUser;
-  _count: {
-    recommendations: number;
-  };
-  answers: {
-    id: number;
-    answer: string;
-    updatedAt: Date;
-    user: ISimpleUser;
-  }[];
 }
 
 interface Review {
@@ -303,7 +294,7 @@ interface IMessageWithUser extends Message {
   3. `500`: 서버측 에러 발생
 
 ### 2.4 GET /api/products/[id]
-+ 역할: 특정 상품에 대한 상세 정보 요청 ( + 연관 상품, 본인 좋아요 여부 )
++ 역할: 특정 상품에 대한 상세 정보 요청 ( + 연관 상품 )
 + 전송 데이터 ( `query` )
 ```typescript
 {
@@ -317,7 +308,6 @@ interface IMessageWithUser extends Message {
   message: string,
   product: IProductWithUser,
   relatedProducts: IProduct[],
-  isFavorite: boolean
 }
 ```
 + 응답 상태 코드
@@ -369,9 +359,33 @@ interface IMessageWithUser extends Message {
   3. `409`: 좋아요 누르지 않은 상태에서 좋아요 제거 요청
   3. `500`: 서버측 에러 발생
 
+### 2.7 GET /api/products/[id]/favorite
++ 역할: 특정 상품에 좋아요 정보 요청
++ 전송 데이터 ( `query` )
+```typescript
+{
+  id: number;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  isFavorite: boolean,
+  favoriteCount: number,
+}
+```
++ 응답 상태 코드
+  1. `200`: 특정 상품에 좋아요 제거
+  2. `401`: 비로그인 상태에서 접근
+  3. `404`: 존재하지 않는 상품에 좋아요 제거 요청
+  3. `409`: 좋아요 누르지 않은 상태에서 좋아요 제거 요청
+  3. `500`: 서버측 에러 발생
+
 ## 3. posts
 ### 3.1 GET /api/posts
-+ 역할: 모든 게시글들 요청
++ 역할: 해당 page의 offset만큼 게시글 요청
 + 전송 데이터 ( `query` )
 ```typescript
 // 전달된 인자에 따라서 거리에 의해 게시글을 검색할지 판단함
@@ -433,8 +447,7 @@ interface IMessageWithUser extends Message {
 {
   ok: boolean,
   message: string,
-  post: IPostWithAnswer,
-  isRecommendation: boolean
+  post: IPostWithUser,
 }
 ```
 + 응답 상태 코드
@@ -487,7 +500,31 @@ interface IMessageWithUser extends Message {
   4. `409`: 이미 궁금해요를 누른 상태
   5. `500`: 서버측 에러 발생
 
-### 3.6 POST /api/posts/[id]/answer
+### 3.6 GET /api/posts/[id]/recommendation
++ 역할: 특정 게시글의 궁금해요 정보 요청
++ 전송 데이터 ( `query` )
+```typescript
+{
+  postId: number;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  isRecommendation: boolean,
+  recommendationCount: number,
+}
+```
++ 응답 상태 코드
+  1. `200`: 궁금해요 제거 성공
+  2. `401`: 비로그인 상태에서 접근
+  3. `404`: 존재하지 않는 게시글 요청
+  4. `409`: 이미 궁금해요를 누른 상태
+  5. `500`: 서버측 에러 발생
+
+### 3.7 POST /api/posts/[id]/answer
 + 역할: 특정 게시글에 댓글 추가 요청
 + 전송 데이터 ( `query` )
 ```typescript
@@ -509,7 +546,7 @@ interface IMessageWithUser extends Message {
   3. `404`: 존재하지 않는 게시글 요청
   4. `500`: 서버측 에러 발생
 
-### 3.7 GET /api/posts/[id]/answer?page={}&offset={}
+### 3.8 GET /api/posts/[id]/answer?page={}&offset={}
 + 역할: 특정 게시글에 댓글들 요청
 + 전송 데이터 ( `query` )
 ```typescript
@@ -530,6 +567,7 @@ interface IMessageWithUser extends Message {
     updatedAt: string;
     user: SimpleUser;
   }[];
+  answerCount: number;
 }
 ```
 + 응답 상태 코드

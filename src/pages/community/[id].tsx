@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
@@ -21,22 +21,23 @@ import Answer from "@src/components/Answer";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
+import prisma from "@src/libs/client/prisma";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
 import useUser from "@src/libs/hooks/useUser";
 import { dateFormat } from "@src/libs/client/dateFormat";
 
-interface IPostWithEtc extends Post {
+interface IPostWithUser extends Post {
   user: SimpleUser;
-  _count: {
-    recommendations: number;
-  };
 }
 interface IPostResponse extends ApiResponse {
-  post: IPostWithEtc;
+  post: IPostWithUser;
+}
+
+interface IRecommendationResponse extends ApiResponse {
   isRecommendation: boolean;
-  answerCount: number;
+  recommendationCount: number;
 }
 
 interface IAnswerWithUser {
@@ -47,15 +48,18 @@ interface IAnswerWithUser {
 }
 interface IAnswerResponse extends ApiResponse {
   answers: IAnswerWithUser[];
+  answerCount: number;
 }
 
-const CommunityPostDetail: NextPage = () => {
+const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
   const router = useRouter();
   const { user } = useUser();
-  // 게시글 상세 정보 요청
-  const { data, mutate: postMutate } = useSWR<IPostResponse>(
-    router.query.id ? `/api/posts/${router.query.id}` : null
-  );
+
+  // 게시글의 궁금해요 정보 요청
+  const { data: recommendationData, mutate: recommendationMutate } =
+    useSWR<IRecommendationResponse>(
+      router.query.id ? `/api/posts/${router.query.id}/recommendation` : null
+    );
   const [offset] = useState(5);
   // 댓글들 요청
   const {
@@ -91,30 +95,24 @@ const CommunityPostDetail: NextPage = () => {
     if (removeRecommendationLoading)
       return toast.error("이미 궁금해요 제거 처리중입니다.");
 
-    postMutate(
+    recommendationMutate(
       (prev) =>
         prev && {
           ...prev,
-          isRecommendation: !prev?.isRecommendation,
-          post: {
-            ...prev.post,
-            _count: {
-              recommendations: prev.isRecommendation
-                ? prev.post._count.recommendations - 1
-                : prev.post._count.recommendations + 1,
-            },
-          },
+          recommendationCount: prev.isRecommendation
+            ? prev.recommendationCount - 1
+            : prev.recommendationCount + 1,
         },
       false
     );
 
-    if (data?.isRecommendation) removeRecommendation(null);
+    if (recommendationData?.isRecommendation) removeRecommendation(null);
     else addRecommendation(null);
   }, [
     addRecommendationLoading,
     removeRecommendationLoading,
-    postMutate,
-    data,
+    recommendationMutate,
+    recommendationData,
     addRecommendation,
     removeRecommendation,
   ]);
@@ -144,14 +142,9 @@ const CommunityPostDetail: NextPage = () => {
                   },
                 },
               ],
+              answerCount: prev[0].answerCount + 1,
             },
           ],
-        false
-      );
-
-      // 임시로 댓글 개수 + 1
-      postMutate(
-        (prev) => prev && { ...prev, answerCount: prev.answerCount + 1 },
         false
       );
 
@@ -159,7 +152,7 @@ const CommunityPostDetail: NextPage = () => {
 
       reset();
     },
-    [answerLoading, answerMutate, postMutate, user, createAnswer, reset]
+    [answerLoading, answerMutate, user, createAnswer, reset]
   );
 
   return (
@@ -172,26 +165,28 @@ const CommunityPostDetail: NextPage = () => {
               동네질문
             </span>
             <span className="font-semibold text-xs">
-              ( {dateFormat(data?.post.updatedAt!, "YYYY/MM/DD hh:mm:ss")} )
+              ( {dateFormat(post.updatedAt!, "YYYY/MM/DD hh:mm:ss")} )
             </span>
           </div>
-          {data?.post.user && <Profile user={data.post.user} />}
+          {post.user && <Profile user={post.user} />}
         </section>
         <section className="flex mt-2 px-4 text-gray-700">
           <span className="text-orange-500 font-medium mr-2">Q .</span>
-          <span className="whitespace-pre">{data?.post.question}</span>
+          <span className="whitespace-pre">{post.question}</span>
         </section>
         <section className="flex px-4 space-x-5 mt-3 text-gray-700 py-2.5 border-t border-b-[2px]  w-full">
           <button
             className={combineClassNames(
               "flex space-x-2 items-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-4 focus:rounded-sm",
-              data?.isRecommendation ? "text-orange-500 font-semibold" : ""
+              recommendationData?.isRecommendation
+                ? "text-orange-500 font-semibold"
+                : ""
             )}
             type="button"
             onClick={onClickRecommendation}
           >
             <Icon shape={ICON_SHAPE.CHECK} width={16} height={16} />
-            <span>궁금해요 {data?.post._count.recommendations}</span>
+            <span>궁금해요 {recommendationData?.recommendationCount}</span>
           </button>
           <button
             type="button"
@@ -202,7 +197,9 @@ const CommunityPostDetail: NextPage = () => {
             onClick={() => setToggleAnswer((prev) => !prev)}
           >
             <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
-            <span>답변 {data?.answerCount}</span>
+            <span>
+              답변 {answersData?.[answersData.length - 1].answerCount}
+            </span>
           </button>
         </section>
       </article>
@@ -220,11 +217,14 @@ const CommunityPostDetail: NextPage = () => {
             </ul>
           </section>
           <section>
-            {Math.ceil(data?.answerCount! / offset) > size ? (
+            {Math.ceil(
+              answersData?.[answersData.length - 1].answerCount! / offset
+            ) > size ? (
               <Button
                 onClick={() => setSize((prev) => prev + 1)}
                 text={`댓글 ${
-                  data?.answerCount! - offset * size
+                  answersData?.[answersData.length - 1].answerCount! -
+                  offset * size
                 }개 더 불러오기`}
                 $primary
                 className="block mx-auto px-4"
@@ -258,6 +258,40 @@ const CommunityPostDetail: NextPage = () => {
       </article>
     </>
   );
+};
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const postId = Number(context.params?.id);
+
+  const postWithUser = await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+  });
+
+  return {
+    props: {
+      ok: true,
+      message: "특정 게시글을 가져왔습니다.",
+      post: JSON.parse(JSON.stringify(postWithUser)),
+    },
+  };
 };
 
 export default CommunityPostDetail;

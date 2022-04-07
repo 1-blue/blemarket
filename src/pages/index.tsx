@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 
@@ -19,6 +19,9 @@ import ProductItem from "@src/components/ProductItem";
 // hook
 import usePagination from "@src/libs/hooks/usePagination";
 
+// util
+import prisma from "@src/libs/client/prisma";
+
 interface ProductWithFavoriteUsers extends Product {
   records: SimpleUser[];
 }
@@ -28,7 +31,7 @@ interface IResponseOfProducts extends ApiResponse {
   productCount: number;
 }
 
-const Home: NextPage = () => {
+const Home: NextPage<IResponseOfProducts> = (props) => {
   const router = useRouter();
   // 2022/04/05 - 전체 상품 요청 - by 1-blue
   const [{ data: responseOfProducts }, { page, setPage }, { offset }] =
@@ -70,6 +73,15 @@ const Home: NextPage = () => {
     }
   }, [responseOfSearchProducts, setKeyword, router]);
 
+  // 보여줄 -- rename
+  const [targetProducts, setTargetProducts] = useState(props);
+
+  useEffect(() => {
+    if (responseOfSearchProducts && router.query?.keyword)
+      return setTargetProducts(responseOfSearchProducts);
+    if (responseOfProducts) return setTargetProducts(responseOfProducts);
+  }, [router, responseOfSearchProducts, responseOfProducts, setTargetProducts]);
+
   return (
     <>
       <article className="flex flex-col divide-y">
@@ -98,29 +110,18 @@ const Home: NextPage = () => {
 
         {/* 상품 리스트 */}
         <div className="mt-4" />
-        {responseOfSearchProducts?.products
-          ? responseOfSearchProducts.products.map((product) => (
-              <ProductItem
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                description={product.description}
-                price={product.price}
-                image={product.image}
-                favoriteUsers={product.records}
-              />
-            ))
-          : responseOfProducts?.products?.map((product) => (
-              <ProductItem
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                description={product.description}
-                price={product.price}
-                image={product.image}
-                favoriteUsers={product.records}
-              />
-            ))}
+        {targetProducts.products.map((product, index) => (
+          <ProductItem
+            key={product.id}
+            id={product.id}
+            name={product.name}
+            description={product.description}
+            price={product.price}
+            image={product.image}
+            favoriteUsers={product.records}
+            index={index}
+          />
+        ))}
         <div />
       </article>
 
@@ -135,11 +136,9 @@ const Home: NextPage = () => {
         offset={offset}
         setPage={setPage}
         max={
-          responseOfSearchProducts?.products
-            ? Math.ceil(
-                (responseOfSearchProducts?.productCount as number) / offset
-              )
-            : Math.ceil((responseOfProducts?.productCount as number) / offset)
+          targetProducts?.products
+            ? Math.ceil((targetProducts?.productCount as number) / offset)
+            : Math.ceil((targetProducts?.productCount as number) / offset)
         }
       />
 
@@ -150,6 +149,47 @@ const Home: NextPage = () => {
       />
     </>
   );
+};
+
+// // getServerSideProps로 받은 초기 데이터를 SWR에 넣어주기
+// // 이 과정을 통해서 초기 데이터를 넣은채로 렌더링되기 때문에 api요청을 하더라도 화면에 빈공간이 생기지 않음
+// const Page: NextPage<{
+//   initialValue: IResponseOfProducts;
+// }> = ({ initialValue }) => {
+//   return (
+//     <SWRConfig
+//       value={{
+//         fallback: {
+//           "/api/products?page=1&offset=10": initialValue,
+//         },
+//       }}
+//     >
+//       <Home />
+//     </SWRConfig>
+//   );
+// };
+
+// 초기 렌더링 정보 미리 가져오기 ( /api/products?page=1&limit=10 )
+export const getStaticProps: GetStaticProps = async () => {
+  const products = await prisma.product.findMany({
+    take: 10,
+    skip: 0,
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+  const productCount = await prisma.product.count();
+
+  return {
+    props: {
+      ok: true,
+      message: "상품들의 첫 페이지를 가져왔습니다.",
+      products: JSON.parse(JSON.stringify(products)),
+      productCount,
+    },
+  };
 };
 
 export default Home;

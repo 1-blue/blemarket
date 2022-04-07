@@ -48,20 +48,11 @@ async function handler(
       },
     });
 
-    const isFavorite = await prisma.record.findFirst({
-      where: {
-        userId,
-        productId,
-        kinds: "Favorite",
-      },
-    });
-
     res.status(200).json({
       ok: true,
       message: "특정 상품에 대한 정보를 가져왔습니다.",
       product: findProductWithUser,
       relatedProducts,
-      isFavorite: !!isFavorite,
     });
   } catch (error) {
     console.error("/api/products/[id] error >> ", error);

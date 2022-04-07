@@ -12,7 +12,7 @@ async function handler(
   const postId = +req.query.id;
 
   try {
-    const postWithAnswer = await prisma.post.findUnique({
+    const postWithUser = await prisma.post.findUnique({
       where: {
         id: postId,
       },
@@ -24,40 +24,18 @@ async function handler(
             avatar: true,
           },
         },
-        _count: {
-          select: {
-            recommendations: true,
-          },
-        },
       },
     });
-    if (!postWithAnswer)
+    if (!postWithUser)
       return res.status(404).json({
         ok: false,
         message: "존재하지 않는 게시글을 요청했습니다.",
       });
 
-    const isRecommendation = await prisma.recommendation.findFirst({
-      where: {
-        postId,
-        userId: req.session.user?.id,
-      },
-      select: {
-        id: true,
-      },
-    });
-    const answerCount = await prisma.answer.count({
-      where: {
-        postId,
-      },
-    });
-
     res.status(200).json({
       ok: true,
       message: "특정 게시글을 가져왔습니다.",
-      post: postWithAnswer,
-      isRecommendation: !!isRecommendation,
-      answerCount,
+      post: postWithUser,
     });
   } catch (error) {
     console.error("/api/posts/[id] error >> ", error);

@@ -57,10 +57,18 @@ async function handler(
         ],
       });
 
+      // 전체 답변 개수
+      const answerCount = await prisma.answer.count({
+        where: {
+          postId,
+        },
+      });
+
       return res.status(201).json({
         ok: true,
         message: "답변들을 가져왔습니다.",
         answers,
+        answerCount,
       });
     } else if (method === "POST") {
       if (!exPost)

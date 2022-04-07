@@ -34,9 +34,32 @@ async function handler(
         userId: user?.id,
       },
     });
+    // 궁금해요 정보 요청
+    if (method === "GET") {
+      const isRecommendation = await prisma.recommendation.findFirst({
+        where: {
+          postId,
+          userId: req.session.user?.id,
+        },
+        select: {
+          id: true,
+        },
+      });
+      const recommendationCount = await prisma.recommendation.count({
+        where: {
+          postId,
+        },
+      });
 
+      return res.status(200).json({
+        ok: true,
+        message: "해당 게시글의 궁금해요에 대한 정보를 가져왔습니다.",
+        isRecommendation,
+        recommendationCount,
+      });
+    }
     // 궁금해요 추가
-    if (method === "POST") {
+    else if (method === "POST") {
       if (exRecommendation)
         return res.status(409).json({
           ok: false,
@@ -65,7 +88,7 @@ async function handler(
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       ok: true,
       message:
         method === "POST"
@@ -84,5 +107,5 @@ async function handler(
 }
 
 export default withApiSession(
-  withHandler({ methods: ["POST", "DELETE"], handler })
+  withHandler({ methods: ["GET", "POST", "DELETE"], handler })
 );

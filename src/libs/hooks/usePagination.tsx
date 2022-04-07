@@ -27,22 +27,6 @@ export default function usePagination<T>(
       : `${url}?page=${page}&offset=${offset}`
   );
 
-  // 2022/04/05 - 현페이지의 앞/뒤 페이지 미리 패치하기 - by 1-blue
-  useSWR(
-    url === null
-      ? null
-      : url.includes("?")
-      ? `${url}&page=${page + 1}&offset=${offset}`
-      : `${url}?page=${page + 1}&offset=${offset}`
-  );
-  useSWR(
-    url === null || page < 2
-      ? null
-      : url.includes("?")
-      ? `${url}&page=${page - 1}&offset=${offset}`
-      : `${url}?page=${page - 1}&offset=${offset}`
-  );
-
   return [
     { data, error },
     { page, setPage },

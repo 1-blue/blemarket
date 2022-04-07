@@ -17,6 +17,7 @@ interface IProps {
   price: number;
   image: string | null;
   favoriteUsers: SimpleUser[];
+  index: number;
 }
 
 const ProductItem = ({
@@ -26,16 +27,22 @@ const ProductItem = ({
   price,
   image,
   favoriteUsers,
+  index,
 }: IProps) => {
   return (
     <section>
       <Link href={`/products/${id}`}>
-        <a className="flex justify-between p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:rounded-sm">
+        <a className="hover:shadow-lg flex justify-between p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:rounded-sm">
           {/* 상품 이미지, 이름, 설명, 가격 */}
           <ul className="flex space-x-4 flex-1">
             {/* 이미지 */}
-            <li>
-              <Photo photo={image} className="w-20 h-20" $cover />
+            <li className="overflow-hidden rounded-md">
+              <Photo
+                photo={image}
+                className="w-20 h-20 duration-500"
+                $cover
+                $priority={index <= 6}
+              />
             </li>
 
             {/* 이름, 설명, 가격 */}
@@ -53,7 +60,7 @@ const ProductItem = ({
           <ul className="flex items-end space-x-2">
             <li className="flex items-center space-x-0.5 text-gray-700 text-sm">
               <Icon shape={ICON_SHAPE.HEART} width={16} height={16} />
-              <span>{favoriteUsers.length}</span>
+              <span>{favoriteUsers?.length}</span>
             </li>
             <li className="flex items-center space-x-0.5 text-gray-700 text-sm">
               <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />

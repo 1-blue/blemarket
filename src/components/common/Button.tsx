@@ -1,8 +1,17 @@
+import { ReactChild, Suspense } from "react";
+import dynamic from "next/dynamic";
+
+// util
 import { combineClassNames } from "@src/libs/client/util";
-import { ReactChild } from "react";
 
 // common-component
-import Spinner from "./Spinner";
+// import Spinner from "@src/components/common/Spinner";
+
+// danamic import + lazy loading
+const Spinner = dynamic(() => import("@src/components/common/Spinner"), {
+  ssr: false,
+  suspense: true,
+});
 
 interface IProps {
   text: string | ReactChild;
@@ -23,7 +32,13 @@ const Button = ({ text, className, $primary, $loading, ...props }: IProps) => {
         className ? className : ""
       )}
     >
-      {$loading ? <Spinner kinds="button" /> : text}
+      {$loading ? (
+        <Suspense fallback={<span>Loading...</span>}>
+          <Spinner kinds="button" />
+        </Suspense>
+      ) : (
+        text
+      )}
     </button>
   );
 };

@@ -1,6 +1,6 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage, NextPageContext } from "next";
 import Link from "next/link";
-import useSWR from "swr";
+import useSWR, { SWRConfig } from "swr";
 
 // type
 import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
@@ -10,6 +10,10 @@ import { Review, User } from "@prisma/client";
 import Icon from "@src/components/common/Icon";
 import UserProfile from "@src/components/common/Profile";
 import UserReview from "@src/components/Review";
+
+// util
+import { withSsrSession } from "@src/libs/server/withSession";
+import prisma from "@src/libs/client/prisma";
 
 interface IReviewWithWriter extends Review {
   createdBy: SimpleUser;
@@ -85,4 +89,40 @@ const Profile: NextPage = () => {
   );
 };
 
-export default Profile;
+const Page: NextPage<{ initialValue: IMeResponse }> = ({ initialValue }) => {
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          "/api/users/me": initialValue,
+        },
+      }}
+    >
+      <Profile />
+    </SWRConfig>
+  );
+};
+
+export const getServerSideProps: GetServerSideProps = withSsrSession(
+  async ({ req }: NextPageContext) => {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req?.session.user?.id,
+      },
+    });
+
+    const initialValue: IMeResponse = {
+      ok: true,
+      message: "로그인된 유저의 정보입니다.",
+      user: JSON.parse(JSON.stringify(user)),
+    };
+
+    return {
+      props: {
+        initialValue,
+      },
+    };
+  }
+);
+
+export default Page;

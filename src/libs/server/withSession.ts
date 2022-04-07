@@ -1,4 +1,4 @@
-import { withIronSessionApiRoute } from "iron-session/next";
+import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
 
 declare module "iron-session" {
   interface IronSessionData {
@@ -15,3 +15,6 @@ const cookieOptions = {
 
 export const withApiSession = (fn: any) =>
   withIronSessionApiRoute(fn, cookieOptions);
+
+export const withSsrSession = (handler: any) =>
+  withIronSessionSsr(handler, cookieOptions);

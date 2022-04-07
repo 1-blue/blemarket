@@ -87,6 +87,8 @@ async function handler(
         },
       });
 
+      await res.unstable_revalidate("/community");
+
       res.status(201).json({
         ok: true,
         message: "새로운 질문을 생성했습니다.",

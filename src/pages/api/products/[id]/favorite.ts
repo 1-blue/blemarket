@@ -37,8 +37,24 @@ async function handler(
       },
     });
 
+    // 좋아요 정보 요청
+    if (method === "GET") {
+      const favoriteCount = await prisma.record.count({
+        where: {
+          productId,
+          kinds: "Favorite",
+        },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "해당 게시글에 대한 좋아요 정보입니다.",
+        isFavorite: !!exFavorite,
+        favoriteCount,
+      });
+    }
     // 좋아요 추가
-    if (method === "POST") {
+    else if (method === "POST") {
       // 좋아요 누른 상태에서 좋아요 추가 요청
       if (exFavorite)
         return res.status(409).json({
@@ -79,7 +95,7 @@ async function handler(
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       ok: true,
       message:
         method === "POST" ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.",
@@ -96,5 +112,5 @@ async function handler(
 }
 
 export default withApiSession(
-  withHandler({ methods: ["POST", "DELETE"], handler })
+  withHandler({ methods: ["GET", "POST", "DELETE"], handler })
 );
