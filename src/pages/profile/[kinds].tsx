@@ -1,20 +1,22 @@
 import React from "react";
-import type { NextPage } from "next";
-import useSWR from "swr";
-import { useRouter } from "next/router";
+import type { GetServerSideProps, NextPage, NextPageContext } from "next";
 
 // type
-import { ApiResponse, SimpleUser } from "@src/types";
-import { Product } from "@prisma/client";
+import { ApiResponse, RECORD, SimpleUser } from "@src/types";
+import { KINDS, Product } from "@prisma/client";
 
 // component
 import ProductItem from "@src/components/ProductItem";
+
+// util
+import { withSsrSession } from "@src/libs/server/withSession";
+import prisma from "@src/libs/client/prisma";
 
 interface IProductWithWriter extends Product {
   records: SimpleUser[];
 }
 
-interface ISoldResponse extends ApiResponse {
+interface IProductsResponse extends ApiResponse {
   products: {
     id: number;
     updatedAt: string;
@@ -22,15 +24,10 @@ interface ISoldResponse extends ApiResponse {
   }[];
 }
 
-const Kinds: NextPage = () => {
-  const router = useRouter();
-  const { data } = useSWR<ISoldResponse>(
-    router.query.kinds ? `/api/users/me?kinds=${router.query.kinds}` : null
-  );
-
+const Kinds: NextPage<IProductsResponse> = ({ products }) => {
   return (
     <article className="flex flex-col space-y-5">
-      {data?.products.map((product, index) => (
+      {products.map((product, index) => (
         <ProductItem
           key={product.id}
           id={product.product.id}
@@ -45,5 +42,71 @@ const Kinds: NextPage = () => {
     </article>
   );
 };
+
+export const getServerSideProps: GetServerSideProps = withSsrSession(
+  async (context: NextPageContext) => {
+    const kinds = context.query?.kinds;
+    const userId = context.req?.session.user?.id;
+
+    let where = null;
+
+    switch (kinds) {
+      case RECORD.FAVORITE:
+        where = {
+          userId,
+          kinds: KINDS.Favorite,
+        };
+        break;
+      case RECORD.SALE:
+        where = {
+          userId,
+          kinds: KINDS.Sale,
+        };
+        break;
+      case RECORD.PURCHASE:
+        where = {
+          userId,
+          kinds: KINDS.Purchase,
+        };
+        break;
+      default:
+        return;
+    }
+
+    const exProducts = await prisma.record.findMany({
+      where,
+      select: {
+        id: true,
+        updatedAt: true,
+        product: {
+          include: {
+            records: {
+              where: {
+                kinds: "Favorite",
+              },
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      props: {
+        ok: true,
+        message: "특정 상품들에 대한 정보입니다.",
+        products: JSON.parse(JSON.stringify(exProducts)),
+      },
+    };
+  }
+);
 
 export default Kinds;

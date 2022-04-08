@@ -1,17 +1,17 @@
 import { ReactChild, Suspense } from "react";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
 
 // common-component
-// import Spinner from "@src/components/common/Spinner";
+import Spinner from "@src/components/common/Spinner";
 
 // danamic import + lazy loading
-const Spinner = dynamic(() => import("@src/components/common/Spinner"), {
-  ssr: false,
-  suspense: true,
-});
+// const Spinner = dynamic(() => import("@src/components/common/Spinner"), {
+//   ssr: false,
+//   suspense: true,
+// });
 
 interface IProps {
   text: string | ReactChild;

@@ -12,6 +12,7 @@ import Icon from "@src/components/common/Icon";
 import Button from "@src/components/common/Button";
 import Pagination from "@src/components/common/Pagination";
 import SideButton from "@src/components/common/SideButton";
+import HeadInfo from "@src/components/common/HeadInfo";
 
 // component
 import ProductItem from "@src/components/ProductItem";
@@ -73,17 +74,32 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
     }
   }, [responseOfSearchProducts, setKeyword, router]);
 
-  // 보여줄 -- rename
+  // 2022/04/08 - 랜더링할 상품들 - by 1-blue
   const [targetProducts, setTargetProducts] = useState(props);
 
+  // 2022/04/08 - 최신 상품으로 업데이트 - by 1-blue
   useEffect(() => {
     if (responseOfSearchProducts && router.query?.keyword)
       return setTargetProducts(responseOfSearchProducts);
     if (responseOfProducts) return setTargetProducts(responseOfProducts);
   }, [router, responseOfSearchProducts, responseOfProducts, setTargetProducts]);
 
+  const photo = targetProducts?.products?.filter((product) =>
+    product.image ? product.image : null
+  );
+
   return (
     <>
+      <HeadInfo
+        title="blemarket | Home"
+        description="blemarket의 상품 목록 페이지입니다. 😄"
+        photo={
+          targetProducts.productCount > 0 && photo?.[0].image
+            ? photo[0].image
+            : null
+        }
+      />
+
       <article className="flex flex-col divide-y">
         {/* 상품 검색 폼 */}
         <section>
@@ -110,7 +126,7 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
 
         {/* 상품 리스트 */}
         <div className="mt-4" />
-        {targetProducts.products.map((product, index) => (
+        {targetProducts?.products?.map((product, index) => (
           <ProductItem
             key={product.id}
             id={product.id}
@@ -150,24 +166,6 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
     </>
   );
 };
-
-// // getServerSideProps로 받은 초기 데이터를 SWR에 넣어주기
-// // 이 과정을 통해서 초기 데이터를 넣은채로 렌더링되기 때문에 api요청을 하더라도 화면에 빈공간이 생기지 않음
-// const Page: NextPage<{
-//   initialValue: IResponseOfProducts;
-// }> = ({ initialValue }) => {
-//   return (
-//     <SWRConfig
-//       value={{
-//         fallback: {
-//           "/api/products?page=1&offset=10": initialValue,
-//         },
-//       }}
-//     >
-//       <Home />
-//     </SWRConfig>
-//   );
-// };
 
 // 초기 렌더링 정보 미리 가져오기 ( /api/products?page=1&limit=10 )
 export const getStaticProps: GetStaticProps = async () => {

@@ -19,6 +19,7 @@ import Icon from "@src/components/common/Icon";
 import Button from "@src/components/common/Button";
 import Profile from "@src/components/common/Profile";
 import Photo from "@src/components/common/Photo";
+import HeadInfo from "@src/components/common/HeadInfo";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
@@ -88,13 +89,21 @@ const ProductsDatail: NextPage<IProductWithEtcResponse> = ({
 
   return (
     <>
+      <HeadInfo
+        title={`blemarket | Product`}
+        description={`제목: ${product.name}
+          가격: ${`${priceWithCommas(product.price)}원`}
+          설명: ${product.description}`}
+        photo={product.image}
+      />
+
       {/* 상품 이미지, 유저 프로필, 이름, 설명, 가격, 키워드, 좋아요 */}
       <article className="px-4 pb-8 mb-8 border-b">
         <section className="mb-2">
           <Photo photo={product.image} className="h-96 w-full" $contain />
         </section>
         <section>
-          <Profile user={product.user!} />
+          <Profile user={product.user} />
         </section>
         <section className="flex flex-col space-y-3">
           <h2 className="font-bold text-3xl">{product.name}</h2>
@@ -185,7 +194,7 @@ export const getStaticPaths: GetStaticPaths = () => {
 };
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const productId = Number(context?.params?.id);
+  const productId = Number(context.params?.id);
 
   // 특정 상품과 작성자 찾기
   const findProductWithUser = await prisma.product.findUnique({

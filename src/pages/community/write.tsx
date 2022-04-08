@@ -9,6 +9,9 @@ import { Post } from "@prisma/client";
 // common-component
 import Button from "@src/components/common/Button";
 import Textarea from "@src/components/common/Textarea";
+import HeadInfo from "@src/components/common/HeadInfo";
+
+// hooks
 import useMutation from "@src/libs/hooks/useMutation";
 import useCoords from "@src/libs/hooks/useCoords";
 
@@ -41,21 +44,29 @@ const Write: NextPage = () => {
   });
 
   return (
-    <form className="px-4" onSubmit={handleSubmit(onValid)}>
-      <Textarea
-        register={register("question", { required: true })}
-        className="mt-1 shadow-sm w-full focus:ring-orange-500 rounded-md border-gray-300 focus:border-orange-500 resize-none"
-        rows={6}
-        placeholder="Ask this question!"
+    <>
+      <HeadInfo
+        title={`blemarket | Write-Community`}
+        description="커뮤니티 생성 페이지입니다. 😄"
+        photo={null}
       />
-      <Button
-        type="submit"
-        text="생성"
-        $primary
-        $loading={loading}
-        className="w-full mt-2"
-      />
-    </form>
+
+      <form className="px-4" onSubmit={handleSubmit(onValid)}>
+        <Textarea
+          register={register("question", { required: true })}
+          className="mt-1 shadow-sm w-full focus:ring-orange-500 rounded-md border-gray-300 focus:border-orange-500 resize-none"
+          rows={6}
+          placeholder="Ask this question!"
+        />
+        <Button
+          type="submit"
+          text="생성"
+          $primary
+          $loading={loading}
+          className="w-full mt-2"
+        />
+      </form>
+    </>
   );
 };
 

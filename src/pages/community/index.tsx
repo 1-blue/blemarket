@@ -9,6 +9,7 @@ import { Post } from "@prisma/client";
 import Icon from "@src/components/common/Icon";
 import SideButton from "@src/components/common/SideButton";
 import Pagination from "@src/components/common/Pagination";
+import HeadInfo from "@src/components/common/HeadInfo";
 
 // component
 import CommunityItem from "@src/components/CommunityItem";
@@ -16,6 +17,8 @@ import CommunityItem from "@src/components/CommunityItem";
 // hook
 import useCoords from "@src/libs/hooks/useCoords";
 import usePagination from "@src/libs/hooks/usePagination";
+
+// util
 import prisma from "@src/libs/client/prisma";
 
 export interface IPostWithEtc extends Post {
@@ -72,6 +75,12 @@ const Community: NextPage<IPostResponse> = (props) => {
 
   return (
     <>
+      <HeadInfo
+        title={`blemarket | Community`}
+        description="커뮤니티 페이지입니다. 😄"
+        photo={null}
+      />
+
       <article className="px-4 space-y-8">
         {/* 검색 조건 변경 및 검색 거리 변경 */}
         <section className="flex justify-between items-center">

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import type { NextPage } from "next";
-import useSWR from "swr";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import useSWRInfinite from "swr/infinite";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
@@ -24,6 +23,7 @@ import useUser from "@src/libs/hooks/useUser";
 // util
 import { timeFormat } from "@src/libs/client/dateFormat";
 import { priceWithCommas } from "@src/libs/client/util";
+import prisma from "@src/libs/client/prisma";
 
 interface IStreamWithUser extends Stream {
   user: SimpleUser;
@@ -46,14 +46,10 @@ interface IGetMessageResponse extends ApiResponse {
   }[];
 }
 
-const StreamDetail: NextPage = () => {
+const StreamDetail: NextPage<IStreamResponse> = ({ stream, messageCount }) => {
   const router = useRouter();
   const { user } = useUser();
   const { register, handleSubmit, reset } = useForm<IMessageForm>();
-  // 스트림 상세 정보 요청
-  const { data: streamData } = useSWR<IStreamResponse>(
-    router.query.id ? `/api/streams/${router.query.id}` : null
-  );
   const [createMessage, { data: messageData, loading }] =
     useMutation<IMessageResponse>(`/api/streams/${router.query.id}/messages`);
   const [offset] = useState(10);
@@ -125,18 +121,16 @@ const StreamDetail: NextPage = () => {
       {/* 비디오, 제목, 가격, 설명 */}
       <article className="px-4 space-y-4 mb-10">
         <div className="w-full aspect-video bg-slate-300 rounded-md mb-2" />
-        <h1 className="text-gray-700 font-semibold text-2xl">
-          {streamData?.stream.title}
-        </h1>
+        <h1 className="text-gray-700 font-semibold text-2xl">{stream.title}</h1>
         <p className="whitespace-pre p-4 bg-slate-200 rounded-lg">
-          {streamData?.stream.description}
+          {stream.description}
         </p>
         <div className="flex justify-between items-baseline">
           <span className="inline-block font-semibold text-base">
-            {priceWithCommas(streamData?.stream.price!)}원
+            {priceWithCommas(stream.price)}원
           </span>
           <span className="text-xs font-semibold">
-            ( {timeFormat(streamData?.stream.updatedAt!)}부터 시작 )
+            ( {timeFormat(stream.updatedAt)}부터 시작 )
           </span>
         </div>
       </article>
@@ -161,12 +155,10 @@ const StreamDetail: NextPage = () => {
           )}
         </ul>
         {/* 댓글 불러오기 버튼 */}
-        {Math.ceil(streamData?.messageCount! / offset) > size ? (
+        {Math.ceil(messageCount! / offset) > size ? (
           <Button
             onClick={() => setSize((prev) => prev + 1)}
-            text={`메시지 ${
-              streamData?.messageCount! - offset * size
-            }개 더 불러오기`}
+            text={`메시지 ${messageCount! - offset * size}개 더 불러오기`}
             $primary
             className="block mx-auto px-4"
             $loading={typeof getMessageData?.[size - 1] === "undefined"}
@@ -205,6 +197,46 @@ const StreamDetail: NextPage = () => {
       </article>
     </>
   );
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const streamId = Number(context.params?.id);
+
+  const stream = await prisma.stream.findUnique({
+    where: {
+      id: streamId,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+  });
+  const messageCount = await prisma.message.count({
+    where: {
+      streamId,
+    },
+  });
+
+  return {
+    props: {
+      ok: true,
+      message: "특정 스트림에 대한 정보입니다.",
+      stream: JSON.parse(JSON.stringify(stream)),
+      messageCount,
+    },
+  };
 };
 
 export default StreamDetail;

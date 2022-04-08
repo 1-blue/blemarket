@@ -10,6 +10,9 @@ import Icon from "@src/components/common/Icon";
 // util
 import { combineClassNames } from "@src/libs/client/util";
 
+// hooks
+import useUser from "@src/libs/hooks/useUser";
+
 const NavLink = ({
   url,
   name,
@@ -40,6 +43,7 @@ const NavLink = ({
 
 const NavBar = () => {
   const { asPath } = useRouter();
+  const { user } = useUser();
 
   return (
     <nav className="fixed w-full max-w-lg inset-x-0 bottom-0 mx-auto border-b-2 py-4 bg-white border-t-2">
@@ -64,7 +68,11 @@ const NavBar = () => {
         <NavLink url="/community" name="동네생활" shape={ICON_SHAPE.NEWS} />
         <NavLink url="/chats" name="채팅" shape={ICON_SHAPE.CHAT} />
         <NavLink url="/streams" name="라이브" shape={ICON_SHAPE.CAMERA} />
-        <NavLink url="/profile" name="나의 정보" shape={ICON_SHAPE.USER} />
+        <NavLink
+          url={`/profile/user/${user?.id}`}
+          name="나의 정보"
+          shape={ICON_SHAPE.USER}
+        />
       </ul>
     </nav>
   );

@@ -30,9 +30,8 @@ const useResponseToast = ({
       toast.error(errorMessage || response.message);
     } else if (response && response.ok) {
       toast.success(successMessage || response.message);
+      if (move) router.push(move);
     }
-
-    if (move) router.push(move);
   }, [response, successMessage, errorMessage, move, router]);
 };
 

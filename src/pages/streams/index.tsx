@@ -1,5 +1,5 @@
-import React from "react";
-import type { NextPage } from "next";
+import React, { useEffect, useState } from "react";
+import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 
 // type
@@ -17,6 +17,8 @@ import usePagination from "@src/libs/hooks/usePagination";
 
 // util
 import { timeFormat } from "@src/libs/client/dateFormat";
+import prisma from "@src/libs/client/prisma";
+import HeadInfo from "@src/components/common/HeadInfo";
 
 interface IStreamResponse extends ApiResponse {
   streams: {
@@ -28,16 +30,31 @@ interface IStreamResponse extends ApiResponse {
   streamCount: number;
 }
 
-const Live: NextPage = () => {
+const Live: NextPage<IStreamResponse> = (props) => {
   // 2022/04/05 - 스트림 패치 - by 1-blue
-  const [{ data }, { page, setPage }, { offset }] =
+  const [{ data: streamsResponse }, { page, setPage }, { offset }] =
     usePagination<IStreamResponse>("/api/streams", {});
+
+  // 2022/04/08 - 사용할 데이터 - by 1-blue
+  const [targetStreams, setTargetStreams] = useState<IStreamResponse>(props);
+
+  // 2022/04/08 - 최신 데이터로 업데이트 - by 1-blue
+  useEffect(() => {
+    if (!streamsResponse) return;
+    setTargetStreams(streamsResponse);
+  }, [streamsResponse, setTargetStreams]);
 
   return (
     <>
+      <HeadInfo
+        title="blemarket | Stream"
+        description="blemarket의 스트림 페이지입니다. 😄"
+        photo={null}
+      />
+
       <article>
         <ul className="divide-y-2">
-          {data?.streams.map((stream) => (
+          {targetStreams.streams.map((stream) => (
             <li key={stream.id}>
               <Link href={`/streams/${stream.id}`}>
                 <a className="flex flex-col space-y-2 p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:rounded-sm">
@@ -62,7 +79,7 @@ const Live: NextPage = () => {
         page={page}
         offset={offset}
         setPage={setPage}
-        max={Math.ceil((data?.streamCount as number) / offset)}
+        max={Math.ceil(targetStreams.streamCount / offset)}
       />
 
       <SideButton
@@ -71,6 +88,40 @@ const Live: NextPage = () => {
       />
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const streams = await prisma.stream.findMany({
+    take: 10,
+    skip: 0,
+    select: {
+      id: true,
+      title: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+  const streamCount = await prisma.stream.count();
+
+  return {
+    props: {
+      ok: true,
+      message: "스트림들을 가져왔습니다.",
+      streams: JSON.parse(JSON.stringify(streams)),
+      streamCount,
+    },
+  };
 };
 
 export default Live;

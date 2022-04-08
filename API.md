@@ -126,7 +126,7 @@ interface IMessageWithUser extends Message {
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
-### 1.2 GET /api/users/me?kinds=
+### 1.2 GET /api/users/me?kinds={}
 + 역할: 로그인한 유저의 특정 데이터 요청
 + 전송 데이터 ( `query` )
 ```
@@ -216,7 +216,50 @@ interface IMessageWithUser extends Message {
 + 응답 상태 코드
   1. `201`: 토큰 생성 성공
   2. `400`: 유효하지 않은 토큰
-  2. `401`: 로그인 상태에서 접근
+  3. `401`: 로그인 상태에서 접근
+  4. `500`: 서버측 에러 발생
+
+### 1.6 GET /api/users/[id]
++ 역할: 특정 유저 정보 요청
++ 전송 데이터 ( `body` )
+```typescript
+{
+  userId: number;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  user: SimpleUser,
+}
+```
++ 응답 상태 코드
+  1. `201`: 토큰 생성 성공
+  2. `400`: 유효하지 않은 토큰
+  3. `401`: 로그인 상태에서 접근
+  4. `500`: 서버측 에러 발생
+
+### 1.7 GET /api/users/[id]/reviews
++ 역할: 특정 유저의 리뷰 요청
++ 전송 데이터 ( `body` )
+```typescript
+{
+  userId: number;
+}
+```
++ 응답 데이터
+```typescript
+{
+  ok: boolean,
+  message: string,
+  reviews: ReviewWithWriter[]
+}
+```
++ 응답 상태 코드
+  1. `200`: 모든 상품들 조회 성공
+  2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
 ## 2. products
@@ -241,8 +284,8 @@ interface IMessageWithUser extends Message {
 + 응답 상태 코드
   1. `200`: 모든 상품들 조회 성공
   2. `401`: 비로그인 상태에서 접근
-  2. `404`: 존재하지 않은 페이지 정보 요청
-  3. `500`: 서버측 에러 발생
+  3. `404`: 존재하지 않은 페이지 정보 요청
+  4. `500`: 서버측 에러 발생
 
 ### 2.2 GET /api/products?keyword={}&page={}&offset={}
 + 역할: 특정 키워드를 포함하는 상품 검색
@@ -576,25 +619,8 @@ interface IMessageWithUser extends Message {
   3. `404`: 존재하지 않는 게시글 요청
   4. `500`: 서버측 에러 발생
 
-## 4. reviews
-### 4.1 GET /api/reviews
-+ 역할: 로그인한 사용자의 리뷰 요청
-+ 전송 데이터: `none`
-+ 응답 데이터
-```typescript
-{
-  ok: boolean,
-  message: string,
-  reviews: ReviewWithWriter[]
-}
-```
-+ 응답 상태 코드
-  1. `200`: 모든 상품들 조회 성공
-  2. `401`: 비로그인 상태에서 접근
-  3. `500`: 서버측 에러 발생
-
-## 5. streams
-### 5.1 POST /api/streams
+## 4. streams
+### 4.1 POST /api/streams
 + 역할: 스트림 생성
 + 전송 데이터
 ```typescript
@@ -617,7 +643,7 @@ interface IMessageWithUser extends Message {
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
-### 5.2 GET /api/streams?page={}&offset={}
+### 4.2 GET /api/streams?page={}&offset={}
 + 역할: 스트림들 가져오기
 + 전송 데이터 ( `query` )
 ```typescript
@@ -644,7 +670,7 @@ interface IMessageWithUser extends Message {
   2. `401`: 비로그인 상태에서 접근
   3. `500`: 서버측 에러 발생
 
-### 5.3 GET /api/streams/[id]
+### 4.3 GET /api/streams/[id]
 + 역할: 특정 스트림 가져오기
 + 전송 데이터 ( `query` )
 ```typescript
@@ -667,7 +693,7 @@ interface IMessageWithUser extends Message {
   3. `404`: 존재하지 않은 스트림에 메시지 생성 요청
   4. `500`: 서버측 에러 발생
 
-### 5.4 POST /api/streams/[id]/message
+### 4.4 POST /api/streams/[id]/message
 + 역할: 메시지 생성 요청
 + 전송 데이터 ( `query`, `body` )
 ```typescript
@@ -690,7 +716,7 @@ interface IMessageWithUser extends Message {
   3. `404`: 존재하지 않은 스트림에 메시지 생성 요청
   4. `500`: 서버측 에러 발생
 
-### 5.5 GET /api/streams/[id]/message?page={}&offset={}
+### 4.5 GET /api/streams/[id]/message?page={}&offset={}
 + 역할: 메시지들 요청
 + 전송 데이터 ( `query`, `body` )
 ```typescript

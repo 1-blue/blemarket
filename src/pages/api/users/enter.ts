@@ -67,9 +67,10 @@ async function handler(
     //   console.log("message >> ", message);
     // }
 
+    // >> 임시로 payload값 넣어줌
     res.status(201).json({
       ok: true,
-      message: "토큰을 생성했습니다.",
+      message: "토큰을 생성했습니다. >> " + payload,
     });
   } catch (error) {
     console.error("/api/users/enter error >> ", error);

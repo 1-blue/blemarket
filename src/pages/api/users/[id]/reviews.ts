@@ -11,12 +11,12 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
 ) {
-  const { user } = req.session;
+  const userId = +req.query.id;
 
   try {
     const reviews = await prisma.review.findMany({
       where: {
-        createdForId: user?.id,
+        createdForId: userId,
       },
       include: {
         createdBy: {

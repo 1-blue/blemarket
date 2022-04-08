@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 
 // type
@@ -21,9 +21,15 @@ import Button from "@src/components/common/Button";
 import Input from "@src/components/common/Input";
 import Notice from "@src/components/common/Notice";
 import Icon from "@src/components/common/Icon";
+import HeadInfo from "@src/components/common/HeadInfo";
+
+// hook
+import useResponseToast from "@src/libs/hooks/useResponseToast";
+import useUser from "@src/libs/hooks/useUser";
 
 const Enter = () => {
   const router = useRouter();
+  const { user, mutate } = useUser();
   // 로그인 인증을 위한 토큰 생성
   const [enter, { loading: enterLoading, data: enterData }] =
     useMutation<ApiResponse>("/api/users/enter");
@@ -60,18 +66,36 @@ const Enter = () => {
   const onTokenValid = useCallback((body: ITokenForm) => token(body), [token]);
 
   // 2022/03/24 - 로그인 완료 시 페이지 이동 - by 1-blue
-  useEffect(() => {
-    if (tokenData?.ok === false) toast.error("토큰이 일치하지 않습니다.");
+  useResponseToast({
+    response: tokenData,
+    successMessage: "로그인에 성공했습니다.\n메인 페이지로 이동합니다.",
+    errorMessage: "토큰이 일치하지 않습니다.",
+    move: "/",
+  });
 
+  // 2022/04/08 - 로그인 성공 시 유저 데이터 변경 ( 여기서 안 해주면 자꾸 enter페이지로 리다이렉트됨 ) - by 1-blue
+  useEffect(() => {
     if (tokenData?.ok) {
-      toast.success(`로그인에 성공했습니다.
-      메인 페이지로 이동합니다.`);
-      router.push("/");
+      mutate({ ok: true, message: "로그인 성공!" });
     }
-  }, [router, tokenData]);
+  }, [tokenData, mutate]);
+  useEffect(() => {
+    if (!user) return;
+    toast.error("📢 로그인한 이후에는 접근이 불가능합니다!");
+    router.push("/");
+  }, [router, user]);
+
+  // >> 임시 ... 로그인 토큰값 알아내기 위함
+  console.log("enterData >> ", enterData?.message);
 
   return (
     <>
+      <HeadInfo
+        title="blemarket | Enter"
+        description="blemarket의 로그인 페이지입니다. 😄"
+        photo={null}
+      />
+
       {/* title */}
       <h3 className="font-bold text-2xl text-center mb-4">Enter to Blemeket</h3>
       {/* sub-title */}

@@ -27,6 +27,7 @@ import prisma from "@src/libs/client/prisma";
 import useMutation from "@src/libs/hooks/useMutation";
 import useUser from "@src/libs/hooks/useUser";
 import { dateFormat } from "@src/libs/client/dateFormat";
+import HeadInfo from "@src/components/common/HeadInfo";
 
 interface IPostWithUser extends Post {
   user: SimpleUser;
@@ -157,6 +158,12 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
 
   return (
     <>
+      <HeadInfo
+        title={`blemarket | Community`}
+        description={post.question}
+        photo={null}
+      />
+
       {/* 게시글 작성자, 내용, 궁금해요와 답변아이콘 버튼 */}
       <article>
         <section>

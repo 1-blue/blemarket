@@ -76,7 +76,11 @@ const ProfileEdit: NextPage = () => {
     [loading, updateProfile]
   );
 
-  useResponseToast({ response: data, successMessage: "정보를 변경했습니다!" });
+  useResponseToast({
+    response: data,
+    successMessage: "정보를 변경했습니다!",
+    move: `/profile/user/${user?.id}`,
+  });
   const [preview] = usePreview(watch("avatar"));
 
   return (
