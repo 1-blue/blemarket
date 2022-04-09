@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import twilio from "twilio";
-import mail from "@sendgrid/mail";
+// import twilio from "twilio";
+// import mail from "@sendgrid/mail";
 
 // prisma
 import prisma from "@src/libs/client/prisma";
@@ -8,8 +8,8 @@ import prisma from "@src/libs/client/prisma";
 // helper function
 import withHandler, { IResponseType } from "@src/libs/server/widthHandler";
 
-const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
-mail.setApiKey(process.env.SENDGRID_KEY!);
+// const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+// mail.setApiKey(process.env.SENDGRID_KEY!);
 
 async function handler(
   req: NextApiRequest,
