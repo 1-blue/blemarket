@@ -100,8 +100,8 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
         }
       />
 
-      <article className="flex flex-col divide-y">
-        {/* 상품 검색 폼 */}
+      {/* 상품 검색 폼 */}
+      <article className="flex flex-col border-b-2 pb-4">
         <section>
           <form className="flex" onSubmit={onSumbitKeyowrd}>
             <input
@@ -123,9 +123,10 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
             />
           </form>
         </section>
+      </article>
 
-        {/* 상품 리스트 */}
-        <div className="mt-4" />
+      {/* 상품 리스트 */}
+      <article>
         {targetProducts?.products?.map((product, index) => (
           <ProductItem
             key={product.id}

@@ -5,6 +5,9 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    fontFamily: {
+      jua: ["Jua", "sans-serif"],
+    },
   },
   plugins: [require("@tailwindcss/forms")],
   // darkMode: "class",

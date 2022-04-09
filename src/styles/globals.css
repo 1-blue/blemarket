@@ -10,3 +10,9 @@
     margin: 0;
   }
 }
+
+@layer base {
+  html {
+    font-family: 'Jua', sans-serif;
+  }
+}

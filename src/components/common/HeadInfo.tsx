@@ -22,14 +22,9 @@ const HeadInfo = ({ title, description, photo }: IProps) => {
       <link rel="shortcut icon" href="/favicon.ico" />
 
       {/* SEO */}
-      <meta
-        name="keyword"
-        content="blemarket, 당근마켓, 클론, clone, 노마드코더, nomadcoders"
-      />
       <meta name="description" content={description} />
-      <meta name="author" content="1-blue" />
 
-      {/* 카카오톡 미리보기에 제공될 정보 */}
+      {/* 카카오톡, 네이버 블로그 미리보기에 제공될 정보 */}
       <meta property="og:url" content={`http://localhost:3000${asPath}`} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
@@ -39,11 +34,21 @@ const HeadInfo = ({ title, description, photo }: IProps) => {
           photo ? combinePhotoUrl(photo) : "http://localhost:3000/favicon.ico"
         }
       />
-      <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="blemarket" />
-      <meta property="og:locale" content="ko_KR" />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="600" />
+
+      {/* 트위터 */}
+      <meta
+        name="twitter:card"
+        content={`제목: ${title}
+        내용: ${description}`}
+      />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta
+        name="twitter:image"
+        content={
+          photo ? combinePhotoUrl(photo) : "http://localhost:3000/favicon.ico"
+        }
+      />
     </Head>
   );
 };
