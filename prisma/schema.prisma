@@ -47,6 +47,8 @@ model Token {
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
+
+  @@index([userId])
 }
 
 model Product {
@@ -63,6 +65,8 @@ model Product {
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
+
+  @@index([userId])
 }
 
 model Post {
@@ -78,6 +82,8 @@ model Post {
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
+
+  @@index([userId])
 }
 
 model Answer {
@@ -90,6 +96,9 @@ model Answer {
   userId Int
   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId Int
+
+  @@index([userId])
+  @@index([postId])
 }
 
 model Recommendation {
@@ -101,6 +110,9 @@ model Recommendation {
   userId Int
   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId Int
+
+  @@index([userId])
+  @@index([postId])
 }
 
 model Review {
@@ -114,6 +126,9 @@ model Review {
   createdById  Int
   createdFor   User @relation(name: "receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
   createdForId Int
+
+  @@index([createdById])
+  @@index([createdForId])
 }
 
 model Record {
@@ -127,6 +142,9 @@ model Record {
   userId    Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
+
+  @@index([userId])
+  @@index([productId])
 }
 
 model Stream {
@@ -141,6 +159,8 @@ model Stream {
 
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Message {
@@ -153,8 +173,7 @@ model Message {
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   streamId Int
   stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
-}
 
-// 추후에 구현할 것
-// Product : Keyword ( N : M )
-// Product : Hashtag ( N : M )
+  @@index([userId])
+  @@index([streamId])
+}
