@@ -1,6 +1,10 @@
-import { Product } from "@prisma/client";
 import Link from "next/link";
-import Photo from "./common/Photo";
+
+// type
+import { Product } from "@prisma/client";
+
+// common-component
+import Photo from "@src/components/common/Photo";
 
 const ProductSimilar = ({ product }: { product: Product }) => {
   return (

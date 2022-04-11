@@ -11,29 +11,71 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
 ) {
-  const userId = +req.query.id;
+  // 타겟
+  const createdForId = +req.query.id;
+  // 작성자
+  const createdById = +req.session.user?.id!;
 
   try {
-    const reviews = await prisma.review.findMany({
-      where: {
-        createdForId: userId,
-      },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
+    if (req.method === "GET") {
+      const page = +req.query.page;
+      const offset = +req.query.offset;
+
+      const reviews = await prisma.review.findMany({
+        take: offset,
+        skip: page * offset,
+        where: {
+          createdForId: createdForId,
+        },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
           },
         },
-      },
-    });
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+      });
 
-    res.json({
-      ok: true,
-      message: "리뷰를 가져왔습니다.",
-      reviews,
-    });
+      return res.status(200).json({
+        ok: true,
+        message: "리뷰를 가져왔습니다.",
+        reviews,
+      });
+    } else if (req.method === "POST") {
+      const review = req.body.review;
+      const score = +req.body.score;
+
+      const createdReview = await prisma.review.create({
+        data: {
+          createdById,
+          createdForId,
+          review,
+          score,
+        },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+
+      return res.status(201).json({
+        ok: true,
+        message: "리뷰를 생성했습니다.",
+        createdReview,
+      });
+    }
   } catch (error) {
     console.error("/api/reviews error >> ", error);
 
@@ -45,4 +87,6 @@ async function handler(
   }
 }
 
-export default withApiSession(withHandler({ methods: ["GET"], handler }));
+export default withApiSession(
+  withHandler({ methods: ["GET", "POST"], handler })
+);

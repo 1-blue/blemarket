@@ -26,7 +26,7 @@ import AnswerSection from "@src/components/Answer/AnswerSection";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
-import ProductSimilar from "@src/components/ProductSimilar";
+import ProductSimilar from "@src/components/Product/ProductSimilar";
 
 interface IProductWithUser extends Product {
   user: SimpleUser;

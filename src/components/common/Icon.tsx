@@ -11,6 +11,7 @@ interface IProps {
   className?: string;
   $fill?: boolean;
   $icon?: boolean;
+  [key: string]: any;
 }
 
 const Icon = ({
@@ -20,6 +21,7 @@ const Icon = ({
   height = 24,
   $fill = false,
   $icon = false,
+  ...props
 }: IProps) => {
   const getIcon = useCallback((shape: ICON_SHAPE) => {
     switch (shape) {
@@ -210,6 +212,7 @@ const Icon = ({
         <svg
           className={combineClassNames("w-5 h-5", className ? className : "")}
           aria-hidden="true"
+          {...props}
         >
           {getIcon(shape)}
         </svg>
@@ -221,6 +224,7 @@ const Icon = ({
           viewBox="0 0 20 20"
           fill="currentColor"
           className={combineClassNames(className ? className : "")}
+          {...props}
         >
           {getFillIcon(shape)}
         </svg>
@@ -235,6 +239,7 @@ const Icon = ({
           strokeWidth={2}
           aria-hidden="true"
           className={combineClassNames(className ? className : "")}
+          {...props}
         >
           {getIcon(shape)}
         </svg>

@@ -89,3 +89,7 @@ export interface IStramForm {
 export interface IMessageForm {
   message: string;
 }
+export interface IReviewForm {
+  review: string;
+  score: number;
+}

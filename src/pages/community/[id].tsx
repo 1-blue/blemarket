@@ -65,6 +65,7 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
           recommendationCount: prev.isRecommendation
             ? prev.recommendationCount - 1
             : prev.recommendationCount + 1,
+          isRecommendation: !prev.isRecommendation,
         },
       false
     );
