@@ -15,7 +15,7 @@ import SideButton from "@src/components/common/SideButton";
 import HeadInfo from "@src/components/common/HeadInfo";
 
 // component
-import ProductItem from "@src/components/ProductItem";
+import ProductItem from "@src/components/Product/ProductItem";
 
 // hook
 import usePagination from "@src/libs/hooks/usePagination";
@@ -23,12 +23,15 @@ import usePagination from "@src/libs/hooks/usePagination";
 // util
 import prisma from "@src/libs/client/prisma";
 
-interface ProductWithFavoriteUsers extends Product {
-  records: SimpleUser[];
+interface ProductWithCount extends Product {
+  _count: {
+    answers: number;
+    records: number;
+  };
 }
 
 interface IResponseOfProducts extends ApiResponse {
-  products: ProductWithFavoriteUsers[];
+  products: ProductWithCount[];
   productCount: number;
 }
 
@@ -53,7 +56,6 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
     (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value),
     [setKeyword]
   );
-
   // 2022/04/01 - 키워드를 이용한 상품 검색 요청 - by 1-blue
   const onSumbitKeyowrd = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
@@ -62,7 +64,6 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
     },
     [keyword, router]
   );
-
   // 2022/04/01 - 키워드 검색 완료 시 실행 - by 1-blue
   useEffect(() => {
     if (responseOfSearchProducts?.ok && router.query.keyword) {
@@ -126,7 +127,7 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
       </article>
 
       {/* 상품 리스트 */}
-      <article>
+      <article className="divide-y-2">
         {targetProducts?.products?.map((product, index) => (
           <ProductItem
             key={product.id}
@@ -135,7 +136,7 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
             description={product.description}
             price={product.price}
             image={product.image}
-            favoriteUsers={product.records}
+            count={product?._count}
             index={index}
           />
         ))}

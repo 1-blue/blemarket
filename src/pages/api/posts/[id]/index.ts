@@ -24,6 +24,11 @@ async function handler(
             avatar: true,
           },
         },
+        _count: {
+          select: {
+            answers: true,
+          },
+        },
       },
     });
     if (!postWithUser)

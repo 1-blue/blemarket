@@ -2,35 +2,31 @@ import { useCallback, useState } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import useSWRInfinite from "swr/infinite";
-import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 // type
-import { IAnswerForm, ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
+import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
 import { Post } from "@prisma/client";
 
 // common-component
 import Icon from "@src/components/common/Icon";
-import Button from "@src/components/common/Button";
 import Profile from "@src/components/common/Profile";
-import Textarea from "@src/components/common/Textarea";
-
-// component
-import Answer from "@src/components/Answer";
+import HeadInfo from "@src/components/common/HeadInfo";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
+import { dateFormat } from "@src/libs/client/dateFormat";
 import prisma from "@src/libs/client/prisma";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
-import useUser from "@src/libs/hooks/useUser";
-import { dateFormat } from "@src/libs/client/dateFormat";
-import HeadInfo from "@src/components/common/HeadInfo";
+import AnswerSection from "@src/components/Answer/AnswerSection";
 
 interface IPostWithUser extends Post {
   user: SimpleUser;
+  _count: {
+    answers: number;
+  };
 }
 interface IPostResponse extends ApiResponse {
   post: IPostWithUser;
@@ -41,54 +37,20 @@ interface IRecommendationResponse extends ApiResponse {
   recommendationCount: number;
 }
 
-interface IAnswerWithUser {
-  id: number;
-  answer: string;
-  updatedAt: Date | number;
-  user: SimpleUser;
-}
-interface IAnswerResponse extends ApiResponse {
-  answers: IAnswerWithUser[];
-  answerCount: number;
-}
-
 const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
   const router = useRouter();
-  const { user } = useUser();
 
   // 게시글의 궁금해요 정보 요청
   const { data: recommendationData, mutate: recommendationMutate } =
     useSWR<IRecommendationResponse>(
       router.query.id ? `/api/posts/${router.query.id}/recommendation` : null
     );
-  const [offset] = useState(5);
-  // 댓글들 요청
-  const {
-    data: answersData,
-    size,
-    setSize,
-    mutate: answerMutate,
-  } = useSWRInfinite<IAnswerResponse>(
-    router.query.id
-      ? (pageIndex, previousPageData) => {
-          if (previousPageData && !previousPageData.answers.length) return null;
-          return `/api/posts/${router.query.id}/answer?page=${pageIndex}&offset=${offset}`;
-        }
-      : () => null
-  );
   // 궁금해요 추가 메서드
   const [addRecommendation, { loading: addRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`);
   // 궁금해요 제거 메서드
   const [removeRecommendation, { loading: removeRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`, "DELETE");
-  // 답변 추가 메서드
-  const [createAnswer, { loading: answerLoading }] = useMutation(
-    `/api/posts/${router.query.id}/answer`
-  );
-  const { register, handleSubmit, reset } = useForm<IAnswerForm>();
-  const [toggleAnswer, setToggleAnswer] = useState(true);
-
   // 2022/03/27 - 궁금해요 클릭 - by 1-blue
   const onClickRecommendation = useCallback(() => {
     if (addRecommendationLoading)
@@ -118,43 +80,8 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
     removeRecommendation,
   ]);
 
-  // 2022/03/27 - 답변 추가 - by 1-blue
-  const onValid = useCallback(
-    (body: IAnswerForm) => {
-      if (answerLoading) return;
-
-      // 임시로 작성 댓글 추가
-      answerMutate(
-        (prev) =>
-          prev && [
-            ...prev,
-            {
-              ok: true,
-              message: "answerMutate로 댓글 추가!",
-              answers: [
-                {
-                  id: Date.now(),
-                  answer: body.answer!,
-                  updatedAt: Date.now(),
-                  user: {
-                    id: user?.id!,
-                    name: user?.name!,
-                    avatar: user?.avatar!,
-                  },
-                },
-              ],
-              answerCount: prev[0].answerCount + 1,
-            },
-          ],
-        false
-      );
-
-      createAnswer(body);
-
-      reset();
-    },
-    [answerLoading, answerMutate, user, createAnswer, reset]
-  );
+  //  댓글 토글 값
+  const [toggleAnswer, setToggleAnswer] = useState(true);
 
   return (
     <>
@@ -204,65 +131,17 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
             onClick={() => setToggleAnswer((prev) => !prev)}
           >
             <Icon shape={ICON_SHAPE.CHAT} width={16} height={16} />
-            <span>
-              답변 {answersData?.[answersData.length - 1].answerCount}
-            </span>
+            <span>답변 {post._count.answers}</span>
           </button>
         </section>
       </article>
 
-      {/* 댓글과 댓글 불러오기 버튼 */}
-      {toggleAnswer && (
-        <article>
-          <section>
-            <ul>
-              {answersData?.map((answers) =>
-                answers.answers.map((answer) => (
-                  <Answer key={answer.id} answer={answer} />
-                ))
-              )}
-            </ul>
-          </section>
-          <section>
-            {Math.ceil(
-              answersData?.[answersData.length - 1].answerCount! / offset
-            ) > size ? (
-              <Button
-                onClick={() => setSize((prev) => prev + 1)}
-                text={`댓글 ${
-                  answersData?.[answersData.length - 1].answerCount! -
-                  offset * size
-                }개 더 불러오기`}
-                $primary
-                className="block mx-auto px-4"
-                $loading={typeof answersData?.[size - 1] === "undefined"}
-              />
-            ) : (
-              <span className="block text-center text-sm font-semibold my-2">
-                더 이상 불러올 댓글이 존재하지 않습니다.
-              </span>
-            )}
-          </section>
-        </article>
-      )}
-
-      {/* 댓글 제출 폼 */}
-      <article>
-        <form className="px-4 mt-5" onSubmit={handleSubmit(onValid)}>
-          <Textarea
-            register={register("answer", { required: true })}
-            rows={6}
-            placeholder="Answer this question!"
-          />
-          <Button
-            type="submit"
-            text="Reply"
-            $primary
-            $loading={answerLoading}
-            className="w-full mt-2"
-          />
-        </form>
-      </article>
+      {/* 댓글 영역 */}
+      <AnswerSection
+        target="posts"
+        toggle={toggleAnswer}
+        count={post._count.answers}
+      />
     </>
   );
 };
@@ -287,6 +166,11 @@ export const getStaticProps: GetStaticProps = async (context) => {
           id: true,
           name: true,
           avatar: true,
+        },
+      },
+      _count: {
+        select: {
+          answers: true,
         },
       },
     },

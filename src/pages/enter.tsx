@@ -75,10 +75,10 @@ const Enter = () => {
 
   // 2022/04/08 - 로그인 성공 시 유저 데이터 변경 ( 여기서 안 해주면 자꾸 enter페이지로 리다이렉트됨 ) - by 1-blue
   useEffect(() => {
-    if (tokenData?.ok) {
-      mutate({ ok: true, message: "로그인 성공!" });
-    }
+    if (tokenData?.ok) mutate({ ok: true, message: "로그인 성공!" });
   }, [tokenData, mutate]);
+
+  // 2022/04/09 - 로그인 후에 접근 시 실행 - by 1-blue
   useEffect(() => {
     if (!user) return;
     toast.error("📢 로그인한 이후에는 접근이 불가능합니다!");

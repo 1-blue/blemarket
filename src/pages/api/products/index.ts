@@ -46,18 +46,10 @@ async function handler(
             },
           },
           include: {
-            records: {
-              where: {
-                kinds: "Favorite",
-              },
+            _count: {
               select: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    avatar: true,
-                  },
-                },
+                answers: true,
+                records: true,
               },
             },
           },
@@ -88,18 +80,10 @@ async function handler(
         take: offset,
         skip: page * offset,
         include: {
-          records: {
-            where: {
-              kinds: "Favorite",
-            },
+          _count: {
             select: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  avatar: true,
-                },
-              },
+              answers: true,
+              records: true,
             },
           },
         },

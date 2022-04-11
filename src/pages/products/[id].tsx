@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -21,16 +21,24 @@ import Profile from "@src/components/common/Profile";
 import Photo from "@src/components/common/Photo";
 import HeadInfo from "@src/components/common/HeadInfo";
 
+// component
+import AnswerSection from "@src/components/Answer/AnswerSection";
+
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
+import ProductSimilar from "@src/components/ProductSimilar";
 
 interface IProductWithUser extends Product {
   user: SimpleUser;
+  _count: {
+    answers: number;
+  };
 }
 
-interface IProductWithEtcResponse extends ApiResponse {
+interface IProductWithRelatedDataResponse extends ApiResponse {
   product: IProductWithUser;
-  relatedProducts: Product[];
+  relatedKeywordProducts: Product[];
+  relatedUserProducts: Product[];
 }
 
 interface IFavoriteResponse extends ApiResponse {
@@ -38,9 +46,10 @@ interface IFavoriteResponse extends ApiResponse {
   favoriteCount: number;
 }
 
-const ProductsDatail: NextPage<IProductWithEtcResponse> = ({
+const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
   product,
-  relatedProducts,
+  relatedKeywordProducts,
+  relatedUserProducts,
 }) => {
   const router = useRouter();
 
@@ -58,7 +67,6 @@ const ProductsDatail: NextPage<IProductWithEtcResponse> = ({
     `/api/products/${router.query.id}/favorite`,
     "DELETE"
   );
-
   // 2022/03/26 - 좋아요 토글 이벤트 - by 1-blue
   const onClickFavorite = useCallback(() => {
     if (addLoading) return toast.error("이미 좋아요 추가 처리중입니다.");
@@ -86,6 +94,8 @@ const ProductsDatail: NextPage<IProductWithEtcResponse> = ({
     addFavorite,
     removeFavorite,
   ]);
+
+  const [toggleAnswer, setToggleAnswer] = useState(false);
 
   return (
     <>
@@ -158,30 +168,49 @@ const ProductsDatail: NextPage<IProductWithEtcResponse> = ({
         </section>
       </article>
 
+      {/* 댓글 영역 */}
+      <button type="button" onClick={() => setToggleAnswer((prev) => !prev)}>
+        댓글 {product._count.answers}개
+      </button>
+      <AnswerSection
+        target="products"
+        toggle={toggleAnswer}
+        count={product._count.answers}
+      />
+
+      {/* 구분선 */}
+      {relatedKeywordProducts.length > 0 && (
+        <hr className="my-8 border border-gray-200" />
+      )}
+
       {/* 유사 상품들 */}
-      <article className="px-4">
-        <h3 className="font-bold text-2xl mb-6">유사한 상품들</h3>
-        <ul className="grid grid-cols-2 gap-4">
-          {relatedProducts.map((product) => (
-            <Link key={product.id} href={`/products/${product.id}`}>
-              <a className="group focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-4 focus:rounded-md">
-                <div className="overflow-hidden rounded-md">
-                  <Photo
-                    photo={product.image}
-                    className="h-56 w-full group-hover:scale-105 duration-500"
-                  />
-                </div>
-                <h3 className="text-gray-700 mt-2 group-hover:underline underline-offset-2 decoration-orange-500 decoration-2">
-                  {product.name}
-                </h3>
-                <p className="text-gray-900 font-semibold group-hover:underline underline-offset-2 decoration-orange-500 decoration-2">
-                  {product.price}원
-                </p>
-              </a>
-            </Link>
-          ))}
-        </ul>
-      </article>
+      {relatedKeywordProducts.length > 0 && (
+        <article className="px-4">
+          <h3 className="font-bold text-2xl mb-2">유사한 상품들</h3>
+          <ul className="grid grid-cols-2 gap-4">
+            {relatedKeywordProducts.map((product) => (
+              <ProductSimilar key={product.id} product={product} />
+            ))}
+          </ul>
+        </article>
+      )}
+
+      {/* 구분선 */}
+      {relatedUserProducts.length > 0 && (
+        <hr className="my-8 border border-gray-200" />
+      )}
+
+      {/* 작성자의 다른 상품들 */}
+      {relatedUserProducts.length > 0 && (
+        <article className="px-4">
+          <h3 className="font-bold text-2xl mb-2">작성자의 다른 상품들</h3>
+          <ul className="grid grid-cols-2 gap-4">
+            {relatedUserProducts.map((product) => (
+              <ProductSimilar key={product.id} product={product} />
+            ))}
+          </ul>
+        </article>
+      )}
     </>
   );
 };
@@ -207,12 +236,40 @@ export const getStaticProps: GetStaticProps = async (context) => {
           avatar: true,
         },
       },
+      _count: {
+        select: {
+          answers: true,
+        },
+      },
+    },
+  });
+
+  // 현재 게시글의 작성자의 다른 게시글 찾기
+  const relatedUserProductsPromise = prisma.product.findMany({
+    where: {
+      userId: findProductWithUser?.user.id,
+      NOT: {
+        id: productId,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+    take: 8,
+    orderBy: {
+      updatedAt: "desc",
     },
   });
 
   // 특정 상품의 관련 상품 찾기
   const keywords = findProductWithUser?.keywords.split(" ");
-  const relatedProducts = await prisma.product.findMany({
+  const relatedKeywordProductsPromise = prisma.product.findMany({
     where: {
       OR: keywords?.map((keyword) => ({
         keywords: {
@@ -231,12 +288,21 @@ export const getStaticProps: GetStaticProps = async (context) => {
     },
   });
 
+  // 결괏값 같이 받기
+  const [relatedKeywordProducts, relatedUserProducts] = await Promise.all([
+    relatedKeywordProductsPromise,
+    relatedUserProductsPromise,
+  ]);
+
   return {
     props: {
       ok: true,
       message: "특정 상품에 대한 정보를 가져왔습니다.",
       product: JSON.parse(JSON.stringify(findProductWithUser)),
-      relatedProducts: JSON.parse(JSON.stringify(relatedProducts)),
+      relatedKeywordProducts: JSON.parse(
+        JSON.stringify(relatedKeywordProducts)
+      ),
+      relatedUserProducts: JSON.parse(JSON.stringify(relatedUserProducts)),
     },
   };
 };

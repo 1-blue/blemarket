@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 
 // type
@@ -23,9 +22,6 @@ const useUser = () => {
   );
 
   useEffect(() => {
-    if (data && !data.ok) {
-      toast.error("로그인 후에 접근해주세요!");
-    }
     if (data && !data.ok && router.pathname !== "/enter") {
       router.replace("/enter");
     }

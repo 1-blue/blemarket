@@ -9,26 +9,25 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
 ) {
-  const postId = +req.query.id;
+  const productId = +req.query.id;
   const {
     session: { user },
     method,
   } = req;
 
   try {
-    const exPost = await prisma.post.findUnique({
+    const exProduct = await prisma.product.findUnique({
       where: {
-        id: postId,
+        id: productId,
       },
     });
+    if (!exProduct)
+      return res.status(404).json({
+        ok: false,
+        message: "존재하지 않는 상품에 댓글처리를 시도했습니다.",
+      });
 
     if (method === "GET") {
-      if (!exPost)
-        return res.status(404).json({
-          ok: false,
-          message: "존재하지 않는 게시글에 댓글들을 요청했습니다.",
-        });
-
       const page = +req.query.page;
       const offset = +req.query.offset;
 
@@ -36,7 +35,7 @@ async function handler(
         take: offset,
         skip: page * offset,
         where: {
-          postId,
+          productId,
         },
         select: {
           id: true,
@@ -63,12 +62,6 @@ async function handler(
         answers,
       });
     } else if (method === "POST") {
-      if (!exPost)
-        return res.status(404).json({
-          ok: false,
-          message: "존재하지 않는 게시글에 댓글을 달았습니다.",
-        });
-
       const { answer } = req.body;
 
       await prisma.answer.create({
@@ -78,9 +71,9 @@ async function handler(
               id: user?.id,
             },
           },
-          post: {
+          product: {
             connect: {
-              id: postId,
+              id: productId,
             },
           },
           answer,
@@ -93,7 +86,7 @@ async function handler(
       });
     }
   } catch (error) {
-    console.error("/api/posts/[id]/answer error >> ", error);
+    console.error("/api/products/[id]/answer error >> ", error);
 
     res.status(500).json({
       ok: false,

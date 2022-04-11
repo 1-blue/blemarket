@@ -62,6 +62,7 @@ model Product {
   updatedAt   DateTime @updatedAt
 
   records Record[]
+  answers Answer[]
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
@@ -92,10 +93,12 @@ model Answer {
   updatedAt DateTime @updatedAt
   answer    String   @db.MediumText
 
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
-  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int?
 
   @@index([userId])
   @@index([postId])

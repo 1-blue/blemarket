@@ -13,6 +13,7 @@ interface IProps {
 
 const HeadInfo = ({ title, description, photo }: IProps) => {
   const { asPath } = useRouter();
+
   return (
     <Head>
       {/* 현 페이지 제목 */}

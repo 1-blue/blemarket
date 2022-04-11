@@ -6,7 +6,7 @@ import { ApiResponse, RECORD, SimpleUser } from "@src/types";
 import { KINDS, Product } from "@prisma/client";
 
 // component
-import ProductItem from "@src/components/ProductItem";
+import ProductItem from "@src/components/Product/ProductItem";
 
 // util
 import { withSsrSession } from "@src/libs/server/withSession";
