@@ -37,6 +37,8 @@ model User {
   records         Record[]
   streams         Stream[]
   messages        Message[]
+  rooms           Room[]
+  chats           Chat[]
 }
 
 model Token {
@@ -179,4 +181,26 @@ model Message {
 
   @@index([userId])
   @@index([streamId])
+}
+
+model Room {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+  chats Chat[]
+}
+
+model Chat {
+  id        Int      @id @default(autoincrement())
+  chat      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
+  Room   Room? @relation(fields: [roomId], references: [id])
+  roomId Int?
 }

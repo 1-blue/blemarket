@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -23,10 +23,11 @@ import HeadInfo from "@src/components/common/HeadInfo";
 
 // component
 import AnswerSection from "@src/components/Answer/AnswerSection";
+import ProductSimilar from "@src/components/Product/ProductSimilar";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
-import ProductSimilar from "@src/components/Product/ProductSimilar";
+import useUser from "@src/libs/hooks/useUser";
 
 interface IProductWithUser extends Product {
   user: SimpleUser;
@@ -46,11 +47,16 @@ interface IFavoriteResponse extends ApiResponse {
   favoriteCount: number;
 }
 
+interface ICreateRoomResponse extends ApiResponse {
+  roomId: number;
+}
+
 const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
   product,
   relatedKeywordProducts,
   relatedUserProducts,
 }) => {
+  const { user } = useUser();
   const router = useRouter();
 
   // 게시글의 좋아요 정보
@@ -95,7 +101,24 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
     removeFavorite,
   ]);
 
+  // 댓글 토글값
   const [toggleAnswer, setToggleAnswer] = useState(false);
+
+  // 채팅방 생성 메서드
+  const [createRoom, { data: createRoomResponse }] =
+    useMutation<ICreateRoomResponse>(`/api/chats/room`);
+  // 2022/04/12 - 채팅방 생성 - by 1-blue
+  const onCreateRoom = useCallback(() => {
+    if (product.userId === user?.id)
+      return toast.error("본인의 상품에는 채팅을 할 수 없습니다.");
+    createRoom({ ownerId: product.userId, title: product.name });
+  }, [createRoom, product, user]);
+  // 2022/04/12 - 채팅방 생성 시 채팅방으로 이동 - by 1-blue
+  useEffect(() => {
+    if (!createRoomResponse?.ok) return;
+
+    router.push(`/chats/${createRoomResponse.roomId}`);
+  }, [router, createRoomResponse]);
 
   return (
     <>
@@ -141,10 +164,11 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
           </ul>
           <div className="flex justify-between space-x-2">
             <Button
-              text="Talk to seller"
+              text="판매자와 대화하기"
               type="button"
               className="flex-1"
               $primary
+              onClick={onCreateRoom}
             />
             <Button
               onClick={onClickFavorite}

@@ -93,3 +93,6 @@ export interface IReviewForm {
   review: string;
   score: number;
 }
+export interface IChatForm {
+  chat: string;
+}

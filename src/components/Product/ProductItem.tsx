@@ -35,7 +35,7 @@ const ProductItem = ({
   return (
     <section>
       <Link href={`/products/${id}`}>
-        <a className="flex justify-between p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:rounded-sm hover:bg-slate-100">
+        <a className="flex justify-between p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:rounded-sm hover:bg-slate-200 transition-colors">
           {/* 상품 이미지, 이름, 설명, 가격 */}
           <ul className="flex space-x-4 flex-1">
             <li className="overflow-hidden rounded-md">

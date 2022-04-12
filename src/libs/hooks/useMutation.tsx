@@ -1,38 +1,11 @@
 import { useState } from "react";
 
-import {
-  IEnterForm,
-  ITokenForm,
-  IUploadForm,
-  IQuestionForm,
-  IAnswerForm,
-  IUpdateForm,
-  IStramForm,
-  IMessageForm,
-  IReviewForm,
-} from "@src/types";
-
 interface IUseMutationState<T> {
   loading: boolean;
   data: T | null;
   error: any;
 }
-type UseMutationResult<T> = [
-  (
-    body:
-      | IEnterForm
-      | ITokenForm
-      | IUploadForm
-      | IQuestionForm
-      | IAnswerForm
-      | IUpdateForm
-      | IStramForm
-      | IMessageForm
-      | IReviewForm
-      | null
-  ) => void,
-  IUseMutationState<T>
-];
+type UseMutationResult<T> = [(body: any) => void, IUseMutationState<T>];
 
 // 2022/03/21 - API함수 및 유용한 변수들을 반환하는 hook - by 1-blue
 export default function useMutation<T>(
@@ -45,19 +18,7 @@ export default function useMutation<T>(
     error: null,
   });
 
-  const mutation = (
-    body:
-      | IEnterForm
-      | ITokenForm
-      | IUploadForm
-      | IQuestionForm
-      | IAnswerForm
-      | IUpdateForm
-      | IStramForm
-      | IMessageForm
-      | IReviewForm
-      | null
-  ) => {
+  const mutation = (body: any) => {
     setState((prev) => ({ ...prev, loading: true }));
     fetch(url, {
       method,
