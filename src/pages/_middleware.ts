@@ -2,8 +2,8 @@ import type { NextRequest, NextFetchEvent } from "next/server";
 import { NextResponse } from "next/server";
 
 export const middleware = (req: NextRequest, fe: NextFetchEvent) => {
-  // if (req.ua?.isBot)
-  //   return new Response("Plz don't be a bot. Be human.", { status: 403 });
+  // 크롤링 허용
+  if (req.ua?.isBot) return NextResponse.next();
 
   // api 요청은 자체적으로 보호됨
   if (req.url.includes("/api")) return NextResponse.next();
