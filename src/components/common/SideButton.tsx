@@ -1,12 +1,12 @@
 import React from "react";
 import Link from "next/link";
 
-interface IProps {
+type Props = {
   url: string;
   contents: React.ReactNode | string;
-}
+};
 
-const SideButton = ({ url, contents }: IProps) => {
+const SideButton = ({ url, contents }: Props) => {
   return (
     <aside>
       <Link href={url}>

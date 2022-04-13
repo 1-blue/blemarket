@@ -67,12 +67,24 @@ const NavBar = () => {
         </li>
         <NavLink url="/community" name="동네생활" shape={ICON_SHAPE.NEWS} />
         <NavLink url="/chats" name="채팅" shape={ICON_SHAPE.CHAT} />
-        <NavLink url="/streams" name="라이브" shape={ICON_SHAPE.CAMERA} />
-        <NavLink
-          url={`/profile/user/${user?.id}`}
-          name="나의 정보"
-          shape={ICON_SHAPE.USER}
-        />
+        <li className="flex-1">
+          <Link href={`/profile/user/${user?.id}`}>
+            <a
+              className={combineClassNames(
+                "flex flex-col justify-center items-center focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none rounded-sm hover:text-orange-600",
+                asPath === `/profile/user/${user?.id}` ||
+                  asPath === "/profile/sale" ||
+                  asPath === "/profile/purchase" ||
+                  asPath === "/profile/favorite"
+                  ? "text-orange-500"
+                  : ""
+              )}
+            >
+              <Icon shape={ICON_SHAPE.USER} />
+              <span className="text-sm select-none">나의 정보</span>
+            </a>
+          </Link>
+        </li>
       </ul>
     </nav>
   );

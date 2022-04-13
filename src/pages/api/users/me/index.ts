@@ -24,15 +24,16 @@ async function handler(
       },
     });
 
+    // 2022/04/13 - 내 정보 요청 - by 1-blue
     if (method === "GET") {
-      res.status(200).json({
+      return res.status(200).json({
         ok: true,
         message: "로그인된 유저의 정보입니다.",
         user: exUser,
       });
     }
-
-    if (method === "POST") {
+    // 2022/04/13 - 내 정보 변경 - by 1-blue
+    else if (method === "POST") {
       const photo = req.body.photo as string;
       const name = req.body.name as string;
       const email = req.body.email as string;
@@ -148,7 +149,7 @@ async function handler(
 
       await res.unstable_revalidate(`/profile/user/${userId}`);
 
-      res.status(200).json({
+      return res.status(200).json({
         ok: true,
         message: "정보를 변경했습니다.",
       });

@@ -6,12 +6,12 @@ import { SimpleUser } from "@src/types";
 // common-component
 import Avatar from "@src/components/common/Avatar";
 
-interface IProps {
+type Props = {
   user: SimpleUser;
   href?: string;
-}
+};
 
-const Profile = ({ user, href }: IProps) => {
+const Profile = ({ user, href }: Props) => {
   return (
     <Link href={href ? href : `/profile/user/${user?.id}`}>
       <a className="flex items-center border-y py-4 px-2 space-x-2 cursor-pointer mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:rounded-md">

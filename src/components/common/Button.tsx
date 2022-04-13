@@ -1,5 +1,4 @@
 import { ReactChild, Suspense } from "react";
-// import dynamic from "next/dynamic";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
@@ -7,21 +6,15 @@ import { combineClassNames } from "@src/libs/client/util";
 // common-component
 import Spinner from "@src/components/common/Spinner";
 
-// danamic import + lazy loading
-// const Spinner = dynamic(() => import("@src/components/common/Spinner"), {
-//   ssr: false,
-//   suspense: true,
-// });
-
-interface IProps {
+type Props = {
   text: string | ReactChild;
   className?: string;
   $primary?: boolean;
   $loading?: boolean;
   [props: string]: any;
-}
+};
 
-const Button = ({ text, className, $primary, $loading, ...props }: IProps) => {
+const Button = ({ text, className, $primary, $loading, ...props }: Props) => {
   return (
     <button
       {...props}

@@ -37,14 +37,18 @@ interface IPostResponse extends ApiResponse {
 }
 
 const Community: NextPage<IPostResponse> = (props) => {
+  // 2022/04/13 - 위도, 경도 허용 요청 및 가져오기 - by 1-blue
   const { latitude, longitude } = useCoords(
     "GPS를 허용하지 않아서 위치기반 검색을 할 수 없습니다."
   );
+  // 2022/04/13 - 검색할 거리 - by 1-blue
   const [distance, setDistance] = useState(10);
+  // 2022/04/13 - 검색 조건 - by 1-blue
   const [condition, setCondition] = useState<SEARCH_CONDITION>(
     SEARCH_CONDITION.ALL
   );
-  const [{ data }, { page, setPage }, { offset }] =
+  // 2022/04/13 - 검색 조건에 의해 검색된 게시글들 - by 1-blue
+  const [{ data: searchedPost }, { page, setPage }, { offset }] =
     usePagination<IPostResponse>(
       +condition === SEARCH_CONDITION.AROUND && latitude && longitude
         ? `/api/posts?latitude=${latitude}&longitude=${longitude}&distance=${distance}`
@@ -67,11 +71,11 @@ const Community: NextPage<IPostResponse> = (props) => {
 
   // 2022/04/07 - 랜더링할 게시글 - by 1-blue
   const [targetPosts, setTargetPost] = useState<IPostResponse>(props);
-
+  // 2022/04/13 - 검색 조건에 의해 검색된 게시글 랜더링을 위한 데이터 교체 - by 1-blue
   useEffect(() => {
-    if (!data) return;
-    setTargetPost(data);
-  }, [setTargetPost, data]);
+    if (!searchedPost) return;
+    setTargetPost(searchedPost);
+  }, [setTargetPost, searchedPost]);
 
   return (
     <>
@@ -121,7 +125,7 @@ const Community: NextPage<IPostResponse> = (props) => {
           )}
         </section>
 
-        {/* 아이템 */}
+        {/* 게시글들 */}
         <section>
           <ul className="space-y-8">
             {targetPosts.posts.map((post) => (
@@ -131,17 +135,19 @@ const Community: NextPage<IPostResponse> = (props) => {
         </section>
       </article>
 
-      <Pagination
-        url={
-          +condition === SEARCH_CONDITION.AROUND && latitude && longitude
-            ? `/api/posts?latitude=${latitude}&longitude=${longitude}&distance=${distance}`
-            : `/api/posts`
-        }
-        page={page}
-        offset={offset}
-        setPage={setPage}
-        max={Math.ceil((targetPosts.postCount as number) / offset!)}
-      />
+      <article>
+        <Pagination
+          url={
+            +condition === SEARCH_CONDITION.AROUND && latitude && longitude
+              ? `/api/posts?latitude=${latitude}&longitude=${longitude}&distance=${distance}`
+              : `/api/posts`
+          }
+          page={page}
+          offset={offset}
+          setPage={setPage}
+          max={Math.ceil((targetPosts.postCount as number) / offset!)}
+        />
+      </article>
 
       <SideButton
         url="/community/write"

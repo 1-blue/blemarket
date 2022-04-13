@@ -1,7 +1,6 @@
 import React from "react";
 import type { GetServerSideProps, NextPage, NextPageContext } from "next";
 import Link from "next/link";
-import useSWR from "swr";
 
 // common-components
 import Avatar from "@src/components/common/Avatar";
@@ -17,11 +16,7 @@ import prisma from "@src/libs/client/prisma";
 
 interface IRoomWithUser extends Room {
   users: SimpleUser[];
-  chats: {
-    chat: string;
-  }[];
 }
-
 interface IRoomsResponse extends ApiResponse {
   rooms: IRoomWithUser[];
   roomsOfLastChat: {
@@ -33,7 +28,7 @@ interface IRoomsResponse extends ApiResponse {
 
 const Chats: NextPage<IRoomsResponse> = ({ rooms, roomsOfLastChat }) => {
   return (
-    <div className="divide-y-[1px]">
+    <article className="divide-y-[1px]">
       <div />
       {rooms.map((room, index) => (
         <Link key={room.id} href={`/chats/${room.id}`}>
@@ -57,7 +52,7 @@ const Chats: NextPage<IRoomsResponse> = ({ rooms, roomsOfLastChat }) => {
         </Link>
       ))}
       <div />
-    </div>
+    </article>
   );
 };
 
@@ -86,16 +81,6 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
             avatar: true,
           },
         },
-        // >>> 마지막 메시지만 가져오도록 수정 필요
-        chats: {
-          select: {
-            chat: true,
-          },
-        },
-      },
-      // >>> 마지막 메시지가 가장 빠른순으로 정렬하도록 수정 필요
-      orderBy: {
-        updatedAt: "desc",
       },
     });
 

@@ -3,21 +3,15 @@ import { UseFormRegisterReturn } from "react-hook-form";
 // util
 import { combineClassNames } from "@src/libs/client/util";
 
-interface IProps {
+type Props = {
   register: UseFormRegisterReturn;
   type: "number" | "email" | "text";
   placeholder?: string;
   className?: string;
   [props: string]: any;
-}
+};
 
-const Input = ({
-  register,
-  type,
-  placeholder,
-  className,
-  ...props
-}: IProps) => {
+const Input = ({ register, type, placeholder, className, ...props }: Props) => {
   return (
     <input
       {...props}

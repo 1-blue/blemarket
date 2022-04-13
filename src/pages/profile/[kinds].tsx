@@ -1,8 +1,9 @@
 import React from "react";
 import type { GetServerSideProps, NextPage, NextPageContext } from "next";
+import { useRouter } from "next/router";
 
 // type
-import { ApiResponse, RECORD, SimpleUser } from "@src/types";
+import { ApiResponse, RECORD } from "@src/types";
 import { KINDS, Product } from "@prisma/client";
 
 // component
@@ -12,33 +13,58 @@ import ProductItem from "@src/components/Product/ProductItem";
 import { withSsrSession } from "@src/libs/server/withSession";
 import prisma from "@src/libs/client/prisma";
 
-interface IProductWithWriter extends Product {
-  records: SimpleUser[];
+interface IProductWithCount extends Product {
+  _count: {
+    answers: number;
+    records: number;
+  };
 }
 
 interface IProductsResponse extends ApiResponse {
   products: {
     id: number;
     updatedAt: string;
-    product: IProductWithWriter;
+    product: IProductWithCount;
   }[];
 }
 
 const Kinds: NextPage<IProductsResponse> = ({ products }) => {
+  const router = useRouter();
+
   return (
     <article className="flex flex-col space-y-5">
-      {products.map((product, index) => (
-        <ProductItem
-          key={product.id}
-          id={product.product.id}
-          name={product.product.name}
-          description={product.product.description}
-          price={product.product.price}
-          favoriteUsers={product.product.records}
-          image={product.product.image}
-          index={index}
-        />
-      ))}
+      {products.length > 0 ? (
+        products.map((product, index) => (
+          <ProductItem
+            key={product.id}
+            id={product.product.id}
+            name={product.product.name}
+            description={product.product.description}
+            price={product.product.price}
+            count={product.product._count}
+            image={product.product.image}
+            index={index}
+          />
+        ))
+      ) : (
+        <>
+          {router.query.kinds === "sale" && (
+            <span className="block text-center text-2xl text-gray-400 mt-4">
+              판매한 상품이 없습니다.
+            </span>
+          )}
+          {router.query.kinds === "purchase" && (
+            <span className="block text-center text-2xl text-gray-400 mt-4">
+              구매한 상품이 없습니다.
+            </span>
+          )}
+          {router.query.kinds === "favorite" && (
+            <span className="block text-center text-2xl text-gray-400 mt-4">
+              좋아요를 누른 상품이 없습니다.
+            </span>
+          )}
+        </>
+      )}
     </article>
   );
 };
@@ -46,7 +72,7 @@ const Kinds: NextPage<IProductsResponse> = ({ products }) => {
 export const getServerSideProps: GetServerSideProps = withSsrSession(
   async (context: NextPageContext) => {
     const kinds = context.query?.kinds;
-    const userId = context.req?.session.user?.id;
+    const userId = +context.req?.session.user?.id!;
 
     let where = null;
 
@@ -80,18 +106,10 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
         updatedAt: true,
         product: {
           include: {
-            records: {
-              where: {
-                kinds: "Favorite",
-              },
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    avatar: true,
-                  },
-                },
+            _count: {
+              select: {
+                answers: true,
+                records: true,
               },
             },
           },

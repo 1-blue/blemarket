@@ -1,13 +1,13 @@
 import { combineClassNames } from "@src/libs/client/util";
 
-interface IProps {
+type Props = {
   text: string;
   $success?: boolean;
   $warning?: boolean;
   $error?: boolean;
-}
+};
 
-const Notice = ({ text, $success, $warning, $error }: IProps) => {
+const Notice = ({ text, $success, $warning, $error }: Props) => {
   return (
     <span
       className={combineClassNames(

@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { ICON_SHAPE } from "@src/types/index";
 import { combineClassNames } from "@src/libs/client/util";
 
-interface IProps {
+type Props = {
   shape: ICON_SHAPE;
   width?: number;
   height?: number;
@@ -12,7 +12,7 @@ interface IProps {
   $fill?: boolean;
   $icon?: boolean;
   [key: string]: any;
-}
+};
 
 const Icon = ({
   shape,
@@ -22,7 +22,7 @@ const Icon = ({
   $fill = false,
   $icon = false,
   ...props
-}: IProps) => {
+}: Props) => {
   const getIcon = useCallback((shape: ICON_SHAPE) => {
     switch (shape) {
       case ICON_SHAPE.HOME:

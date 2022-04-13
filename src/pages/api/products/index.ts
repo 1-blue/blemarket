@@ -116,7 +116,7 @@ async function handler(
         },
       });
 
-      // "/"의 getStaticProps 재실행
+      // >>> 이거 실행이 안 되는 이유는...?
       await res.unstable_revalidate("/");
 
       res.status(201).json({

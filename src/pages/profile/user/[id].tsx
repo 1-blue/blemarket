@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type {
+  GetStaticPaths,
+  GetStaticProps,
+  NextPage,
+  GetStaticPropsContext,
+} from "next";
 import Link from "next/link";
 import useSWRInfinite from "swr/infinite";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
 // type
-import { ICON_SHAPE, ApiResponse, SimpleUser, IReviewForm } from "@src/types";
+import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
 import { Review } from "@prisma/client";
 
 // common-component
@@ -35,6 +40,10 @@ interface IReviewResponse extends ApiResponse {
 interface ICreateReviewResponse extends ApiResponse {
   createdReview: IReviewWithWriter;
 }
+type ReviewForm = {
+  review: string;
+  score: number;
+};
 
 interface IUserResponse extends ApiResponse {
   user: {
@@ -50,14 +59,15 @@ interface IUserResponse extends ApiResponse {
 const Profile: NextPage<IUserResponse> = ({ user }) => {
   const router = useRouter();
   const { user: me } = useUser();
-  // 별
-  const [score, setScore] = useState(1);
-  // 리뷰 토글
-  const [toggleReview, setToggleReview] = useState(true);
 
+  // 2022/04/13 - 평점 - by 1-blue
+  const [score, setScore] = useState(1);
+  // 2022/04/13 - 리뷰 토글 - by 1-blue
+  const [toggleReview, setToggleReview] = useState(true);
+  // 2022/04/13 - 한번에 불러올 리뷰 개수 - by 1-blue
   const [offset] = useState(5);
 
-  // 2022/04/11 - 댓글들 순차적 요청 - by 1-blue
+  // 2022/04/11 - 리뷰들 순차적 요청 - by 1-blue
   const {
     data: reviewsResponse,
     size,
@@ -71,14 +81,14 @@ const Profile: NextPage<IUserResponse> = ({ user }) => {
         }
       : () => null
   );
-  // 리뷰 생성
+  // 2022/04/13 - 리뷰 생성 - by 1-blue
   const [createReview, { data: createdReviewResponse, loading }] =
     useMutation<ICreateReviewResponse>(`/api/users/${router.query.id}/reviews`);
-  // 리뷰 입력
-  const { register, handleSubmit, reset } = useForm<IReviewForm>();
+  // 2022/04/13 - 리뷰 입력 - by 1-blue
+  const { register, handleSubmit, reset } = useForm<ReviewForm>();
   // 2022/04/11 - 리뷰 제출 - by 1-blue
   const onSubmitReview = useCallback(
-    ({ review }: IReviewForm) => {
+    ({ review }: ReviewForm) => {
       if (loading) return;
       createReview({ score, review });
 
@@ -109,7 +119,7 @@ const Profile: NextPage<IUserResponse> = ({ user }) => {
     <>
       <HeadInfo
         title={`blemarket | ${user.name}님의 프로필`}
-        description={`blemarket의 ${user.name}님의 프로필 페이지입니다. 😄`}
+        description={`blemarket | ${user.name}님의 프로필 페이지입니다. 😄`}
         photo={user.avatar}
       />
 
@@ -239,12 +249,14 @@ export const getStaticPaths: GetStaticPaths = () => {
     fallback: "blocking",
   };
 };
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: GetStaticProps = async (
+  context: GetStaticPropsContext
+) => {
   const userId = Number(context.params?.id);
 
   const exUser = await prisma.user.findUnique({
     where: {
-      id: userId,
+      id: userId || 1,
     },
     select: {
       id: true,

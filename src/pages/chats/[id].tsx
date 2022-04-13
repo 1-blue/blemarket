@@ -12,7 +12,7 @@ import Button from "@src/components/common/Button";
 import Message from "@src/components/Message";
 
 // type
-import { ApiResponse, IChatForm, SimpleUser } from "@src/types";
+import { ApiResponse, SimpleUser } from "@src/types";
 import { Chat } from "@prisma/client";
 
 // hook
@@ -30,18 +30,22 @@ interface IChatResponse extends ApiResponse {
 interface IAddChatResponse extends ApiResponse {
   createdChat: IChatWithUser;
 }
+type ChatForm = {
+  chat: string;
+};
 
 const ChatDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
-  const { register, handleSubmit, reset } = useForm<IChatForm>();
 
-  // 채팅 추가 메서드
+  // 2022/04/13 - 채팅 폼 - by 1-blue
+  const { register, handleSubmit, reset } = useForm<ChatForm>();
+  // 2022/04/13 - 채팅 추가 메서드 - by 1-blue
   const [addChat, { data: addChatResponse, loading: addChatLoading }] =
     useMutation<IAddChatResponse>(`/api/chats/${router.query.id}`);
   // 2022/04/12 - 채팅 추가 - by 1-blue
   const onAddChat = useCallback(
-    (body: IChatForm) => {
+    (body: ChatForm) => {
       if (addChatLoading)
         return toast.warning(
           "채팅을 보내는 중입니다.\n잠시후에 다시 시도해주세요!"
@@ -51,7 +55,7 @@ const ChatDetail: NextPage = () => {
     [addChat, addChatLoading]
   );
 
-  // 채팅 불러오기
+  // 2022/04/13 - 채팅 불러오기 - by 1-blue
   const [hasMoreChat, setHasMoreChat] = useState(true);
   const {
     data: chatsResponse,
@@ -89,9 +93,10 @@ const ChatDetail: NextPage = () => {
     reset();
   }, [chatMutate, addChatResponse, reset]);
 
-  // // 2022/04/13 - 채팅 인피니티 스크롤링 훅 - by 1-blue
+  // 2022/04/13 - 채팅 인피니티 스크롤링 훅 - by 1-blue
   useInfiniteScroll({ condition: hasMoreChat && !isValidating, setSize });
 
+  // 2022/04/13 - 권한 없이 채팅방 입장 - by 1-blue
   useEffect(() => {
     if (chatsResponse && !chatsResponse[0].isMine) {
       toast.error("채팅방에 접근할 권한이 없습니다.");
@@ -100,58 +105,62 @@ const ChatDetail: NextPage = () => {
   }, [chatsResponse, router]);
 
   return (
-    <div className="space-y-4 bg-slate-200 min-h-[70vh] p-4 rounded-sm mb-[10vh]">
-      {chatsResponse && chatsResponse?.[0]?.chats.length > 0 ? (
-        <ul className="space-y-2">
-          <li className="text-lg text-center bg-indigo-400 p-2 rounded-md text-white">
-            채팅방에 입장하셨습니다.
-          </li>
-          {chatsResponse[0].isMine &&
-            chatsResponse.map((chatResponse) =>
-              chatResponse?.chats.map((chat) => (
-                <Message
-                  key={chat.id}
-                  message={chat.chat}
-                  user={chat.User}
-                  updatedAt={chat.updatedAt}
-                  $reversed={user?.id === chat.User.id}
-                />
-              ))
+    <>
+      <article className="space-y-4 bg-slate-200 min-h-[70vh] p-4 rounded-sm mb-[10vh]">
+        {chatsResponse && chatsResponse?.[0]?.chats.length > 0 ? (
+          <ul className="space-y-2">
+            <li className="text-lg text-center bg-indigo-400 p-2 rounded-md text-white">
+              채팅방에 입장하셨습니다.
+            </li>
+            {chatsResponse[0].isMine &&
+              chatsResponse.map((chatResponse) =>
+                chatResponse?.chats.map((chat) => (
+                  <Message
+                    key={chat.id}
+                    message={chat.chat}
+                    user={chat.User}
+                    updatedAt={chat.updatedAt}
+                    $reversed={user?.id === chat.User.id}
+                  />
+                ))
+              )}
+            {!hasMoreChat && (
+              <li className="text-lg text-center bg-indigo-400 py-2 rounded-md text-white">
+                더 이상 채팅이 없습니다.
+              </li>
             )}
-          {!hasMoreChat && (
-            <li className="text-lg text-center bg-indigo-400 py-2 rounded-md text-white">
-              더 이상 채팅이 없습니다.
-            </li>
-          )}
-          {isValidating && (
-            <li className="text-lg text-center bg-indigo-400 py-2 rounded-md text-white">
-              채팅을 불러오는 중입니다...
-            </li>
-          )}
-        </ul>
-      ) : (
-        <span className="text-center block">
-          현재 채팅이 없습니다. 채팅을 입력해주세요!
-        </span>
-      )}
+            {isValidating && (
+              <li className="text-lg text-center bg-indigo-400 py-2 rounded-md text-white">
+                채팅을 불러오는 중입니다...
+              </li>
+            )}
+          </ul>
+        ) : (
+          <span className="text-center block">
+            현재 채팅이 없습니다. 채팅을 입력해주세요!
+          </span>
+        )}
+      </article>
 
-      <form
-        onSubmit={handleSubmit(onAddChat)}
-        className="fixed bottom-24 max-w-lg w-10/12 inset-x-0 mx-auto flex"
-      >
-        <input
-          type="text"
-          className="peer rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400 flex-[8.5]"
-          {...register("chat")}
-        />
-        <Button
-          type="submit"
-          text="전송"
-          className="peer-focus:ring-1 bg-orange-400 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500 flex-[1.5] py-[10px]"
-          $loading={addChatLoading}
-        />
-      </form>
-    </div>
+      <article>
+        <form
+          onSubmit={handleSubmit(onAddChat)}
+          className="fixed bottom-24 max-w-lg w-10/12 inset-x-0 mx-auto flex"
+        >
+          <input
+            type="text"
+            className="peer rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400 flex-[8.5]"
+            {...register("chat")}
+          />
+          <Button
+            type="submit"
+            text="전송"
+            className="peer-focus:ring-1 bg-orange-400 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500 flex-[1.5] py-[10px]"
+            $loading={addChatLoading}
+          />
+        </form>
+      </article>
+    </>
   );
 };
 

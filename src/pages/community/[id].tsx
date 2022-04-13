@@ -1,5 +1,10 @@
 import { useCallback, useState } from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type {
+  GetStaticPaths,
+  GetStaticProps,
+  GetStaticPropsContext,
+  NextPage,
+} from "next";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import { toast } from "react-toastify";
@@ -40,15 +45,15 @@ interface IRecommendationResponse extends ApiResponse {
 const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
   const router = useRouter();
 
-  // 게시글의 궁금해요 정보 요청
+  // 2022/04/13 - 게시글의 궁금해요 정보 요청 - by 1-blue
   const { data: recommendationData, mutate: recommendationMutate } =
     useSWR<IRecommendationResponse>(
       router.query.id ? `/api/posts/${router.query.id}/recommendation` : null
     );
-  // 궁금해요 추가 메서드
+  // 2022/04/13 - 궁금해요 추가 메서드 - by 1-blue
   const [addRecommendation, { loading: addRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`);
-  // 궁금해요 제거 메서드
+  // 2022/04/13 - 궁금해요 제거 메서드 - by 1-blue
   const [removeRecommendation, { loading: removeRecommendationLoading }] =
     useMutation(`/api/posts/${router.query.id}/recommendation`, "DELETE");
   // 2022/03/27 - 궁금해요 클릭 - by 1-blue
@@ -81,7 +86,7 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
     removeRecommendation,
   ]);
 
-  //  댓글 토글 값
+  //  2022/04/13 - 댓글 토글 값 - by 1-blue
   const [toggleAnswer, setToggleAnswer] = useState(true);
 
   return (
@@ -106,8 +111,8 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
           {post.user && <Profile user={post.user} />}
         </section>
         <section className="flex mt-2 px-4 text-gray-700">
-          <span className="text-orange-500 font-medium mr-2">Q .</span>
-          <span className="whitespace-pre">{post.question}</span>
+          <span className="text-orange-500 font-medium mr-2">Q.</span>
+          <span className="whitespace-pre-wrap">{post.question}</span>
         </section>
         <section className="flex px-4 space-x-5 mt-3 text-gray-700 py-2.5 border-t border-b-[2px]  w-full">
           <button
@@ -142,6 +147,7 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
         target="posts"
         toggle={toggleAnswer}
         count={post._count.answers}
+        setToggle={setToggleAnswer}
       />
     </>
   );
@@ -154,12 +160,14 @@ export const getStaticPaths: GetStaticPaths = () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: GetStaticProps = async (
+  context: GetStaticPropsContext
+) => {
   const postId = Number(context.params?.id);
 
   const postWithUser = await prisma.post.findUnique({
     where: {
-      id: postId,
+      id: postId || 1,
     },
     include: {
       user: {

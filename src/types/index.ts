@@ -25,12 +25,6 @@ export enum SEARCH_CONDITION {
   AROUND,
 }
 
-// 로그인 방식
-export enum LOGIN_TYPE {
-  EMAIL = "email",
-  PHONE = "phone",
-}
-
 //
 export enum RECORD {
   FAVORITE = "favorite",
@@ -51,35 +45,8 @@ export type SimpleUser = {
   avatar: string;
 };
 
-// 폼 전송 데이터
-export interface IEnterForm {
-  email?: string;
-  phone?: string;
-}
-export interface ITokenForm {
-  token: string;
-}
-export interface IUploadForm {
-  photo?: FileList;
-  name: string;
-  price: number;
-  description: string;
-  keywords: string;
-}
-export interface IQuestionForm {
-  question: string;
-  latitude: number | null;
-  longitude: number | null;
-}
 export interface IAnswerForm {
   answer: string;
-}
-export interface IUpdateForm {
-  avatar?: FileList;
-  name?: string;
-  email?: string;
-  phone?: string;
-  photo?: string;
 }
 export interface IStramForm {
   title: string;
@@ -88,11 +55,4 @@ export interface IStramForm {
 }
 export interface IMessageForm {
   message: string;
-}
-export interface IReviewForm {
-  review: string;
-  score: number;
-}
-export interface IChatForm {
-  chat: string;
 }

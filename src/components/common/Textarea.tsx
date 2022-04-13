@@ -3,14 +3,14 @@ import { UseFormRegisterReturn } from "react-hook-form";
 // util
 import { combineClassNames } from "@src/libs/client/util";
 
-interface IProps {
+type Props = {
   register: UseFormRegisterReturn;
   placeholder?: string;
   className?: string;
   [props: string]: any;
-}
+};
 
-const Textarea = ({ register, placeholder, className, ...props }: IProps) => {
+const Textarea = ({ register, placeholder, className, ...props }: Props) => {
   return (
     <textarea
       {...props}

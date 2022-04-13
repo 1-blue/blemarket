@@ -6,14 +6,9 @@ import { ToastContainer } from "react-toastify";
 
 import Layout from "@src/components/layout";
 
-// hook
-import useUser from "@src/libs/hooks/useUser";
-
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const {} = useUser();
-
   return (
     <SWRConfig value={{ fetcher }}>
       <Layout hasTabBar>

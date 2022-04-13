@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import type { GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import { useForm } from "react-hook-form";
 
 // type
-import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
+import { ICON_SHAPE, ApiResponse } from "@src/types";
 import { Product } from "@prisma/client";
 
 // common-component
@@ -29,11 +30,13 @@ interface ProductWithCount extends Product {
     records: number;
   };
 }
-
 interface IResponseOfProducts extends ApiResponse {
   products: ProductWithCount[];
   productCount: number;
 }
+type KeywordForm = {
+  keyword: string;
+};
 
 const Home: NextPage<IResponseOfProducts> = (props) => {
   const router = useRouter();
@@ -49,31 +52,22 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
     {}
   );
 
-  // 2022/04/05 - 검색 상품 요청 - by 1-blue
-  const [keyword, setKeyword] = useState("");
-  // 2022/04/01 - 키워드 검색 onchange이벤트 - by 1-blue
-  const onChangeKeyword = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value),
-    [setKeyword]
-  );
+  // 2022/04/13 - 키워드 form - by 1-blue
+  const { handleSubmit, register, reset } = useForm<KeywordForm>();
   // 2022/04/01 - 키워드를 이용한 상품 검색 요청 - by 1-blue
-  const onSumbitKeyowrd = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      router.push(`?keyword=${keyword}`);
-    },
-    [keyword, router]
+  const onSearchKeyword = useCallback(
+    (body: KeywordForm) => router.push(`?keyword=${body.keyword}`),
+    [router]
   );
   // 2022/04/01 - 키워드 검색 완료 시 실행 - by 1-blue
   useEffect(() => {
     if (responseOfSearchProducts?.ok && router.query.keyword) {
       toast.success(
-        `키워드가 "${router.query.keyword}"인 상품들을 ${responseOfSearchProducts.productCount}개 검색했습니다.`,
-        { autoClose: 4000 }
+        `키워드가 "${router.query.keyword}"인 상품들을 ${responseOfSearchProducts.productCount}개 검색했습니다.`
       );
-      setKeyword("");
+      reset();
     }
-  }, [responseOfSearchProducts, setKeyword, router]);
+  }, [responseOfSearchProducts, reset, router]);
 
   // 2022/04/08 - 랜더링할 상품들 - by 1-blue
   const [targetProducts, setTargetProducts] = useState(props);
@@ -85,6 +79,7 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
     if (responseOfProducts) return setTargetProducts(responseOfProducts);
   }, [router, responseOfSearchProducts, responseOfProducts, setTargetProducts]);
 
+  // 2022/04/13 - SEO - by 1-blue
   const photo = targetProducts?.products?.filter((product) =>
     product.image ? product.image : null
   );
@@ -102,28 +97,25 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
       />
 
       {/* 상품 검색 폼 */}
-      <article className="flex flex-col border-b-2 pb-4">
-        <section>
-          <form className="flex" onSubmit={onSumbitKeyowrd}>
-            <input
-              type="search"
-              className="peer flex-1 rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400"
-              placeholder="🚀 키워드를 검색해보세요! 🚀"
-              onChange={onChangeKeyword}
-              value={keyword}
-            />
-            <Button
-              type="submit"
-              text={<Icon shape={ICON_SHAPE.SEARCH} />}
-              className="peer-focus:ring-1 bg-orange-400 px-3 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500"
-              $loading={
-                !!router.query.keyword &&
-                !responseOfSearchProducts &&
-                !responseOfSearchProductsError
-              }
-            />
-          </form>
-        </section>
+      <article className="border-b-2 pb-4">
+        <form className="flex" onSubmit={handleSubmit(onSearchKeyword)}>
+          <input
+            type="search"
+            className="peer flex-1 rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400"
+            placeholder="🚀 키워드를 검색해보세요! 🚀"
+            {...register("keyword")}
+          />
+          <Button
+            type="submit"
+            text={<Icon shape={ICON_SHAPE.SEARCH} />}
+            className="peer-focus:ring-1 bg-orange-400 px-3 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500"
+            $loading={
+              !!router.query.keyword &&
+              !responseOfSearchProducts &&
+              !responseOfSearchProductsError
+            }
+          />
+        </form>
       </article>
 
       {/* 상품 리스트 */}
@@ -144,21 +136,23 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
       </article>
 
       {/* 페이지네이션 컴포넌트 */}
-      <Pagination
-        url={
-          router.query.keyword
-            ? `/api/products?keyword=${router.query.keyword}`
-            : "/api/products"
-        }
-        page={page}
-        offset={offset}
-        setPage={setPage}
-        max={
-          targetProducts?.products
-            ? Math.ceil((targetProducts?.productCount as number) / offset)
-            : Math.ceil((targetProducts?.productCount as number) / offset)
-        }
-      />
+      <article>
+        <Pagination
+          url={
+            router.query.keyword
+              ? `/api/products?keyword=${router.query.keyword}`
+              : "/api/products"
+          }
+          page={page}
+          offset={offset}
+          setPage={setPage}
+          max={
+            targetProducts?.products
+              ? Math.ceil((targetProducts?.productCount as number) / offset)
+              : Math.ceil((targetProducts?.productCount as number) / offset)
+          }
+        />
+      </article>
 
       {/* 상품 업로드 버튼 */}
       <SideButton
@@ -169,7 +163,7 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
   );
 };
 
-// 초기 렌더링 정보 미리 가져오기 ( /api/products?page=1&limit=10 )
+// 상품 생성 시 `res.unstable_revalidate("/")`를 실행
 export const getStaticProps: GetStaticProps = async () => {
   const products = await prisma.product.findMany({
     take: 10,

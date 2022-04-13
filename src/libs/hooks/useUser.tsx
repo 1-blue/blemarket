@@ -15,19 +15,12 @@ export interface IUserResponse {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const useUser = () => {
-  const router = useRouter();
   const { data, error, mutate } = useSWR<IUserResponse>(
     "/api/users/me",
     fetcher
   );
 
-  useEffect(() => {
-    if (data && !data.ok && router.pathname !== "/enter") {
-      router.replace("/enter");
-    }
-  }, [router, data]);
-
-  return { user: data?.user, loading: !data && !error, mutate };
+  return { user: data?.user, loading: !data && !error, userMutate: mutate };
 };
 
 export default useUser;

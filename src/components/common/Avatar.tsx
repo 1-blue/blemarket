@@ -7,12 +7,12 @@ import { User } from "@prisma/client";
 // util
 import { combineClassNames, combinePhotoUrl } from "@src/libs/client/util";
 
-interface IProps {
+type Props = {
   user?: SimpleUser | User;
   className?: string;
-}
+};
 
-const Avatar = ({ user, className }: IProps) => {
+const Avatar = ({ user, className }: Props) => {
   return (
     <>
       {user?.avatar ? (

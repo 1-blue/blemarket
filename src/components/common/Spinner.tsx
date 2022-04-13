@@ -2,11 +2,11 @@ import React, { useCallback } from "react";
 
 type sinnerType = "button";
 
-interface IProps {
+type Props = {
   kinds: sinnerType;
-}
+};
 
-const Spinner = ({ kinds }: IProps) => {
+const Spinner = ({ kinds }: Props) => {
   const getSpinner = useCallback((kinds: sinnerType) => {
     switch (kinds) {
       case "button":

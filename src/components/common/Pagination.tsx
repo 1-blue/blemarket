@@ -1,16 +1,24 @@
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import useSWR from "swr";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
-import useSWR from "swr";
 
-interface IProps {
+type PagenationType = {
   url: string;
   page: number;
   offset: number;
   setPage: Dispatch<SetStateAction<number>>;
   max: number;
-}
+};
+type PageButtonType = {
+  page: string | number;
+  $point?: boolean;
+  $hidden?: boolean;
+  $disabled?: boolean;
+  onClick: () => void;
+  onHover?: () => void;
+};
 
 const PageButton = ({
   page,
@@ -19,14 +27,7 @@ const PageButton = ({
   $disabled,
   onClick,
   onHover,
-}: {
-  page: string | number;
-  $point?: boolean;
-  $hidden?: boolean;
-  $disabled?: boolean;
-  onClick: () => void;
-  onHover?: () => void;
-}) => {
+}: PageButtonType) => {
   return (
     <li
       className={combineClassNames("text-center w-11", $hidden ? "hidden" : "")}
@@ -49,7 +50,7 @@ const PageButton = ({
   );
 };
 
-const Pagination = ({ url, page, offset, setPage, max }: IProps) => {
+const Pagination = ({ url, page, offset, setPage, max }: PagenationType) => {
   // 2022/04/05 - 페이지 링크위에 마우스 올리면 패치 시작 - by 1-blue
   const [preFetchPageNumber, setPreFetchPageNumber] = useState<null | number>(
     null
@@ -177,17 +178,11 @@ const Pagination = ({ url, page, offset, setPage, max }: IProps) => {
   }, [page, max, onClick, onPreFetch]);
 
   return (
-    <article>
-      <ul className="mx-auto flex justify-center space-x-2 mt-6 mb-4">
-        <PageButton
-          page="⮜"
-          onClick={onClickPrevious}
-          $disabled={1 > page - 1}
-        />
-        {getPageButton()}
-        <PageButton page="⮞" onClick={onClickNext} $disabled={max < page + 1} />
-      </ul>
-    </article>
+    <ul className="mx-auto flex justify-center space-x-2 mt-6 mb-4">
+      <PageButton page="⮜" onClick={onClickPrevious} $disabled={1 > page - 1} />
+      {getPageButton()}
+      <PageButton page="⮞" onClick={onClickNext} $disabled={max < page + 1} />
+    </ul>
   );
 };
 

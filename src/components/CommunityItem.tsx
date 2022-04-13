@@ -6,7 +6,9 @@ import { IPostWithEtc } from "@src/pages/community";
 
 // common-component
 import Icon from "@src/components/common/Icon";
-import { dateFormat, timeFormat } from "@src/libs/client/dateFormat";
+
+// util
+import { dateFormat } from "@src/libs/client/dateFormat";
 
 const CommunityItem = ({ post }: { post: IPostWithEtc }) => {
   return (

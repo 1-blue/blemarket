@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type {
+  GetStaticPaths,
+  GetStaticProps,
+  GetStaticPropsContext,
+  NextPage,
+} from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -35,18 +40,15 @@ interface IProductWithUser extends Product {
     answers: number;
   };
 }
-
 interface IProductWithRelatedDataResponse extends ApiResponse {
   product: IProductWithUser;
   relatedKeywordProducts: Product[];
   relatedUserProducts: Product[];
 }
-
 interface IFavoriteResponse extends ApiResponse {
   isFavorite: boolean;
   favoriteCount: number;
 }
-
 interface ICreateRoomResponse extends ApiResponse {
   roomId: number;
 }
@@ -59,16 +61,19 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
   const { user } = useUser();
   const router = useRouter();
 
-  // 게시글의 좋아요 정보
+  // 2022/04/13 - 댓글 토글값 - by 1-blue
+  const [toggleAnswer, setToggleAnswer] = useState(true);
+
+  // 2022/04/13 - 게시글의 좋아요 정보 - by 1-blue
   const { data: favoriteResponse, mutate: favoriteMutate } =
     useSWR<IFavoriteResponse>(
       router.query.id ? `/api/products/${router.query.id}/favorite` : null
     );
-  // 좋아요 추가 요청 메서드
+  // 2022/04/13 - 좋아요 추가 요청 메서드 - by 1-blue
   const [addFavorite, { loading: addLoading }] = useMutation<ApiResponse>(
     `/api/products/${router.query.id}/favorite`
   );
-  // 좋아요 제거 요청 메서드
+  // 2022/04/13 - 좋아요 제거 요청 메서드 - by 1-blue
   const [removeFavorite, { loading: removeLoading }] = useMutation<ApiResponse>(
     `/api/products/${router.query.id}/favorite`,
     "DELETE"
@@ -101,10 +106,7 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
     removeFavorite,
   ]);
 
-  // 댓글 토글값
-  const [toggleAnswer, setToggleAnswer] = useState(false);
-
-  // 채팅방 생성 메서드
+  // 2022/04/13 - 채팅방 생성 메서드 - by 1-blue
   const [createRoom, { data: createRoomResponse }] =
     useMutation<ICreateRoomResponse>(`/api/chats/room`);
   // 2022/04/12 - 채팅방 생성 - by 1-blue
@@ -117,6 +119,7 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
   useEffect(() => {
     if (!createRoomResponse?.ok) return;
 
+    toast.success("채팅방이 생성되었습니다!\n채팅방으로 이동합니다.");
     router.push(`/chats/${createRoomResponse.roomId}`);
   }, [router, createRoomResponse]);
 
@@ -193,14 +196,21 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
       </article>
 
       {/* 댓글 영역 */}
-      <button type="button" onClick={() => setToggleAnswer((prev) => !prev)}>
-        댓글 {product._count.answers}개
-      </button>
-      <AnswerSection
-        target="products"
-        toggle={toggleAnswer}
-        count={product._count.answers}
-      />
+      <article>
+        <button
+          type="button"
+          onClick={() => setToggleAnswer((prev) => !prev)}
+          className="mx-4 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-4 focus:rounded-sm hover:text-orange-400 focus:text-orange-400"
+        >
+          댓글 {product._count.answers}개
+        </button>
+        <AnswerSection
+          target="products"
+          toggle={toggleAnswer}
+          count={product._count.answers}
+          setToggle={setToggleAnswer}
+        />
+      </article>
 
       {/* 구분선 */}
       {relatedKeywordProducts.length > 0 && (
@@ -246,7 +256,9 @@ export const getStaticPaths: GetStaticPaths = () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: GetStaticProps = async (
+  context: GetStaticPropsContext
+) => {
   const productId = Number(context.params?.id);
 
   // 특정 상품과 작성자 찾기

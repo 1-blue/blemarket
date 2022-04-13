@@ -52,7 +52,7 @@ async function handler(
         },
         orderBy: [
           {
-            createdAt: "desc",
+            createdAt: "asc",
           },
         ],
       });

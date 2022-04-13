@@ -11,7 +11,7 @@ import Notice from "@src/components/common/Notice";
 import Avatar from "@src/components/common/Avatar";
 
 // type
-import { ApiResponse, IUpdateForm } from "@src/types";
+import { ApiResponse } from "@src/types";
 
 // hook
 import useUser from "@src/libs/hooks/useUser";
@@ -19,17 +19,28 @@ import useMutation from "@src/libs/hooks/useMutation";
 import usePreview from "@src/libs/hooks/usePreview";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
 
+type UpdateForm = {
+  avatar?: FileList;
+  name?: string;
+  email?: string;
+  phone?: string;
+  photo?: string;
+};
+
 const ProfileEdit: NextPage = () => {
   const { user, loading: userLoading } = useUser();
-  const [updateProfile, { data, loading }] =
+
+  // 2022/04/13 - 유저 정보 수정 - by 1-blue
+  const [updateProfile, { data, loading: updateProfileLoading }] =
     useMutation<ApiResponse>("/api/users/me");
+  // 2022/04/13 - 유저 정보 수정 폼 - by 1-blue
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
     watch,
-  } = useForm<IUpdateForm>({ mode: "onChange" });
+  } = useForm<UpdateForm>({ mode: "onChange" });
 
   // 2022/03/31 - 유저의 본래 정보 기입 - by 1-blue
   useEffect(() => {
@@ -39,13 +50,13 @@ const ProfileEdit: NextPage = () => {
   }, [setValue, user]);
 
   // 2022/03/31 - 프로필 업데이트 - 1-blue
-  const onValid = useCallback(
-    async ({ avatar, email, name, phone }: IUpdateForm) => {
-      if (loading) return toast.error("이미 처리중입니다.");
+  const onUpdateProfile = useCallback(
+    async ({ avatar, email, name, phone }: UpdateForm) => {
+      if (updateProfileLoading) return toast.error("이미 처리중입니다.");
 
+      // 수정할 프로필 사진이 존재하면 실행
       if (avatar && avatar.length > 0) {
         try {
-          // 이미지 업로드
           const formData = new FormData();
           formData.append("photo", avatar?.[0]!);
 
@@ -65,7 +76,9 @@ const ProfileEdit: NextPage = () => {
             autoClose: 4000,
           });
         }
-      } else {
+      }
+      // 수정할 프로필 사진이 없으면 실행
+      else {
         updateProfile({
           email,
           name,
@@ -73,18 +86,19 @@ const ProfileEdit: NextPage = () => {
         });
       }
     },
-    [loading, updateProfile]
+    [updateProfileLoading, updateProfile]
   );
-
+  // 2022/04/13 - 유저 정보 변경 메시지 및 리다이렉트 - by 1-blue
   useResponseToast({
     response: data,
     successMessage: "정보를 변경했습니다!",
     move: `/profile/user/${user?.id}`,
   });
+  // 2022/04/13 - 업로드할 이미지 미리보기 훅 - by 1-blue
   const [preview] = usePreview(watch("avatar"));
 
   return (
-    <form className="px-4 space-y-4" onSubmit={handleSubmit(onValid)}>
+    <form className="px-4 space-y-4" onSubmit={handleSubmit(onUpdateProfile)}>
       {/* 프로필 이미지 */}
       <div className="flex items-center space-x-3">
         {preview ? (
@@ -117,7 +131,7 @@ const ProfileEdit: NextPage = () => {
       {/* 이름 */}
       <div className="space-y-1">
         <label htmlFor="name" className="text-sm font-medium text-gray-700">
-          이름
+          이름 입력
         </label>
         <Input
           id="name"
@@ -141,7 +155,7 @@ const ProfileEdit: NextPage = () => {
       {/* 이메일 */}
       <div className="space-y-1">
         <label htmlFor="email" className="text-sm font-medium text-gray-700">
-          Email address
+          이메일 입력
         </label>
         <Input
           id="email"
@@ -166,7 +180,7 @@ const ProfileEdit: NextPage = () => {
       {/* 휴대폰 */}
       <div className="space-y-1">
         <label htmlFor="phone" className="text-sm font-medium text-gray-700">
-          Phone number
+          휴대폰 번호 입력
         </label>
         <div className="flex rounded-md shadow-sm">
           <span className="flex items-center justify-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 select-none text-sm">
@@ -193,13 +207,14 @@ const ProfileEdit: NextPage = () => {
           <Notice $success text="전화번호 형식에 맞게 입력해주세요." />
         )}
       </div>
-      {/* 버튼 */}
+
+      {/* 수정 버튼 */}
       <Button
-        text="Update profile"
+        text="정보 수정"
         $primary
         className="w-full"
         type="submit"
-        $loading={userLoading || loading}
+        $loading={userLoading || updateProfileLoading}
       />
     </form>
   );

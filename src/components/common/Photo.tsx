@@ -3,19 +3,15 @@ import Image from "next/image";
 // util
 import { combineClassNames, combinePhotoUrl } from "@src/libs/client/util";
 
-const Photo = ({
-  photo,
-  className,
-  $cover,
-  $contain,
-  $priority,
-}: {
+type Props = {
   photo?: string | null;
   className?: string;
   $cover?: boolean;
   $contain?: boolean;
   $priority?: boolean;
-}) => {
+};
+
+const Photo = ({ photo, className, $cover, $contain, $priority }: Props) => {
   return (
     <>
       {photo ? (

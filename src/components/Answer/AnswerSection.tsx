@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useRouter } from "next/router";
 import useSWRInfinite from "swr/infinite";
 
@@ -30,14 +30,15 @@ type Props = {
   target: "posts" | "products";
   toggle: boolean;
   count: number;
+  setToggle: Dispatch<SetStateAction<boolean>>;
 };
 
-const AnswerSection = ({ target, toggle, count }: Props) => {
+const AnswerSection = ({ target, toggle, count, setToggle }: Props) => {
   const router = useRouter();
   const { user } = useUser();
 
+  // 2022/04/13 - 댓글 요청 개수 - by 1-blue
   const [offset] = useState(5);
-
   // 2022/04/11 - 댓글들 순차적 요청 - by 1-blue
   const {
     data: answersResponse,
@@ -56,7 +57,6 @@ const AnswerSection = ({ target, toggle, count }: Props) => {
   const [createAnswer, { loading }] = useMutation(
     `/api/${target}/${router.query.id}/answer`
   );
-
   // 2022/03/27 - 댓글 추가 - by 1-blue
   const onSubmitAnswer = useCallback(
     (body: IAnswerForm) => {
@@ -87,8 +87,10 @@ const AnswerSection = ({ target, toggle, count }: Props) => {
       );
 
       createAnswer(body);
+
+      setToggle(true);
     },
-    [loading, mutate, user, createAnswer]
+    [loading, mutate, user, createAnswer, setToggle]
   );
 
   return (

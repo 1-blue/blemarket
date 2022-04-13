@@ -3,15 +3,14 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { combinePhotoUrl } from "@src/libs/client/util";
 
-interface IProps {
+type Props = {
   title?: string;
   description?: string;
   photo: string | null;
-}
+};
 
-// >> 배포 시 localhost:3000 대신 제대로 된 경로로 수정하기
-
-const HeadInfo = ({ title, description, photo }: IProps) => {
+// >>> 배포 시 NEXT_PUBLIC_ROOT_URL 제대로 된 경로로 수정하기
+const HeadInfo = ({ title, description, photo }: Props) => {
   const { asPath } = useRouter();
 
   return (
@@ -26,13 +25,18 @@ const HeadInfo = ({ title, description, photo }: IProps) => {
       <meta name="description" content={description} />
 
       {/* 카카오톡, 네이버 블로그 미리보기에 제공될 정보 */}
-      <meta property="og:url" content={`http://localhost:3000${asPath}`} />
+      <meta
+        property="og:url"
+        content={`${process.env.NEXT_PUBLIC_ROOT_URL}${asPath}`}
+      />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta
         property="og:image"
         content={
-          photo ? combinePhotoUrl(photo) : "http://localhost:3000/favicon.ico"
+          photo
+            ? combinePhotoUrl(photo)
+            : `${process.env.NEXT_PUBLIC_ROOT_URL}/favicon.ico`
         }
       />
 
@@ -47,7 +51,9 @@ const HeadInfo = ({ title, description, photo }: IProps) => {
       <meta
         name="twitter:image"
         content={
-          photo ? combinePhotoUrl(photo) : "http://localhost:3000/favicon.ico"
+          photo
+            ? combinePhotoUrl(photo)
+            : `${process.env.NEXT_PUBLIC_ROOT_URL}/favicon.ico`
         }
       />
     </Head>
