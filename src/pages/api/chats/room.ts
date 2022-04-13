@@ -17,45 +17,7 @@ async function handler(
 
   try {
     if (method === "GET") {
-      const rooms = await prisma.room.findMany({
-        where: {
-          users: {
-            some: {
-              id: +user?.id!,
-            },
-          },
-        },
-        include: {
-          users: {
-            where: {
-              NOT: {
-                id: +user?.id!,
-              },
-            },
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
-          },
-          // >>> 마지막 메시지만 가져오도록 수정 필요
-          chats: {
-            select: {
-              chat: true,
-            },
-          },
-        },
-        // >>> 마지막 메시지가 가장 빠른순으로 정렬하도록 수정 필요
-        orderBy: {
-          updatedAt: "desc",
-        },
-      });
-
-      return res.status(201).json({
-        ok: true,
-        message: "모든 채팅방들을 가져왔습니다.",
-        rooms,
-      });
+      // >>> 채팅방 페이지네이션 필요하다면 코드 작성할 곳
     } else if (method === "POST") {
       const title = req.body.title;
       const exRoom = await prisma.room.findUnique({

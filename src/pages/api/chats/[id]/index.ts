@@ -16,7 +16,12 @@ async function handler(
   const roomId = +req.query.id;
   try {
     if (method === "GET") {
+      const page = +req.query.page;
+      const offset = +req.query.offset;
+
       const chats = await prisma.chat.findMany({
+        take: offset,
+        skip: page * offset,
         where: {
           roomId,
         },
@@ -34,10 +39,25 @@ async function handler(
         },
       });
 
+      // 현재 채팅방에 접근권한 확인
+      const isMine = await prisma.user.findFirst({
+        where: {
+          AND: {
+            id: +user?.id!,
+            rooms: {
+              some: {
+                id: roomId,
+              },
+            },
+          },
+        },
+      });
+
       return res.status(200).json({
         ok: true,
         message: "모든 메시지를 가져왔습니다.",
         chats,
+        isMine: !!isMine,
       });
     } else if (method === "POST") {
       const chat = req.body.chat;

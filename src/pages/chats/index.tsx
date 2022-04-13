@@ -24,15 +24,18 @@ interface IRoomWithUser extends Room {
 
 interface IRoomsResponse extends ApiResponse {
   rooms: IRoomWithUser[];
+  roomsOfLastChat: {
+    roomId: number;
+    chat: string;
+    updatedAt: Date;
+  }[];
 }
 
-const Chats: NextPage<IRoomsResponse> = ({ rooms }) => {
-  // const { data: roomsResponse } = useSWR<IRoomsResponse>("/api/chats/room");
-
+const Chats: NextPage<IRoomsResponse> = ({ rooms, roomsOfLastChat }) => {
   return (
     <div className="divide-y-[1px]">
       <div />
-      {rooms.map((room) => (
+      {rooms.map((room, index) => (
         <Link key={room.id} href={`/chats/${room.id}`}>
           <a className="flex px-4 cursor-pointer py-3 items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-md hover:bg-slate-200 transition-colors">
             <Avatar user={room.users[0]} />
@@ -41,15 +44,14 @@ const Chats: NextPage<IRoomsResponse> = ({ rooms }) => {
                 {room.users[0].name}
               </p>
               <p className="text-sm text-gray-500">
-                {room.chats.length > 0
-                  ? room.chats[room.chats.length - 1].chat
+                {roomsOfLastChat?.[index].chat
+                  ? roomsOfLastChat?.[index].chat
                   : "아직 입력된 채팅이 없습니다."}
               </p>
             </div>
             <div className="flex-1" />
-            {/* >>> 마지막 메시지 작성 시간으로 변경하기 */}
             <span className="self-start text-xs text-gray-500">
-              {timeFormat(room.updatedAt)}
+              {timeFormat(roomsOfLastChat?.[index].updatedAt)}
             </span>
           </a>
         </Link>
@@ -97,11 +99,37 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
       },
     });
 
+    // 방들의 마지막 채팅만 추출하고 시간순 정렬
+    const chatPromises = rooms.map((room) =>
+      prisma.chat.findMany({
+        take: 1,
+        where: {
+          roomId: room.id,
+        },
+        select: {
+          chat: true,
+          updatedAt: true,
+          roomId: true,
+        },
+        orderBy: {
+          updatedAt: "desc",
+        },
+      })
+    );
+    const roomsOfLastChat = (await Promise.all(chatPromises)).flat(1);
+    roomsOfLastChat.sort((x, y) => (+x.updatedAt > +y.updatedAt ? -1 : 1));
+
+    // 마지막 채팅을 기준으로 방들을 정렬
+    const sortRooms = roomsOfLastChat.map((chat) =>
+      rooms.find((room) => room.id === chat.roomId)
+    );
+
     return {
       props: {
         ok: true,
         message: "모든 채팅방을 가져왔습니다.",
-        rooms: JSON.parse(JSON.stringify(rooms)),
+        rooms: JSON.parse(JSON.stringify(sortRooms)),
+        roomsOfLastChat: JSON.parse(JSON.stringify(roomsOfLastChat)),
       },
     };
   }
