@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/router";
-import { toast } from "react-toastify";
 
 // type
 import { ApiResponse, ICON_SHAPE } from "@src/types";
@@ -34,8 +32,7 @@ enum LOGIN_TYPE {
 }
 
 const Enter = () => {
-  const router = useRouter();
-  const { user, userMutate } = useUser();
+  const { userMutate } = useUser();
 
   // 2022/04/13 - email or phone으로 유저 생성 - by 1-blue
   const [createUser, { loading: createUserLoading, data: createUserResponse }] =
@@ -98,6 +95,7 @@ const Enter = () => {
 
   // >>> 임시 ... 로그인 토큰값 알아내기 위함 ( 추후에 이메일과 휴대폰으로 인증방식 변경 예정 )
   console.log("createUserResponse >> ", createUserResponse?.message);
+  console.log("https:// >> ", process.env.NEXT_PUBLIC_VERCEL_URL);
 
   return (
     <article>

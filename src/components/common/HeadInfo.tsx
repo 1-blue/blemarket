@@ -9,7 +9,6 @@ type Props = {
   photo: string | null;
 };
 
-// >>> 배포 시 NEXT_PUBLIC_ROOT_URL 제대로 된 경로로 수정하기
 const HeadInfo = ({ title, description, photo }: Props) => {
   const { asPath } = useRouter();
 
@@ -27,7 +26,7 @@ const HeadInfo = ({ title, description, photo }: Props) => {
       {/* 카카오톡, 네이버 블로그 미리보기에 제공될 정보 */}
       <meta
         property="og:url"
-        content={`${process.env.NEXT_PUBLIC_ROOT_URL}${asPath}`}
+        content={`https://${process.env.NEXT_PUBLIC_VERCEL_URL}${asPath}`}
       />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
@@ -36,7 +35,7 @@ const HeadInfo = ({ title, description, photo }: Props) => {
         content={
           photo
             ? combinePhotoUrl(photo)
-            : `${process.env.NEXT_PUBLIC_ROOT_URL}/favicon.ico`
+            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/favicon.ico`
         }
       />
 
@@ -53,7 +52,7 @@ const HeadInfo = ({ title, description, photo }: Props) => {
         content={
           photo
             ? combinePhotoUrl(photo)
-            : `${process.env.NEXT_PUBLIC_ROOT_URL}/favicon.ico`
+            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/favicon.ico`
         }
       />
     </Head>
