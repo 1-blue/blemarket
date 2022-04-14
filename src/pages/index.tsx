@@ -90,7 +90,7 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
         title="blemarket | Home"
         description="blemarket의 상품 목록 페이지입니다. 😄"
         photo={
-          targetProducts.productCount > 0 && photo?.[0].image
+          targetProducts.productCount > 0 && photo?.[0]?.image
             ? photo[0].image
             : null
         }

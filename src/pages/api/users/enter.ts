@@ -26,12 +26,13 @@ async function handler(
     ...(email && { email }),
     ...(phone && { phone }),
   };
+  // >>> 이메일과 전화번호 인증전까지 토큰값 "55555"로 고정
   const payload = Math.floor(10000 + Math.random() * 90000) + "";
 
   try {
     await prisma.token.create({
       data: {
-        payload,
+        payload: "55555",
         user: {
           connectOrCreate: {
             where: {
@@ -70,7 +71,7 @@ async function handler(
     // >> 임시로 payload값 넣어줌
     res.status(201).json({
       ok: true,
-      message: "토큰을 생성했습니다. >> " + payload,
+      message: "토큰을 생성했습니다.",
     });
   } catch (error) {
     console.error("/api/users/enter error >> ", error);

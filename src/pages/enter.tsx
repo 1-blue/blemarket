@@ -83,20 +83,6 @@ const Enter = () => {
     move: "/",
   });
 
-  // >>>
-  // 2022/04/08 - 로그인 성공 시 유저 데이터 변경 ( 여기서 안 해주면 자꾸 enter페이지로 리다이렉트됨 ) - by 1-blue
-  useEffect(() => {
-    if (!tokenConfirmResponse?.ok) return;
-
-    userMutate(
-      (prev) => prev && { ...prev, ok: true, message: "로그인 성공!" }
-    );
-  }, [tokenConfirmResponse, userMutate]);
-
-  // >>> 임시 ... 로그인 토큰값 알아내기 위함 ( 추후에 이메일과 휴대폰으로 인증방식 변경 예정 )
-  console.log("createUserResponse >> ", createUserResponse?.message);
-  console.log("https:// >> ", process.env.NEXT_PUBLIC_VERCEL_URL);
-
   return (
     <article>
       <HeadInfo
