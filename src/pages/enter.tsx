@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 // type
@@ -17,7 +17,6 @@ import HeadInfo from "@src/components/common/HeadInfo";
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
-import useUser from "@src/libs/hooks/useUser";
 
 type EnterForm = {
   email?: string;
@@ -32,8 +31,6 @@ enum LOGIN_TYPE {
 }
 
 const Enter = () => {
-  const { userMutate } = useUser();
-
   // 2022/04/13 - email or phone으로 유저 생성 - by 1-blue
   const [createUser, { loading: createUserLoading, data: createUserResponse }] =
     useMutation<ApiResponse>("/api/users/enter");

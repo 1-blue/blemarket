@@ -30,7 +30,9 @@ const useResponseToast = ({
       toast.error(errorMessage || response.message);
     } else if (response && response.ok) {
       toast.success(successMessage || response.message);
-      if (move) router.push(move);
+      // >>> 원인 모를 이유 때문에 "/"경로로 이동이 안돼서 "/#"으로 처리함
+      if (move === "/") router.push("/#");
+      else if (move) router.push(move);
     }
   }, [response, successMessage, errorMessage, move, router]);
 };
