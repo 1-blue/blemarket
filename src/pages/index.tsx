@@ -1,8 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
+import useSWR from "swr";
+import Link from "next/link";
 
 // type
 import { ICON_SHAPE, ApiResponse } from "@src/types";
@@ -23,6 +25,7 @@ import usePagination from "@src/libs/hooks/usePagination";
 
 // util
 import prisma from "@src/libs/client/prisma";
+import { combineClassNames } from "@src/libs/client/util";
 
 interface ProductWithCount extends Product {
   _count: {
@@ -37,6 +40,11 @@ interface IResponseOfProducts extends ApiResponse {
 type KeywordForm = {
   keyword: string;
 };
+interface IResponseOfRecommendKeywords extends ApiResponse {
+  keywords: {
+    keyword: string;
+  }[];
+}
 
 const Home: NextPage<IResponseOfProducts> = (props) => {
   const router = useRouter();
@@ -53,7 +61,7 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
   );
 
   // 2022/04/13 - 키워드 form - by 1-blue
-  const { handleSubmit, register, reset } = useForm<KeywordForm>();
+  const { handleSubmit, register, reset, watch } = useForm<KeywordForm>();
   // 2022/04/01 - 키워드를 이용한 상품 검색 요청 - by 1-blue
   const onSearchKeyword = useCallback(
     (body: KeywordForm) => router.push(`?keyword=${body.keyword}`),
@@ -84,6 +92,46 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
     product.image ? product.image : null
   );
 
+  // 2022/04/16 - 키워드 값 - by 1-blue
+  const keyword = watch("keyword");
+  // 2022/04/16 - 키워드 포커스 여부 및 관련 키워드 보여줄지 결정할 변수 - by 1-blue
+  const [isFocus, setIsFocus] = useState(false);
+  // 2022/04/16 - 키워드 검색 시 디바운스 적용할 때 사용하는 변수 - by 1-blue
+  const [debounce, setDebounce] = useState(false);
+  // 2022/04/16 - 키워드 검색 시 디바운스 적용할 때 사용하는 함수 - by 1-blue
+  const debounceKeyword = useCallback(() => setDebounce(true), [setDebounce]);
+  // 2022/04/16 - 키워드 검색 시 디바운스 적용 - by 1-blue
+  useEffect(() => {
+    const timerId = setTimeout(debounceKeyword, 300);
+
+    return () => {
+      clearTimeout(timerId);
+      setDebounce(false);
+    };
+  }, [debounceKeyword, keyword, setDebounce]);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  // 2022/04/16 - 영역외 클릭 시 추천 키워드 창 닫기 - by 1-blue
+  const handleCloseModal = useCallback(
+    (e: any) => {
+      if (
+        isFocus &&
+        (!wrapperRef.current || !wrapperRef.current.contains(e.target))
+      )
+        setIsFocus(false);
+    },
+    [isFocus, setIsFocus, wrapperRef]
+  );
+  // 2022/04/16 - 추천 키워드 창 닫기 이벤트 등록 - by 1-blue
+  useEffect(() => {
+    setTimeout(() => window.addEventListener("click", handleCloseModal), 0);
+    return () => window.removeEventListener("click", handleCloseModal);
+  }, [handleCloseModal]);
+  // 2022/04/16 - 추천 키워드 패치 - by 1-blue
+  const { data: recommendKeywords } = useSWR<IResponseOfRecommendKeywords>(
+    debounce && keyword ? `/api/keyword/${keyword}` : null
+  );
+  // >>> 추천 키워드 방향키로 이동하는 기능 추가하기
+
   return (
     <>
       <HeadInfo
@@ -96,27 +144,63 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
         }
       />
 
-      {/* 상품 검색 폼 */}
-      <article className="border-b-2 pb-4">
+      {/* 상품 검색 폼과 추천 키워드 */}
+      <div className="relative border-b-2 pb-4" ref={wrapperRef}>
         <form className="flex" onSubmit={handleSubmit(onSearchKeyword)}>
           <input
             type="search"
-            className="peer flex-1 rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400"
+            className={combineClassNames(
+              "peer flex-1 rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400",
+              recommendKeywords ? "rounded-lr-md rounded-b-none" : ""
+            )}
             placeholder="🚀 키워드를 검색해보세요! 🚀"
             {...register("keyword")}
+            onFocus={() => setIsFocus(true)}
           />
           <Button
             type="submit"
             text={<Icon shape={ICON_SHAPE.SEARCH} />}
-            className="peer-focus:ring-1 bg-orange-400 px-3 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500"
+            className={combineClassNames(
+              "peer-focus:ring-1 bg-orange-400 px-3 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500",
+              recommendKeywords ? "rounded-lr-md rounded-b-none" : ""
+            )}
             $loading={
               !!router.query.keyword &&
               !responseOfSearchProducts &&
               !responseOfSearchProductsError
             }
+            tabIndex={-1}
           />
         </form>
-      </article>
+        {isFocus &&
+          (recommendKeywords && recommendKeywords.keywords.length > 0 ? (
+            <ul className="absolute top-[43px] w-full rounded-b-md overflow-hidden z-10">
+              {recommendKeywords.keywords.map(({ keyword }) => (
+                <li key={keyword}>
+                  <Link href={`/?keyword=${keyword}`}>
+                    <a className="group flex items-center p-4 bg-slate-200 space-x-4 hover:bg-orange-100 transition-colors focus:outline-none focus:bg-orange-100 focus:text-orange-500">
+                      <Icon
+                        shape={ICON_SHAPE.SEARCH}
+                        width={20}
+                        height={20}
+                        className="group-hover:text-orange-400 transition-colors"
+                      />
+                      <span className="group-hover:text-orange-400 transition-colors">
+                        {keyword}
+                      </span>
+                    </a>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="absolute  top-[43px] w-full rounded-b-md overflow-hidden z-10">
+              <span className="block bg-slate-200 p-4">
+                ⁉️ 추천 검색어가 없습니다.
+              </span>
+            </div>
+          ))}
+      </div>
 
       {/* 상품 리스트 */}
       <article className="divide-y-2">
