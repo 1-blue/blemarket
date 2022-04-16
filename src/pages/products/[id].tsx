@@ -34,16 +34,21 @@ import ProductSimilar from "@src/components/Product/ProductSimilar";
 import useMutation from "@src/libs/hooks/useMutation";
 import useUser from "@src/libs/hooks/useUser";
 
-interface IProductWithUser extends Product {
+interface IProduct extends Product {
   user: SimpleUser;
   _count: {
     answers: number;
   };
+  keywords: {
+    keyword: string;
+  }[];
 }
-interface IProductWithRelatedDataResponse extends ApiResponse {
-  product: IProductWithUser;
-  relatedKeywordProducts: Product[];
-  relatedUserProducts: Product[];
+interface IProductResponse extends ApiResponse {
+  product: IProduct;
+}
+interface IResponseOfRelationProducts extends ApiResponse {
+  relatedUserProducts: IProduct[];
+  relatedKeywordProducts: IProduct[];
 }
 interface IFavoriteResponse extends ApiResponse {
   isFavorite: boolean;
@@ -53,11 +58,7 @@ interface ICreateRoomResponse extends ApiResponse {
   roomId: number;
 }
 
-const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
-  product,
-  relatedKeywordProducts,
-  relatedUserProducts,
-}) => {
+const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
   const { user } = useUser();
   const router = useRouter();
 
@@ -123,6 +124,12 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
     router.push(`/chats/${createRoomResponse.roomId}`);
   }, [router, createRoomResponse]);
 
+  // 2022/04/16 - 연관 상품 요청 - by 1-blue
+  const { data: relationProducts, isValidating: relationProductsLoading } =
+    useSWR<IResponseOfRelationProducts>(
+      router.query.id ? `/api/products/${router.query.id}/relation` : null
+    );
+
   return (
     <>
       <HeadInfo
@@ -155,7 +162,7 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
             </span>
           </div>
           <ul className="flex space-x-2 mb-4 flex-wrap">
-            {product.keywords.split(" ").map((keyword) => (
+            {product.keywords.map(({ keyword }) => (
               <li key={keyword}>
                 <Link href={`/?keyword=${keyword}`}>
                   <a className="p-2 bg-slate-200 rounded-lg text-orange-400 font-semibold text-sm focus:outline-orange-500">
@@ -212,17 +219,31 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
         />
       </article>
 
-      {/* 구분선 */}
-      {relatedKeywordProducts.length > 0 && (
-        <hr className="my-8 border border-gray-200" />
+      {/* 연관 상품 불러오는 동안 보여줄 컨텐츠 */}
+      {relationProductsLoading && (
+        <>
+          <hr className="my-8 border border-gray-200" />
+          <section className="flex justify-center items-center">
+            <span className=" text-xl font-bold">
+              연관 상품을 로딩중입니다...
+            </span>
+            <Button text="" $loading />
+          </section>
+        </>
       )}
 
+      {/* 구분선 */}
+      {relationProducts &&
+        relationProducts.relatedKeywordProducts.length > 0 && (
+          <hr className="my-8 border border-gray-200" />
+        )}
+
       {/* 유사 상품들 */}
-      {relatedKeywordProducts.length > 0 && (
+      {relationProducts && relationProducts.relatedKeywordProducts.length > 0 && (
         <article className="px-4">
           <h3 className="font-bold text-2xl mb-2">유사한 상품들</h3>
           <ul className="grid grid-cols-2 gap-4">
-            {relatedKeywordProducts.map((product) => (
+            {relationProducts.relatedKeywordProducts.map((product) => (
               <ProductSimilar key={product.id} product={product} />
             ))}
           </ul>
@@ -230,16 +251,16 @@ const ProductsDatail: NextPage<IProductWithRelatedDataResponse> = ({
       )}
 
       {/* 구분선 */}
-      {relatedUserProducts.length > 0 && (
+      {relationProducts && relationProducts.relatedUserProducts.length > 0 && (
         <hr className="my-8 border border-gray-200" />
       )}
 
       {/* 작성자의 다른 상품들 */}
-      {relatedUserProducts.length > 0 && (
+      {relationProducts && relationProducts.relatedUserProducts.length > 0 && (
         <article className="px-4">
           <h3 className="font-bold text-2xl mb-2">작성자의 다른 상품들</h3>
           <ul className="grid grid-cols-2 gap-4">
-            {relatedUserProducts.map((product) => (
+            {relationProducts.relatedUserProducts.map((product) => (
               <ProductSimilar key={product.id} product={product} />
             ))}
           </ul>
@@ -262,7 +283,7 @@ export const getStaticProps: GetStaticProps = async (
   const productId = Number(context.params?.id);
 
   // 특정 상품과 작성자 찾기
-  const findProductWithUser = await prisma.product.findUnique({
+  const foundProduct = await prisma.product.findUnique({
     where: { id: productId },
     include: {
       user: {
@@ -277,68 +298,19 @@ export const getStaticProps: GetStaticProps = async (
           answers: true,
         },
       },
-    },
-  });
-
-  // 현재 게시글의 작성자의 다른 게시글 찾기
-  const relatedUserProductsPromise = prisma.product.findMany({
-    where: {
-      userId: findProductWithUser?.user.id,
-      NOT: {
-        id: productId,
-      },
-    },
-    include: {
-      user: {
+      keywords: {
         select: {
-          id: true,
-          name: true,
-          avatar: true,
+          keyword: true,
         },
       },
     },
-    take: 8,
-    orderBy: {
-      updatedAt: "desc",
-    },
   });
-
-  // 특정 상품의 관련 상품 찾기
-  const keywords = findProductWithUser?.keywords.split(" ");
-  const relatedKeywordProductsPromise = prisma.product.findMany({
-    where: {
-      OR: keywords?.map((keyword) => ({
-        keywords: {
-          contains: keyword,
-        },
-      })),
-      AND: {
-        id: {
-          not: productId,
-        },
-      },
-    },
-    take: 8,
-    orderBy: {
-      updatedAt: "desc",
-    },
-  });
-
-  // 결괏값 같이 받기
-  const [relatedKeywordProducts, relatedUserProducts] = await Promise.all([
-    relatedKeywordProductsPromise,
-    relatedUserProductsPromise,
-  ]);
 
   return {
     props: {
       ok: true,
       message: "특정 상품에 대한 정보를 가져왔습니다.",
-      product: JSON.parse(JSON.stringify(findProductWithUser)),
-      relatedKeywordProducts: JSON.parse(
-        JSON.stringify(relatedKeywordProducts)
-      ),
-      relatedUserProducts: JSON.parse(JSON.stringify(relatedUserProducts)),
+      product: JSON.parse(JSON.stringify(foundProduct)),
     },
   };
 };

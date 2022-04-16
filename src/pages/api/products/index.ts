@@ -20,13 +20,16 @@ async function handler(
     if (req.method === "GET") {
       const page = +req.query.page - 1;
       const offset = +req.query.offset;
-      const { keyword } = req.query;
 
-      if (keyword) {
+      if (req.query.keyword) {
+        const keyword = req.query.keyword + "";
+
         const productCount = await prisma.product.count({
           where: {
             keywords: {
-              contains: keyword as string,
+              some: {
+                keyword,
+              },
             },
           },
         });
@@ -42,7 +45,9 @@ async function handler(
           skip: page * offset,
           where: {
             keywords: {
-              contains: keyword as string,
+              some: {
+                keyword,
+              },
             },
           },
           include: {
@@ -101,13 +106,13 @@ async function handler(
         productCount,
       });
     } else if (req.method === "POST") {
+      // 상품 생성
       const createdProduct = await prisma.product.create({
         data: {
           name,
           price: +price,
           description,
           image: photo ? photo : null,
-          keywords,
           user: {
             connect: {
               id: user?.id,
@@ -115,6 +120,32 @@ async function handler(
           },
         },
       });
+
+      // 키워드 생성 or 찾고 상품과 연결
+      const keywordsPromise = (keywords as string).split(" ").map((keyword) =>
+        prisma.keyword.upsert({
+          create: {
+            keyword,
+            products: {
+              connect: {
+                id: createdProduct.id,
+              },
+            },
+          },
+          update: {
+            products: {
+              connect: {
+                id: createdProduct.id,
+              },
+            },
+          },
+          where: {
+            keyword,
+          },
+        })
+      );
+
+      await Promise.all(keywordsPromise);
 
       // >>> 이거 실행이 안 되는 이유는...?
       await res.unstable_revalidate("/");

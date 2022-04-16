@@ -59,17 +59,26 @@ model Product {
   price       Int
   description String   @db.MediumText
   image       String?
-  keywords    String   @db.VarChar(40)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  records Record[]
-  answers Answer[]
+  records  Record[]
+  answers  Answer[]
+  keywords Keyword[]
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
 
   @@index([userId])
+}
+
+model Keyword {
+  id        Int      @id @default(autoincrement())
+  keyword   String   @unique @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
 }
 
 model Post {
@@ -203,4 +212,7 @@ model Chat {
   userId Int?
   Room   Room? @relation(fields: [roomId], references: [id])
   roomId Int?
+
+  @@index([userId])
+  @@index([roomId])
 }
