@@ -156,6 +156,14 @@ const Icon = ({
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
         );
+      case ICON_SHAPE.DOTS_H:
+        return (
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
+          />
+        );
 
       default:
         break;

@@ -33,6 +33,8 @@ import ProductSimilar from "@src/components/Product/ProductSimilar";
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
 import useUser from "@src/libs/hooks/useUser";
+import SideButton from "@src/components/common/SideButton";
+import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 interface IProduct extends Product {
   user: SimpleUser;
@@ -130,6 +132,24 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
       router.query.id ? `/api/products/${router.query.id}/relation` : null
     );
 
+  // 2022/04/17 - 상품 제거 및 수정 모달 토글 값 - by 1-blue
+  const [toggleModal, setToggleModal] = useState(false);
+  // 2022/04/17 - 상품 제거 - by 1-blue
+  const [
+    removeProduct,
+    { data: removeProductResponse, loading: removeProductLoading },
+  ] = useMutation<ApiResponse>(`/api/products/${router.query.id}`, "DELETE");
+  // 2022/04/17 - 상품 제거 - 1-blue
+  const onRemoveProduct = useCallback(() => {
+    if (removeProductLoading) return toast.warning("이미 상품을 제거중입니다!");
+    removeProduct({});
+  }, [removeProduct, removeProductLoading]);
+  // 2022/04/17 - 상품 제거 성공 시 메시지 및 페이지 이동 - by 1-blue
+  useResponseToast({
+    response: removeProductResponse,
+    move: "/",
+  });
+
   return (
     <>
       <HeadInfo
@@ -148,7 +168,7 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
         <section>
           <Profile user={product.user} />
         </section>
-        <section className="flex flex-col space-y-3">
+        <section className="flex flex-col space-y-4">
           <h2 className="font-bold text-3xl">{product.name}</h2>
           <p className="text-gray-900 p-4 rounded-md bg-gray-200 whitespace-pre">
             {product.description}
@@ -161,9 +181,9 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
               ( {dateFormat(product.updatedAt!, "YYYY/MM/DD hh:mm:ss")} )
             </span>
           </div>
-          <ul className="flex space-x-2 mb-4 flex-wrap">
+          <ul className="flex space-x-2 flex-wrap">
             {product.keywords.map(({ keyword }) => (
-              <li key={keyword}>
+              <li key={keyword} className="mb-3">
                 <Link href={`/?keyword=${keyword}`}>
                   <a className="p-2 bg-slate-200 rounded-lg text-orange-400 font-semibold text-sm focus:outline-orange-500">
                     {keyword}
@@ -265,6 +285,53 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
             ))}
           </ul>
         </article>
+      )}
+
+      {/* 상품 삭제 및 수정 모달 토글 버튼 */}
+      {product.userId === user?.id && (
+        <SideButton
+          contents={<Icon shape={ICON_SHAPE.DOTS_H} />}
+          onClick={() => setToggleModal((prev) => !prev)}
+        />
+      )}
+
+      {/* 상품 수정 및 삭제 모달창 */}
+      {toggleModal && (
+        <aside
+          className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center"
+          onClick={() => setToggleModal(false)}
+        >
+          <section className="flex flex-col bg-white w-[512px] divide-y-2 rounded-md overflow-hidden">
+            <Link
+              href={{
+                pathname: "/products/modify",
+                query: { productId: router.query.id },
+              }}
+            >
+              <a className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors text-center">
+                상품 수정
+              </a>
+            </Link>
+            <button
+              type="button"
+              className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors"
+              onClick={onRemoveProduct}
+            >
+              상품 삭제
+            </button>
+          </section>
+        </aside>
+      )}
+
+      {/* 상품 삭제 중 메시지 */}
+      {removeProductLoading && (
+        <aside className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center">
+          <section className="bg-white px-8 py-12 rounded-md">
+            <span className="text-xl text-orange-500 whitespace-pre-line">
+              {"상품을 삭제중입니다...\n잠시만 기다려주세요!"}
+            </span>
+          </section>
+        </aside>
       )}
     </>
   );

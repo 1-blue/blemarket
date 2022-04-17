@@ -38,7 +38,7 @@ const Layout = ({ children, hasTabBar }: IProps) => {
 
   return (
     <>
-      <header className="fixed w-full max-w-lg inset-x-0 mx-auto border-b-2 py-4 bg-white shadow-lg z-50">
+      <header className="fixed w-full max-w-lg inset-x-0 mx-auto border-b-2 py-4 bg-white shadow-lg z-10">
         <h1 className="text-xl font-bold text-center">
           {getTitle(router.asPath)}
         </h1>
