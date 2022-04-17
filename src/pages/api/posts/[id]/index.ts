@@ -10,37 +10,63 @@ async function handler(
   res: NextApiResponse<IResponseType>
 ) {
   const postId = +req.query.id;
+  const userId = +req.session.user?.id!;
+  const { method } = req;
 
   try {
-    const postWithUser = await prisma.post.findUnique({
+    const exPost = await prisma.post.findUnique({
       where: {
         id: postId,
       },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
-        },
-        _count: {
-          select: {
-            answers: true,
-          },
-        },
-      },
     });
-    if (!postWithUser)
+    if (!exPost)
       return res.status(404).json({
         ok: false,
-        message: "존재하지 않는 게시글을 요청했습니다.",
+        message: "존재하지 않는 게시글입니다.",
+      });
+    if (+exPost.userId !== userId)
+      return res.status(404).json({
+        ok: false,
+        message: "접근 권한이 없습니다.",
       });
 
-    res.status(200).json({
-      ok: true,
-      message: "특정 게시글을 가져왔습니다.",
-      post: postWithUser,
+    if (method === "DELETE") {
+      await prisma.post.delete({
+        where: {
+          id: postId,
+        },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "특정 게시글을 제거했습니다.",
+      });
+    } else if (method === "PATCH") {
+      const {
+        body: { question, latitude, longitude },
+      } = req;
+
+      const modifiedPost = await prisma.post.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          question,
+          latitude,
+          longitude,
+        },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "특정 게시글을 수정했습니다.",
+        post: modifiedPost,
+      });
+    }
+
+    res.status(405).json({
+      ok: false,
+      message: "잘못된 접근입니다.",
     });
   } catch (error) {
     console.error("/api/posts/[id] error >> ", error);
@@ -53,4 +79,6 @@ async function handler(
   }
 }
 
-export default withApiSession(withHandler({ methods: ["GET"], handler }));
+export default withApiSession(
+  withHandler({ methods: ["DELETE", "PATCH"], handler })
+);

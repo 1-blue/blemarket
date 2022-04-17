@@ -300,7 +300,6 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   const productId = Number(context.query?.productId);
 
-  // 특정 상품과 작성자 찾기
   const foundProduct = await prisma.product.findUnique({
     where: { id: productId },
     include: {

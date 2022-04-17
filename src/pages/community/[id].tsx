@@ -7,6 +7,7 @@ import type {
 } from "next";
 import { useRouter } from "next/router";
 import useSWR from "swr";
+import Link from "next/link";
 import { toast } from "react-toastify";
 
 // type
@@ -17,6 +18,10 @@ import { Post } from "@prisma/client";
 import Icon from "@src/components/common/Icon";
 import Profile from "@src/components/common/Profile";
 import HeadInfo from "@src/components/common/HeadInfo";
+import SideButton from "@src/components/common/SideButton";
+
+// component
+import AnswerSection from "@src/components/Answer/AnswerSection";
 
 // util
 import { combineClassNames } from "@src/libs/client/util";
@@ -25,7 +30,8 @@ import prisma from "@src/libs/client/prisma";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
-import AnswerSection from "@src/components/Answer/AnswerSection";
+import useUser from "@src/libs/hooks/useUser";
+import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 interface IPostWithUser extends Post {
   user: SimpleUser;
@@ -44,6 +50,7 @@ interface IRecommendationResponse extends ApiResponse {
 
 const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
   const router = useRouter();
+  const { user } = useUser();
 
   // 2022/04/13 - 게시글의 궁금해요 정보 요청 - by 1-blue
   const { data: recommendationData, mutate: recommendationMutate } =
@@ -88,6 +95,22 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
 
   //  2022/04/13 - 댓글 토글 값 - by 1-blue
   const [toggleAnswer, setToggleAnswer] = useState(true);
+
+  // 2022/04/18 - 질문 제거 및 수정 모달 토글 값 - by 1-blue
+  const [toggleModal, setToggleModal] = useState(false);
+  // 2022/04/17 - 질문 제거 - by 1-blue
+  const [removePost, { data: removePostResponse, loading: removePostLoading }] =
+    useMutation<ApiResponse>(`/api/posts/${router.query.id}`, "DELETE");
+  // 2022/04/17 - 질문 제거 - 1-blue
+  const onRemovePost = useCallback(() => {
+    if (removePostLoading) return toast.warning("이미 질문을 제거중입니다!");
+    removePost({});
+  }, [removePost, removePostLoading]);
+  // 2022/04/17 - 질문 제거 성공 시 메시지 및 페이지 이동 - by 1-blue
+  useResponseToast({
+    response: removePostResponse,
+    move: "/community",
+  });
 
   return (
     <>
@@ -149,6 +172,53 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
         count={post._count.answers}
         setToggle={setToggleAnswer}
       />
+
+      {/* 질문 삭제 및 수정 모달 토글 버튼 */}
+      {post.userId === user?.id && (
+        <SideButton
+          contents={<Icon shape={ICON_SHAPE.DOTS_H} />}
+          onClick={() => setToggleModal((prev) => !prev)}
+        />
+      )}
+
+      {/* 질문 수정 및 삭제 모달창 */}
+      {toggleModal && (
+        <aside
+          className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center"
+          onClick={() => setToggleModal(false)}
+        >
+          <section className="flex flex-col bg-white max-w-[460px] w-4/5 mx-auto divide-y-2 rounded-md overflow-hidden">
+            <Link
+              href={{
+                pathname: "/community/modify",
+                query: { postId: router.query.id },
+              }}
+            >
+              <a className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors text-center">
+                질문 수정
+              </a>
+            </Link>
+            <button
+              type="button"
+              className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors"
+              onClick={onRemovePost}
+            >
+              질문 삭제
+            </button>
+          </section>
+        </aside>
+      )}
+
+      {/* 질문 삭제 중 메시지 */}
+      {removePostLoading && (
+        <aside className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center">
+          <section className="bg-white px-8 py-12 rounded-md">
+            <span className="text-xl text-orange-500 whitespace-pre-line">
+              {"질문을 삭제중입니다...\n잠시만 기다려주세요!"}
+            </span>
+          </section>
+        </aside>
+      )}
     </>
   );
 };

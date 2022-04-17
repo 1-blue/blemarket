@@ -301,7 +301,7 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
           className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center"
           onClick={() => setToggleModal(false)}
         >
-          <section className="flex flex-col bg-white w-[512px] divide-y-2 rounded-md overflow-hidden">
+          <section className="flex flex-col bg-white max-w-[460px] w-4/5 divide-y-2 rounded-md overflow-hidden">
             <Link
               href={{
                 pathname: "/products/modify",
