@@ -8,7 +8,7 @@ import withHandler, { IResponseType } from "@src/libs/server/widthHandler";
 import { withApiSession } from "@src/libs/server/withSession";
 
 // aws s3
-import S3 from "@src/libs/server/s3";
+import { copyPhoto, deletePhoto } from "@src/libs/server/s3";
 
 async function handler(
   req: NextApiRequest,
@@ -128,13 +128,8 @@ async function handler(
         // 이미 multer-s3를 이용해서 이미지를 넣어놓은 상태임
         // 기존 이미지 지우기
         if (exUser?.avatar) {
-          S3.deleteObject(
-            {
-              Bucket: "blemarket",
-              Key: exUser.avatar,
-            },
-            (error) => console.error(error)
-          );
+          copyPhoto(exUser.avatar);
+          deletePhoto(exUser.avatar);
         }
 
         await prisma.user.update({
@@ -154,6 +149,37 @@ async function handler(
         message: "정보를 변경했습니다.",
       });
     }
+    // 2022/04/18 - 로그아웃 - by 1-blue
+    else if (method === "PATCH") {
+      req.session.destroy();
+
+      return res.status(200).json({
+        ok: true,
+        message: "로그아웃에 성공했습니다.",
+      });
+    }
+    // 2022/04/18 - 계정삭제 - by 1-blue
+    else if (method === "DELETE") {
+      // 프로필 사진 제거
+      if (exUser?.avatar) {
+        copyPhoto(exUser.avatar);
+        deletePhoto(exUser.avatar);
+      }
+      // >>> 연관된 게시글의 이미지들도 모두 aws-s3에서 삭제 폴더로 이동하는 로직 필요
+
+      await prisma.user.delete({
+        where: {
+          id: userId,
+        },
+      });
+
+      req.session.destroy();
+
+      return res.status(200).json({
+        ok: true,
+        message: `${exUser?.name}님의 계정을 삭제했습니다.`,
+      });
+    }
   } catch (error) {
     console.error("/api/users/me error >> ", error);
 
@@ -166,5 +192,5 @@ async function handler(
 }
 
 export default withApiSession(
-  withHandler({ methods: ["GET", "POST"], handler })
+  withHandler({ methods: ["GET", "POST", "PATCH", "DELETE"], handler })
 );

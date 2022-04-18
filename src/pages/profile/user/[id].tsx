@@ -29,6 +29,9 @@ import { combineClassNames } from "@src/libs/client/util";
 // hook
 import useUser from "@src/libs/hooks/useUser";
 import useMutation from "@src/libs/hooks/useMutation";
+import SideButton from "@src/components/common/SideButton";
+import { toast } from "react-toastify";
+import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 interface IReviewWithWriter extends Review {
   createdBy: SimpleUser;
@@ -114,6 +117,43 @@ const Profile: NextPage<IUserResponse> = ({ user }) => {
       false
     );
   }, [reviewMutate, createdReviewResponse]);
+
+  // 2022/04/18 - 회원 탈퇴 및 수정 모달 토글 값 - by 1-blue
+  const [toggleModal, setToggleModal] = useState(false);
+  // 2022/04/17 - 회원 탈퇴 - by 1-blue
+  const [
+    deleteAccount,
+    { data: deleteAccountResponse, loading: deleteAccountLoading },
+  ] = useMutation<ApiResponse>(`/api/users/me`, "DELETE");
+  // 2022/04/17 - 회원 탈퇴 - 1-blue
+  const onDeleteAccount = useCallback(() => {
+    if (deleteAccountLoading) return toast.warning("이미 회원탈퇴중입니다.");
+    if (
+      !confirm(
+        "회원탈퇴를 하면 되돌릴 수 없습니다.\n정말 계정을 제거하시겠습니까?"
+      )
+    )
+      return;
+    deleteAccount({});
+  }, [deleteAccount, deleteAccountLoading]);
+  // 2022/04/17 - 회원 탈퇴 성공 시 메시지 및 페이지 이동 - by 1-blue
+  useResponseToast({
+    response: deleteAccountResponse,
+    move: "/enter",
+  });
+  // 2022/04/17 - 로그아웃 - by 1-blue
+  const [logOut, { data: logOutResponse, loading: logOutLoading }] =
+    useMutation<ApiResponse>(`/api/users/me`, "PATCH");
+  // 2022/04/17 - 로그아웃 - 1-blue
+  const onLogOut = useCallback(() => {
+    if (logOutLoading) return toast.warning("이미 로그아웃중입니다.");
+    logOut({});
+  }, [logOut, logOutLoading]);
+  // 2022/04/17 - 로그아웃 성공 시 메시지 및 페이지 이동 - by 1-blue
+  useResponseToast({
+    response: logOutResponse,
+    move: "/enter",
+  });
 
   return (
     <>
@@ -238,6 +278,61 @@ const Profile: NextPage<IUserResponse> = ({ user }) => {
             <Button text="리뷰 작성" $primary className="w-full" />
           </form>
         </article>
+      )}
+
+      {/* 로그아웃 및 계정삭제 모달 토글 버튼 */}
+      {me?.id === user.id && (
+        <SideButton
+          contents={<Icon shape={ICON_SHAPE.DOTS_H} />}
+          onClick={() => setToggleModal((prev) => !prev)}
+        />
+      )}
+
+      {/* 로그아웃 및 계정삭제 모달창 */}
+      {toggleModal && (
+        <aside
+          className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center"
+          onClick={() => setToggleModal(false)}
+        >
+          <section className="flex flex-col bg-white max-w-[460px] w-4/5 mx-auto divide-y-2 rounded-md overflow-hidden">
+            <button
+              type="button"
+              className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors"
+              onClick={onLogOut}
+            >
+              로그아웃
+            </button>
+            <button
+              type="button"
+              className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors"
+              onClick={onDeleteAccount}
+            >
+              계정삭제
+            </button>
+          </section>
+        </aside>
+      )}
+
+      {/* 로그아웃 및 계정삭제 중 메시지 */}
+      {deleteAccountLoading && (
+        <aside className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center">
+          <section className="bg-white px-8 py-12 rounded-md">
+            <span className="text-xl text-orange-500 whitespace-pre-line">
+              {"회원탈퇴중입니다...\n잠시만 기다려주세요!"}
+            </span>
+          </section>
+        </aside>
+      )}
+
+      {/* 로그아웃 및 계정삭제 중 메시지 */}
+      {logOutResponse && (
+        <aside className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center">
+          <section className="bg-white px-8 py-12 rounded-md">
+            <span className="text-xl text-orange-500 whitespace-pre-line">
+              {"로그아웃중입니다...\n잠시만 기다려주세요!"}
+            </span>
+          </section>
+        </aside>
       )}
     </>
   );
