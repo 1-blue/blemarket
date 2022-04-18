@@ -7,6 +7,9 @@ import prisma from "@src/libs/client/prisma";
 import withHandler, { IResponseType } from "@src/libs/server/widthHandler";
 import { withApiSession } from "@src/libs/server/withSession";
 
+// aws-s3
+import { copyPhoto, deletePhoto } from "@src/libs/server/s3";
+
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponseType>
@@ -36,6 +39,11 @@ async function handler(
 
     // 상품 제거
     if (method === "DELETE") {
+      if (exProduct?.image) {
+        copyPhoto(exProduct.image);
+        deletePhoto(exProduct.image);
+      }
+
       await prisma.product.delete({
         where: {
           id: productId,
@@ -52,6 +60,11 @@ async function handler(
       const {
         body: { name, price, description, keywords, photo },
       } = req;
+
+      if (exProduct?.image && photo) {
+        copyPhoto(exProduct.image);
+        deletePhoto(exProduct.image);
+      }
 
       const modifiedProduct = await prisma.product.update({
         where: {

@@ -1,19 +1,7 @@
 import nextConnect from "next-connect";
-import S3, { getPhotoPath } from "@src/libs/server/s3";
-import multer from "multer";
-import multerS3 from "multer-s3";
 
-const upload = multer({
-  storage: multerS3({
-    s3: S3,
-    bucket: "blemarket",
-    key(req, file, cb) {
-      const filename = file.originalname.split(".")[0];
-      cb(null, getPhotoPath(filename));
-    },
-  }),
-  limits: { fileSize: 1024 * 1024 }, // 1mb
-});
+// aws-s3
+import { upload } from "@src/libs/server/s3";
 
 const app = nextConnect();
 

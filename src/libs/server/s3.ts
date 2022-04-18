@@ -1,4 +1,6 @@
 import AWS from "aws-sdk";
+import multer from "multer";
+import multerS3 from "multer-s3";
 
 AWS.config.update({
   region: process.env.BLEMARKET_AWS_REGION,
@@ -14,6 +16,19 @@ export default S3;
 export const getPhotoPath = (filename: string) =>
   `images/${process.env.NODE_ENV}/${filename}_${Date.now()}`;
 
+// multer와 multer-s3를 이용한 이미지 생성
+export const upload = multer({
+  storage: multerS3({
+    s3: S3,
+    bucket: "blemarket",
+    key(req, file, cb) {
+      const filename = file.originalname.split(".")[0];
+      cb(null, getPhotoPath(filename));
+    },
+  }),
+  limits: { fileSize: 1024 * 1024 }, // 1mb
+});
+
 // S3 이미지 제거
 export const deletePhoto = (photo: string) =>
   S3.deleteObject(
@@ -23,7 +38,7 @@ export const deletePhoto = (photo: string) =>
     },
     (error, data) => {
       if (error) {
-        console.error("error >> ", photo, " >> ", error);
+        console.error("error >> ", error);
       }
     }
   );
@@ -41,7 +56,7 @@ export const copyPhoto = (originalSource: string) =>
     },
     (error, data) => {
       if (error) {
-        console.error("error >> ", originalSource, " >> ", error);
+        console.error("error >> ", error);
       }
     }
   );
