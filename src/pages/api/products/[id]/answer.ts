@@ -84,6 +84,19 @@ async function handler(
         ok: true,
         message: "답변을 생성했습니다.",
       });
+    } else if (method === "DELETE") {
+      const answerId = Number(req.query.answerId);
+
+      await prisma.answer.delete({
+        where: {
+          id: answerId,
+        },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "답변을 성공적으로 제거했습니다.",
+      });
     }
   } catch (error) {
     console.error("/api/products/[id]/answer error >> ", error);
@@ -97,5 +110,5 @@ async function handler(
 }
 
 export default withApiSession(
-  withHandler({ methods: ["GET", "POST"], handler })
+  withHandler({ methods: ["GET", "POST", "DELETE"], handler })
 );
