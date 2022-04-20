@@ -17,9 +17,6 @@ const HeadInfo = ({ title, description, photo }: Props) => {
       {/* 현 페이지 제목 */}
       <title>{title}</title>
 
-      {/* 페비콘 */}
-      <link rel="shortcut icon" href="/favicon.ico" />
-
       {/* SEO */}
       <meta name="description" content={description} />
 
@@ -35,7 +32,7 @@ const HeadInfo = ({ title, description, photo }: Props) => {
         content={
           photo
             ? combinePhotoUrl(photo)
-            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/favicon.ico`
+            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/logo.svg`
         }
       />
 
@@ -52,7 +49,7 @@ const HeadInfo = ({ title, description, photo }: Props) => {
         content={
           photo
             ? combinePhotoUrl(photo)
-            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/favicon.ico`
+            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/logo.svg`
         }
       />
     </Head>

@@ -11,7 +11,7 @@ import Icon from "@src/components/common/Icon";
 import { combineClassNames } from "@src/libs/client/util";
 
 // hooks
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 
 const NavLink = ({
   url,
@@ -43,7 +43,7 @@ const NavLink = ({
 
 const NavBar = () => {
   const { asPath } = useRouter();
-  const { user } = useUser();
+  const { me } = useMe();
 
   return (
     <nav className="fixed w-full max-w-lg inset-x-0 bottom-0 mx-auto border-b-2 py-4 bg-white border-t-2">
@@ -68,14 +68,15 @@ const NavBar = () => {
         <NavLink url="/community" name="동네생활" shape={ICON_SHAPE.NEWS} />
         <NavLink url="/chats" name="채팅" shape={ICON_SHAPE.CHAT} />
         <li className="flex-1">
-          <Link href={`/profile/user/${user?.id}`}>
+          <Link href={`/profile/user/${me?.id}`}>
             <a
               className={combineClassNames(
                 "flex flex-col justify-center items-center focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none rounded-sm hover:text-orange-600",
-                asPath === `/profile/user/${user?.id}` ||
+                asPath === `/profile/user/${me?.id}` ||
                   asPath === "/profile/sale" ||
                   asPath === "/profile/purchase" ||
-                  asPath === "/profile/favorite"
+                  asPath === "/profile/favorite" ||
+                  asPath === "/profile/edit"
                   ? "text-orange-500"
                   : ""
               )}

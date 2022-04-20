@@ -15,7 +15,7 @@ import Button from "@src/components/common/Button";
 import Modal from "@src/components/common/Modal";
 
 // hook
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 import useMutation from "@src/libs/hooks/useMutation";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
 
@@ -38,7 +38,7 @@ type Props = {
 
 const AnswerSection = ({ target, toggle, count, setToggle }: Props) => {
   const router = useRouter();
-  const { user } = useUser();
+  const { me } = useMe();
 
   // 2022/04/13 - 댓글 요청 개수 - by 1-blue
   const [offset] = useState(5);
@@ -79,9 +79,9 @@ const AnswerSection = ({ target, toggle, count, setToggle }: Props) => {
                   answer: body.answer!,
                   updatedAt: Date.now(),
                   user: {
-                    id: user?.id!,
-                    name: user?.name!,
-                    avatar: user?.avatar!,
+                    id: me?.id!,
+                    name: me?.name!,
+                    avatar: me?.avatar!,
                   },
                 },
               ],
@@ -94,7 +94,7 @@ const AnswerSection = ({ target, toggle, count, setToggle }: Props) => {
 
       setToggle(true);
     },
-    [createAnswerLoading, mutate, user, createAnswer, setToggle]
+    [createAnswerLoading, mutate, me, createAnswer, setToggle]
   );
 
   // 2022/04/19 - 댓글 제거 모달창 토글 - by 1-blue
@@ -175,7 +175,7 @@ const AnswerSection = ({ target, toggle, count, setToggle }: Props) => {
             <li>
               <button
                 type="button"
-                className="w-full p-4 text-lg"
+                className="w-full p-4 text-lg hover:bg-orange-100 hover:text-orange-500 transition-colors"
                 onClick={onRemoveAnswer}
               >
                 댓글 제거

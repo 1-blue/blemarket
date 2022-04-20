@@ -14,7 +14,7 @@ import Avatar from "@src/components/common/Avatar";
 import { ApiResponse } from "@src/types";
 
 // hook
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 import useMutation from "@src/libs/hooks/useMutation";
 import usePreview from "@src/libs/hooks/usePreview";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
@@ -28,7 +28,7 @@ type UpdateForm = {
 };
 
 const ProfileEdit: NextPage = () => {
-  const { user, loading: userLoading } = useUser();
+  const { me, meLoading } = useMe();
 
   // 2022/04/13 - 유저 정보 수정 - by 1-blue
   const [updateProfile, { data, loading: updateProfileLoading }] =
@@ -44,10 +44,10 @@ const ProfileEdit: NextPage = () => {
 
   // 2022/03/31 - 유저의 본래 정보 기입 - by 1-blue
   useEffect(() => {
-    setValue("name", user?.name);
-    if (user?.email) setValue("email", user.email);
-    if (user?.phone) setValue("phone", user.phone);
-  }, [setValue, user]);
+    setValue("name", me?.name);
+    if (me?.email) setValue("email", me.email);
+    if (me?.phone) setValue("phone", me.phone);
+  }, [setValue, me]);
 
   // 2022/03/31 - 프로필 업데이트 - 1-blue
   const onUpdateProfile = useCallback(
@@ -92,7 +92,7 @@ const ProfileEdit: NextPage = () => {
   useResponseToast({
     response: data,
     successMessage: "정보를 변경했습니다!",
-    move: `/profile/user/${user?.id}`,
+    move: `/profile/user/${me?.id}`,
   });
   // 2022/04/13 - 업로드할 이미지 미리보기 훅 - by 1-blue
   const [preview] = usePreview(watch("avatar"));
@@ -111,7 +111,7 @@ const ProfileEdit: NextPage = () => {
             />
           </figure>
         ) : (
-          <Avatar user={user} className="w-14 h-14" />
+          <Avatar user={me} className="w-14 h-14" />
         )}
         <label
           htmlFor="picture"
@@ -214,7 +214,7 @@ const ProfileEdit: NextPage = () => {
         $primary
         className="w-full"
         type="submit"
-        $loading={userLoading || updateProfileLoading}
+        $loading={meLoading || updateProfileLoading}
       />
     </form>
   );

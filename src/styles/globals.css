@@ -15,4 +15,7 @@
   html {
     font-family: 'Jua', sans-serif;
   }
+  body::-webkit-scrollbar {
+    display: none
+  }
 }

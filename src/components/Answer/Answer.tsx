@@ -11,7 +11,7 @@ import Icon from "@src/components/common/Icon";
 import { timeFormat } from "@src/libs/client/dateFormat";
 
 // hook
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 
 interface AnswerWithUser {
   id: number;
@@ -26,7 +26,7 @@ type Props = {
 };
 
 const Answer = ({ answer, setToggleModal, setToRemoveAnswerId }: Props) => {
-  const { user } = useUser();
+  const { me } = useMe();
 
   return (
     <li className="px-4 my-5 space-y-5">
@@ -42,10 +42,10 @@ const Answer = ({ answer, setToggleModal, setToRemoveAnswerId }: Props) => {
           <p className="text-gray-700 mt-2 whitespace-pre">{answer.answer}</p>
         </div>
         <div className="flex-1" />
-        {answer.user.id === user?.id && (
+        {answer.user.id === me?.id && (
           <button
             type="button"
-            className="rounded-full hover:bg-gray-200 p-1"
+            className="rounded-full hover:bg-gray-200 hover:text-orange-500 p-1 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:text-orange-500 transition-colors"
             onClick={() => {
               setToggleModal(true);
               setToRemoveAnswerId(answer.id);

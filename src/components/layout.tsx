@@ -6,6 +6,7 @@ import { ICON_SHAPE } from "@src/types";
 
 // common-component
 import Icon from "@src/components/common/Icon";
+import ScrollProgress from "@src/components/common/ScrollProgress";
 
 // component
 import NavBar from "@src/components/NavBar";
@@ -39,6 +40,7 @@ const Layout = ({ children, hasTabBar }: IProps) => {
   return (
     <>
       <header className="fixed w-full max-w-lg inset-x-0 mx-auto border-b-2 py-4 bg-white shadow-lg z-10">
+        <ScrollProgress />
         <h1 className="text-xl font-bold text-center">
           {getTitle(router.asPath)}
         </h1>

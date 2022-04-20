@@ -19,7 +19,7 @@ export const middleware = (req: NextRequest, fe: NextFetchEvent) => {
     return NextResponse.next();
   }
 
-  // 쿠키의 존재 유무에 의해서만 로그인 여부를 판단 ( 유효성검사는 DB를 검색해봐야하므로 여기서 못하고 useUser에서 처리함 )
+  // 쿠키의 존재 유무에 의해서만 로그인 여부를 판단
   if (req.cookies["blemarket-session"]) return NextResponse.next();
 
   // 쿠키 미소유 시 로그인 페이지로 리다이렉트

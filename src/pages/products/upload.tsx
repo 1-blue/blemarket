@@ -204,19 +204,12 @@ const Upload: NextPage = () => {
                 type="text"
                 register={register("keywords", {
                   required: true,
-                  maxLength: 40,
                 })}
               />
               {errors.keywords ? (
-                <Notice
-                  $error
-                  text="40자 이하로 공백을 기준으로 분리해서 입력해주세요"
-                />
+                <Notice $error text="공백을 기준으로 분리해서 입력해주세요" />
               ) : (
-                <Notice
-                  $success
-                  text="40자 이하로 공백을 기준으로 분리해서 입력해주세요"
-                />
+                <Notice $success text="공백을 기준으로 분리해서 입력해주세요" />
               )}
             </li>
             {/* 상품 등록 버튼 */}

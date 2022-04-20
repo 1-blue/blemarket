@@ -6,7 +6,7 @@ class CustomDocument extends Document {
       <Html lang="ko">
         <Head>
           {/* 페비콘 */}
-          <link rel="shortcut icon" href="/favicon.ico" />
+          <link rel="shortcut icon" href="/fav1.ico" />
           {/* SEO */}
           <meta
             name="keyword"

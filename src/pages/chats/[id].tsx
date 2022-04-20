@@ -17,7 +17,7 @@ import { Chat } from "@prisma/client";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 import useInfiniteScroll from "@src/libs/hooks/useInfiniteScroll";
 
 interface IChatWithUser extends Chat {
@@ -36,7 +36,7 @@ type ChatForm = {
 
 const ChatDetail: NextPage = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { me } = useMe();
 
   // 2022/04/13 - 채팅 폼 - by 1-blue
   const { register, handleSubmit, reset } = useForm<ChatForm>();
@@ -120,7 +120,7 @@ const ChatDetail: NextPage = () => {
                     message={chat.chat}
                     user={chat.User}
                     updatedAt={chat.updatedAt}
-                    $reversed={user?.id === chat.User.id}
+                    $reversed={me?.id === chat.User.id}
                   />
                 ))
               )}

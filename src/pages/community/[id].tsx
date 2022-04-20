@@ -19,6 +19,8 @@ import Icon from "@src/components/common/Icon";
 import Profile from "@src/components/common/Profile";
 import HeadInfo from "@src/components/common/HeadInfo";
 import SideButton from "@src/components/common/SideButton";
+import Modal from "@src/components/common/Modal";
+import Spinner from "@src/components/common/Spinner";
 
 // component
 import AnswerSection from "@src/components/Answer/AnswerSection";
@@ -30,7 +32,7 @@ import prisma from "@src/libs/client/prisma";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 interface IPostWithUser extends Post {
@@ -50,7 +52,7 @@ interface IRecommendationResponse extends ApiResponse {
 
 const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
   const router = useRouter();
-  const { user } = useUser();
+  const { me } = useMe();
 
   // 2022/04/13 - 게시글의 궁금해요 정보 요청 - by 1-blue
   const { data: recommendationData, mutate: recommendationMutate } =
@@ -111,6 +113,8 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
     response: removePostResponse,
     move: "/community",
   });
+
+  if (router.isFallback) return <Spinner kinds="page" />;
 
   return (
     <>
@@ -174,7 +178,7 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
       />
 
       {/* 질문 삭제 및 수정 모달 토글 버튼 */}
-      {post.userId === user?.id && (
+      {post.userId === me?.id && (
         <SideButton
           contents={<Icon shape={ICON_SHAPE.DOTS_H} />}
           onClick={() => setToggleModal((prev) => !prev)}
@@ -183,18 +187,15 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
 
       {/* 질문 수정 및 삭제 모달창 */}
       {toggleModal && (
-        <aside
-          className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center"
-          onClick={() => setToggleModal(false)}
-        >
-          <section className="flex flex-col bg-white max-w-[460px] w-4/5 mx-auto divide-y-2 rounded-md overflow-hidden">
+        <Modal position="middle" setToggleModal={setToggleModal}>
+          <>
             <Link
               href={{
                 pathname: "/community/modify",
                 query: { postId: router.query.id },
               }}
             >
-              <a className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors text-center">
+              <a className="block text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors text-center">
                 질문 수정
               </a>
             </Link>
@@ -205,8 +206,8 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
             >
               질문 삭제
             </button>
-          </section>
-        </aside>
+          </>
+        </Modal>
       )}
 
       {/* 질문 삭제 중 메시지 */}
@@ -226,7 +227,7 @@ const CommunityPostDetail: NextPage<IPostResponse> = ({ post }) => {
 export const getStaticPaths: GetStaticPaths = () => {
   return {
     paths: [],
-    fallback: "blocking",
+    fallback: true,
   };
 };
 

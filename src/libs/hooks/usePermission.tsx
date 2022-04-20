@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 
 // hook
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 
 type Props = {
   userId: number;
@@ -13,14 +13,14 @@ type Props = {
 
 const usePermission = ({ userId, message, move }: Props) => {
   const router = useRouter();
-  const { user } = useUser();
+  const { me } = useMe();
 
   useEffect(() => {
-    if (user && user.id === userId) return;
+    if (me && me.id === userId) return;
 
     toast.warning(message);
     router.replace(move);
-  }, [user, userId, message, router, move]);
+  }, [me, userId, message, router, move]);
 };
 
 export default usePermission;

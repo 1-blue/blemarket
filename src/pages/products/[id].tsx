@@ -25,6 +25,8 @@ import Button from "@src/components/common/Button";
 import Profile from "@src/components/common/Profile";
 import Photo from "@src/components/common/Photo";
 import HeadInfo from "@src/components/common/HeadInfo";
+import Modal from "@src/components/common/Modal";
+import Spinner from "@src/components/common/Spinner";
 
 // component
 import AnswerSection from "@src/components/Answer/AnswerSection";
@@ -32,7 +34,7 @@ import ProductSimilar from "@src/components/Product/ProductSimilar";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 import SideButton from "@src/components/common/SideButton";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
 
@@ -61,7 +63,7 @@ interface ICreateRoomResponse extends ApiResponse {
 }
 
 const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
-  const { user } = useUser();
+  const { me } = useMe();
   const router = useRouter();
 
   // 2022/04/13 - 댓글 토글값 - by 1-blue
@@ -114,10 +116,10 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
     useMutation<ICreateRoomResponse>(`/api/chats/room`);
   // 2022/04/12 - 채팅방 생성 - by 1-blue
   const onCreateRoom = useCallback(() => {
-    if (product.userId === user?.id)
+    if (product.userId === me?.id)
       return toast.error("본인의 상품에는 채팅을 할 수 없습니다.");
     createRoom({ ownerId: product.userId, title: product.name });
-  }, [createRoom, product, user]);
+  }, [createRoom, product, me]);
   // 2022/04/12 - 채팅방 생성 시 채팅방으로 이동 - by 1-blue
   useEffect(() => {
     if (!createRoomResponse?.ok) return;
@@ -150,6 +152,8 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
     move: "/",
   });
 
+  if (router.isFallback) return <Spinner kinds="page" />;
+
   return (
     <>
       <HeadInfo
@@ -162,7 +166,14 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
 
       {/* 상품 이미지, 유저 프로필, 이름, 설명, 가격, 키워드, 좋아요 */}
       <article className="px-4 pb-8 mb-8 border-b">
-        <section className="mb-2">
+        <section
+          className="mb-2"
+          onClick={() =>
+            toast.success(
+              "사이즈 테스트, 사이즈 테스트, 사이즈 테스트, 사이즈 테스트,사이즈 테스트"
+            )
+          }
+        >
           <Photo photo={product.image} className="h-96 w-full" $contain />
         </section>
         <section>
@@ -288,7 +299,7 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
       )}
 
       {/* 상품 삭제 및 수정 모달 토글 버튼 */}
-      {product.userId === user?.id && (
+      {product.userId === me?.id && (
         <SideButton
           contents={<Icon shape={ICON_SHAPE.DOTS_H} />}
           onClick={() => setToggleModal((prev) => !prev)}
@@ -297,30 +308,27 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
 
       {/* 상품 수정 및 삭제 모달창 */}
       {toggleModal && (
-        <aside
-          className="fixed bg-black/60 top-0 left-0 w-full h-full z-20 flex justify-center items-center"
-          onClick={() => setToggleModal(false)}
-        >
-          <section className="flex flex-col bg-white max-w-[460px] w-4/5 divide-y-2 rounded-md overflow-hidden">
+        <Modal position="middle" setToggleModal={setToggleModal}>
+          <>
             <Link
               href={{
                 pathname: "/products/modify",
                 query: { productId: router.query.id },
               }}
             >
-              <a className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors text-center">
+              <a className="block text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors text-center">
                 상품 수정
               </a>
             </Link>
             <button
               type="button"
-              className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors"
               onClick={onRemoveProduct}
+              className="text-xl p-4 w-full hover:text-orange-500 hover:bg-orange-100 transition-colors"
             >
               상품 삭제
             </button>
-          </section>
-        </aside>
+          </>
+        </Modal>
       )}
 
       {/* 상품 삭제 중 메시지 */}
@@ -340,7 +348,7 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
 export const getStaticPaths: GetStaticPaths = () => {
   return {
     paths: [],
-    fallback: "blocking",
+    fallback: true,
   };
 };
 

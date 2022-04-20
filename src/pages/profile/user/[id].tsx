@@ -21,13 +21,14 @@ import UserReview from "@src/components/Review";
 import Textarea from "@src/components/common/Textarea";
 import Button from "@src/components/common/Button";
 import HeadInfo from "@src/components/common/HeadInfo";
+import Spinner from "@src/components/common/Spinner";
 
 // util
 import prisma from "@src/libs/client/prisma";
 import { combineClassNames } from "@src/libs/client/util";
 
 // hook
-import useUser from "@src/libs/hooks/useUser";
+import useMe from "@src/libs/hooks/useMe";
 import useMutation from "@src/libs/hooks/useMutation";
 import SideButton from "@src/components/common/SideButton";
 import { toast } from "react-toastify";
@@ -61,7 +62,7 @@ interface IUserResponse extends ApiResponse {
 
 const Profile: NextPage<IUserResponse> = ({ user }) => {
   const router = useRouter();
-  const { user: me } = useUser();
+  const { me } = useMe();
 
   // 2022/04/13 - 평점 - by 1-blue
   const [score, setScore] = useState(1);
@@ -154,6 +155,8 @@ const Profile: NextPage<IUserResponse> = ({ user }) => {
     response: logOutResponse,
     move: "/enter",
   });
+
+  if (router.isFallback) return <Spinner kinds="page" />;
 
   return (
     <>
@@ -341,9 +344,10 @@ const Profile: NextPage<IUserResponse> = ({ user }) => {
 export const getStaticPaths: GetStaticPaths = () => {
   return {
     paths: [],
-    fallback: "blocking",
+    fallback: true,
   };
 };
+
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
