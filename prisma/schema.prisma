@@ -16,6 +16,7 @@ enum KINDS {
   Favorite
   Sale
   Purchase
+  Reserved
 }
 
 model User {

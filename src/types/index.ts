@@ -31,6 +31,7 @@ export enum RECORD {
   FAVORITE = "favorite",
   SALE = "sale",
   PURCHASE = "purchase",
+  RESERVED = "reserved",
 }
 
 // api 리턴 값 ( 인터페이스... 상속으로 사용하기 )

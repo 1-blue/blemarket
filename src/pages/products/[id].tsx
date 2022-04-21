@@ -46,6 +46,9 @@ interface IProduct extends Product {
   keywords: {
     keyword: string;
   }[];
+  records: {
+    kinds: "Sale" | "Favorite" | "Reserved" | "Purchase";
+  }[];
 }
 interface IProductResponse extends ApiResponse {
   product: IProduct;
@@ -63,8 +66,11 @@ interface ICreateRoomResponse extends ApiResponse {
 }
 
 const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
-  const { me } = useMe();
   const router = useRouter();
+  const { me } = useMe();
+
+  // 2022/04/21 - 상품의 종류들 ( 판매, 예약, 구매 등 ) - by 1-blue
+  const kindsList = product?.records?.map((v) => v.kinds);
 
   // 2022/04/13 - 댓글 토글값 - by 1-blue
   const [toggleAnswer, setToggleAnswer] = useState(true);
@@ -112,14 +118,18 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
   ]);
 
   // 2022/04/13 - 채팅방 생성 메서드 - by 1-blue
-  const [createRoom, { data: createRoomResponse }] =
+  const [createRoom, { data: createRoomResponse, loading: createRoomLoading }] =
     useMutation<ICreateRoomResponse>(`/api/chats/room`);
   // 2022/04/12 - 채팅방 생성 - by 1-blue
   const onCreateRoom = useCallback(() => {
     if (product.userId === me?.id)
       return toast.error("본인의 상품에는 채팅을 할 수 없습니다.");
+    if (createRoomLoading)
+      return toast.warning("채팅방을 생성중입니다.\n잠시 기다려주세요!");
+    if (kindsList.includes("Reserved"))
+      return toast.warning("예약중인 상품이면 판매자와 대화할 수 없습니다.");
     createRoom({ ownerId: product.userId, title: product.name });
-  }, [createRoom, product, me]);
+  }, [createRoom, product, me, createRoomLoading, kindsList]);
   // 2022/04/12 - 채팅방 생성 시 채팅방으로 이동 - by 1-blue
   useEffect(() => {
     if (!createRoomResponse?.ok) return;
@@ -180,7 +190,14 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
           <Profile user={product.user} />
         </section>
         <section className="flex flex-col space-y-4">
-          <h2 className="font-bold text-3xl">{product.name}</h2>
+          <h2 className="font-bold text-3xl">
+            {kindsList.includes("Reserved") && (
+              <span className="text-orange-500 underline underline-offset-2">
+                [예약중]
+              </span>
+            )}{" "}
+            {product.name}
+          </h2>
           <p className="text-gray-900 p-4 rounded-md bg-gray-200 whitespace-pre">
             {product.description}
           </p>
@@ -376,6 +393,11 @@ export const getStaticProps: GetStaticProps = async (
       keywords: {
         select: {
           keyword: true,
+        },
+      },
+      records: {
+        select: {
+          kinds: true,
         },
       },
     },

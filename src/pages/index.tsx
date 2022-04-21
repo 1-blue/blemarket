@@ -27,14 +27,17 @@ import usePagination from "@src/libs/hooks/usePagination";
 import prisma from "@src/libs/client/prisma";
 import { combineClassNames } from "@src/libs/client/util";
 
-interface ProductWithCount extends Product {
+interface ProductWithEtc extends Product {
   _count: {
     answers: number;
     records: number;
   };
+  records: {
+    kinds: "Sale" | "Favorite" | "Reserved" | "Purchase";
+  }[];
 }
 interface IResponseOfProducts extends ApiResponse {
-  products: ProductWithCount[];
+  products: ProductWithEtc[];
   productCount: number;
 }
 type KeywordForm = {
@@ -214,6 +217,7 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
             image={product.image}
             count={product?._count}
             index={index}
+            records={product?.records}
           />
         ))}
         <div />

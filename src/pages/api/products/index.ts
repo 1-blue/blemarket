@@ -57,6 +57,11 @@ async function handler(
                 records: true,
               },
             },
+            records: {
+              select: {
+                kinds: true,
+              },
+            },
           },
           orderBy: [
             {
@@ -91,6 +96,11 @@ async function handler(
               records: true,
             },
           },
+          records: {
+            select: {
+              kinds: true,
+            },
+          },
         },
         orderBy: [
           {
@@ -116,6 +126,16 @@ async function handler(
           user: {
             connect: {
               id: user?.id,
+            },
+          },
+          records: {
+            create: {
+              kinds: "Sale",
+              user: {
+                connect: {
+                  id: user?.id,
+                },
+              },
             },
           },
         },
@@ -149,7 +169,6 @@ async function handler(
 
       // >>> 이거 실행이 안 되는 이유는...?
       await res.unstable_revalidate("/");
-
       res.status(201).json({
         ok: true,
         message: `"${name}"을 등록했습니다.`,

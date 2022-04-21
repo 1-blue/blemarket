@@ -17,8 +17,8 @@ async function handler(
 ) {
   const {
     query: { kinds },
-    session: { user },
   } = req;
+  const userId = +req.session.user?.id!;
 
   try {
     let where = null;
@@ -26,19 +26,19 @@ async function handler(
     switch (kinds) {
       case RECORD.FAVORITE:
         where = {
-          userId: user?.id,
+          userId,
           kinds: KINDS.Favorite,
         };
         break;
       case RECORD.SALE:
         where = {
-          userId: user?.id,
+          userId,
           kinds: KINDS.Sale,
         };
         break;
       case RECORD.PURCHASE:
         where = {
-          userId: user?.id,
+          userId,
           kinds: KINDS.Purchase,
         };
         break;
@@ -49,35 +49,69 @@ async function handler(
         });
     }
 
-    const exProducts = await prisma.record.findMany({
+    const exProductsPromise = prisma.record.findMany({
       where,
       select: {
         id: true,
         updatedAt: true,
         product: {
           include: {
-            records: {
-              where: {
-                kinds: "Favorite",
+            _count: {
+              select: {
+                answers: true,
+                records: true,
               },
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    avatar: true,
-                  },
-                },
+            },
+            records: {
+              select: {
+                kinds: true,
               },
             },
           },
         },
       },
     });
+
+    let reservedProductsPromise = null;
+
+    if (kinds === RECORD.SALE) {
+      reservedProductsPromise = prisma.record.findMany({
+        where: {
+          userId,
+          kinds: KINDS.Reserved,
+        },
+        select: {
+          id: true,
+          updatedAt: true,
+          product: {
+            include: {
+              _count: {
+                select: {
+                  answers: true,
+                  records: true,
+                },
+              },
+              records: {
+                select: {
+                  kinds: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    const [exProducts, reservedProducts] = await Promise.all([
+      exProductsPromise,
+      reservedProductsPromise,
+    ]);
+
     return res.status(200).json({
       ok: true,
       message: "특정 상품들에 대한 정보입니다.",
       products: exProducts,
+      reservedProducts,
     });
   } catch (error) {
     console.error("/api/users/me/[kinds] error >> ", error);
