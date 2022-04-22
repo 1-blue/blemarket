@@ -18,6 +18,7 @@ export enum ICON_SHAPE {
   GITHUB,
   SEARCH,
   DOTS_H,
+  GIFT,
 }
 
 // 검색 조건
@@ -32,6 +33,7 @@ export enum RECORD {
   SALE = "sale",
   PURCHASE = "purchase",
   RESERVED = "reserved",
+  BUY = "buy",
 }
 
 // api 리턴 값 ( 인터페이스... 상속으로 사용하기 )

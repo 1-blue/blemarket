@@ -40,6 +40,7 @@ model User {
   messages        Message[]
   rooms           Room[]
   chats           Chat[]
+  buyerProduct    Product?         @relation(name: "buyer")
 }
 
 model Token {
@@ -66,11 +67,15 @@ model Product {
   records  Record[]
   answers  Answer[]
   keywords Keyword[]
+  rooms    Room[]
 
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  buyer   User? @relation(fields: [buyerId], references: [id], onDelete: Cascade, name: "buyer")
+  buyerId Int?  @unique
 
   @@index([userId])
+  @@index([buyerId])
 }
 
 model Keyword {
@@ -201,6 +206,9 @@ model Room {
 
   users User[]
   chats Chat[]
+
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId Int?
 }
 
 model Chat {

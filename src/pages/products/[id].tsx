@@ -128,13 +128,19 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
       return toast.warning("채팅방을 생성중입니다.\n잠시 기다려주세요!");
     if (kindsList.includes("Reserved"))
       return toast.warning("예약중인 상품이면 판매자와 대화할 수 없습니다.");
-    createRoom({ ownerId: product.userId, title: product.name });
+    if (kindsList.includes("Purchase"))
+      return toast.warning("이미 판매한 상품이면 판매자와 대화할 수 없습니다.");
+    createRoom({
+      ownerId: product.userId,
+      title: product.name,
+      productId: product.id,
+    });
   }, [createRoom, product, me, createRoomLoading, kindsList]);
   // 2022/04/12 - 채팅방 생성 시 채팅방으로 이동 - by 1-blue
   useEffect(() => {
     if (!createRoomResponse?.ok) return;
 
-    toast.success("채팅방이 생성되었습니다!\n채팅방으로 이동합니다.");
+    toast.success("채팅방으로 이동합니다.");
     router.push(`/chats/${createRoomResponse.roomId}`);
   }, [router, createRoomResponse]);
 
@@ -196,6 +202,11 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
                 [예약중]
               </span>
             )}{" "}
+            {kindsList.includes("Purchase") && (
+              <span className="text-indigo-400 underline underline-offset-2">
+                [판매완료]
+              </span>
+            )}{" "}
             {product.name}
           </h2>
           <p className="text-gray-900 p-4 rounded-md bg-gray-200 whitespace-pre">
@@ -227,6 +238,7 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
               className="flex-1"
               $primary
               onClick={onCreateRoom}
+              $loading={createRoomLoading}
             />
             <Button
               onClick={onClickFavorite}

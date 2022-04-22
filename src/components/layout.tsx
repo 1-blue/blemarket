@@ -34,8 +34,10 @@ const Layout = ({ children, hasTabBar }: IProps) => {
     if (asPath.includes("/streams")) return "라이브";
     if (asPath.includes("/profile")) {
       if (asPath.includes("/sale")) return "판매ㆍ예약 내역";
-      if (asPath.includes("/purchase")) return "구매 내역";
+      if (asPath.includes("/purchase")) return "판매완료 내역";
+      if (asPath.includes("/buy")) return "구매 내역";
       if (asPath.includes("/favorite")) return "관심 목록";
+      if (asPath.includes("/complete")) return "판매자 선택";
       return "나의 정보";
     }
     if (asPath.includes("/enter")) return "로그인";

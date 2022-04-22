@@ -21,6 +21,34 @@ async function handler(
   const userId = +req.session.user?.id!;
 
   try {
+    // 구매 상품 요청인 경우
+    if (kinds === RECORD.BUY) {
+      const products = await prisma.product.findMany({
+        where: {
+          buyerId: userId,
+        },
+        include: {
+          _count: {
+            select: {
+              answers: true,
+              records: true,
+            },
+          },
+          records: {
+            select: {
+              kinds: true,
+            },
+          },
+        },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "구매한 상품들을 불러왔습니다.",
+        products,
+      });
+    }
+
     let where = null;
 
     switch (kinds) {

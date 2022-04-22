@@ -12,10 +12,10 @@ async function handler(
   res: NextApiResponse<IResponseType>
 ) {
   const productId = +req.query.id;
-  const userId = +req.session.user?.id!;
+  const meId = +req.session.user?.id!;
   const {
     method,
-    body: { currentKinds, afterKinds },
+    body: { currentKinds, afterKinds, userId },
   } = req;
 
   try {
@@ -44,14 +44,15 @@ async function handler(
         message: "존재하지 않는 게시글입니다.",
       });
 
-    if (exProduct.userId !== userId)
+    if (exProduct.userId !== meId)
       return res.status(403).json({
         ok: false,
         message: "접근 권한이 없습니다.",
       });
 
     if (method === "PATCH") {
-      await prisma.record.update({
+      // 상품 상태 변경
+      const recordPromise = prisma.record.update({
         where: {
           id: exProduct.records[0].id,
         },
@@ -59,6 +60,21 @@ async function handler(
           kinds: afterKinds,
         },
       });
+      // 상품 구매자 지정
+      const productPromise = prisma.product.update({
+        where: {
+          id: productId,
+        },
+        data: {
+          buyer: {
+            connect: {
+              id: +userId,
+            },
+          },
+        },
+      });
+
+      await Promise.allSettled([recordPromise, productPromise]);
 
       let state = null;
       state = afterKinds === "Sale" ? "판매상태" : state;

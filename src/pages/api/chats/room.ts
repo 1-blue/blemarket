@@ -20,6 +20,7 @@ async function handler(
       // >>> 채팅방 페이지네이션 필요하다면 코드 작성할 곳
     } else if (method === "POST") {
       const title = req.body.title;
+      const productId = +req.body.productId;
       const exRoom = await prisma.room.findUnique({
         where: {
           name: title + user?.id + ownerId,
@@ -48,6 +49,11 @@ async function handler(
             ],
           },
           name: title + user?.id + ownerId,
+          Product: {
+            connect: {
+              id: productId,
+            },
+          },
         },
       });
 

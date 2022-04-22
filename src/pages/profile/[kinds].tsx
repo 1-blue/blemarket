@@ -73,6 +73,16 @@ const Kinds: NextPage = () => {
               router.query.kinds === "purchase" ? "border-orange-500" : ""
             )}
           >
+            판매완료 내역
+          </a>
+        </Link>
+        <Link href="/profile/buy">
+          <a
+            className={combineClassNames(
+              "flex-1 text-center p-2 hover:text-orange-500 transition-colors border-b-2",
+              router.query.kinds === "buy" ? "border-orange-500" : ""
+            )}
+          >
             구매 내역
           </a>
         </Link>

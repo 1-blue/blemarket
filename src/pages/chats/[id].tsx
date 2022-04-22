@@ -63,15 +63,20 @@ const ChatDetail: NextPage = () => {
     size,
     setSize,
     isValidating,
-  } = useSWRInfinite<IChatResponse>((pageIndex, prevPageData) => {
-    if (!router.query.id) return;
-    if (prevPageData && !prevPageData.chats.length) {
-      setHasMoreChat(false);
-      return null;
-    }
+  } = useSWRInfinite<IChatResponse>(
+    (pageIndex, prevPageData) => {
+      if (!router.query.id) return;
+      if (prevPageData && !prevPageData.chats.length) {
+        setHasMoreChat(false);
+        return null;
+      }
 
-    return `/api/chats/${router.query.id}?page=${pageIndex}&offset=${15}`;
-  });
+      return `/api/chats/${router.query.id}?page=${pageIndex}&offset=${15}`;
+    },
+    {
+      refreshInterval: 1000,
+    }
+  );
   // 2022/04/12 - 채팅 추가 시 업데이트 ( mutate ) - by 1-blue
   useEffect(() => {
     if (!addChatResponse?.ok || !addChatResponse.createdChat) return;
@@ -127,11 +132,6 @@ const ChatDetail: NextPage = () => {
             {!hasMoreChat && (
               <li className="text-lg text-center bg-indigo-400 py-2 rounded-md text-white">
                 더 이상 채팅이 없습니다.
-              </li>
-            )}
-            {isValidating && (
-              <li className="text-lg text-center bg-indigo-400 py-2 rounded-md text-white">
-                채팅을 불러오는 중입니다...
               </li>
             )}
           </ul>

@@ -105,6 +105,13 @@ const ProductItem = ({
                     </span>
                   </li>
                 )}
+                {kindsList?.includes("Purchase") && (
+                  <li>
+                    <span className="bg-indigo-500 text-white p-2 rounded-md text-xs">
+                      판매완료
+                    </span>
+                  </li>
+                )}
               </div>
               <div className="flex-1" />
               <div className="flex space-x-2">
@@ -135,11 +142,13 @@ const ProductItem = ({
             text="예약중으로 변경"
             $loading={changeKindsLoading}
           />
-          <Button
-            type="button"
-            className="flex-1 text-center py-2 hover:bg-orange-100 hover:text-orange-500 transition-colors"
-            text="거래완료로 변경"
-          />
+          <Link
+            href={`/profile/complete?productId=${id}&currentKinds=${records?.[0].kinds}`}
+          >
+            <a className="flex-1 text-center py-2 hover:bg-orange-100 hover:text-orange-500 transition-colors">
+              거래완료로 변경
+            </a>
+          </Link>
         </section>
       )}
       {/* 예약된 상품 */}
@@ -152,11 +161,13 @@ const ProductItem = ({
             text="판매중으로 변경"
             $loading={changeKindsLoading}
           />
-          <Button
-            type="button"
-            className="flex-1 text-center py-2 hover:bg-orange-100 hover:text-orange-500 transition-colors"
-            text="거래완료로 변경"
-          />
+          <Link
+            href={`/profile/complete?productId=${id}&currentKinds=${records?.[0].kinds}`}
+          >
+            <a className="flex-1 text-center py-2 hover:bg-orange-100 hover:text-orange-500 transition-colors">
+              거래완료로 변경
+            </a>
+          </Link>
         </section>
       )}
     </>

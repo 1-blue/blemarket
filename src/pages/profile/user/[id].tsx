@@ -195,6 +195,16 @@ const Profile: NextPage<IUserResponse> = ({ user }) => {
                   <div className="flex justify-center items-center bg-orange-400 w-16 h-16 rounded-full text-white mb-2 group-hover:bg-orange-500">
                     <Icon shape={ICON_SHAPE.BAG} />
                   </div>
+                  <span>판매완료내역</span>
+                </a>
+              </Link>
+            </li>
+            <li>
+              <Link href="/profile/buy">
+                <a className="flex-1 group flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-8 focus:rounded-sm">
+                  <div className="flex justify-center items-center bg-orange-400 w-16 h-16 rounded-full text-white mb-2 group-hover:bg-orange-500">
+                    <Icon shape={ICON_SHAPE.GIFT} />
+                  </div>
                   <span>구매내역</span>
                 </a>
               </Link>
