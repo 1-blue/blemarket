@@ -6,6 +6,7 @@ import prisma from "@src/libs/client/prisma";
 // helper function
 import withHandler, { IResponseType } from "@src/libs/server/widthHandler";
 import { withApiSession } from "@src/libs/server/withSession";
+import { KINDS } from "@prisma/client";
 
 async function handler(
   req: NextApiRequest,
@@ -20,6 +21,13 @@ async function handler(
     if (req.method === "GET") {
       const page = +req.query.page - 1;
       const offset = +req.query.offset;
+
+      // 예약/판매완료 상품 제외할지 판단
+      const reservedFilter = !!+req.query.reserved;
+      const purchaseFilter = !!+req.query.purchase;
+      const condition: { kinds: KINDS }[] = [{ kinds: KINDS.Sale }];
+      if (!reservedFilter) condition.push({ kinds: KINDS.Reserved });
+      if (!purchaseFilter) condition.push({ kinds: KINDS.Purchase });
 
       if (req.query.keyword) {
         const keyword = req.query.keyword + "";
@@ -47,6 +55,11 @@ async function handler(
             keywords: {
               some: {
                 keyword,
+              },
+            },
+            records: {
+              some: {
+                OR: condition,
               },
             },
           },
@@ -89,6 +102,13 @@ async function handler(
       const findProducts = await prisma.product.findMany({
         take: offset,
         skip: page * offset,
+        where: {
+          records: {
+            some: {
+              OR: condition,
+            },
+          },
+        },
         include: {
           _count: {
             select: {

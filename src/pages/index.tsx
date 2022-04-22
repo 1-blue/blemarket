@@ -43,6 +43,10 @@ interface IResponseOfProducts extends ApiResponse {
 type KeywordForm = {
   keyword: string;
 };
+type filterForm = {
+  reserved: boolean;
+  purchase: boolean;
+};
 interface IResponseOfRecommendKeywords extends ApiResponse {
   keywords: {
     keyword: string;
@@ -51,14 +55,26 @@ interface IResponseOfRecommendKeywords extends ApiResponse {
 
 const Home: NextPage<IResponseOfProducts> = (props) => {
   const router = useRouter();
+
+  // 2022/04/23 - 필터링 form - by 1-blue
+  const { register: filterRegister, watch: filterWatch } =
+    useForm<filterForm>();
+
   // 2022/04/05 - 전체 상품 요청 - by 1-blue
   const [{ data: responseOfProducts }, { page, setPage }, { offset }] =
-    usePagination<IResponseOfProducts>("/api/products", {});
+    usePagination<IResponseOfProducts>(
+      `/api/products?reserved=${filterWatch("reserved") ? "1" : "0"}&purchase=${
+        filterWatch("purchase") ? "1" : "0"
+      }`,
+      {}
+    );
   const [
     { data: responseOfSearchProducts, error: responseOfSearchProductsError },
   ] = usePagination<IResponseOfProducts>(
     router.query.keyword
-      ? `/api/products?keyword=${router.query.keyword}`
+      ? `/api/products?keyword=${router.query.keyword}&reserved=${
+          filterWatch("reserved") ? "1" : "0"
+        }&purchase=${filterWatch("purchase") ? "1" : "0"}`
       : null,
     {}
   );
@@ -204,6 +220,34 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
             </div>
           ))}
       </div>
+
+      {/* 상품 필터 */}
+      <article className="border-b-2 p-4">
+        <ul className="space-y-2">
+          <li className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="reserved"
+              {...filterRegister("reserved")}
+              className="cursor-pointer"
+            />
+            <label htmlFor="reserved" className="cursor-pointer">
+              예약 상품 제외
+            </label>
+          </li>
+          <li className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="purchase"
+              {...filterRegister("purchase")}
+              className="cursor-pointer"
+            />
+            <label htmlFor="purchase" className="cursor-pointer">
+              판매 완료 상품 제외
+            </label>
+          </li>
+        </ul>
+      </article>
 
       {/* 상품 리스트 */}
       <article className="divide-y-2">
