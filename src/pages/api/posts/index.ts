@@ -39,7 +39,7 @@ async function handler(
         };
       }
 
-      const posts = await prisma.post.findMany({
+      const postsPromise = prisma.post.findMany({
         take: offset,
         skip: page * offset,
         where,
@@ -63,9 +63,14 @@ async function handler(
         ],
       });
 
-      const postCount = await prisma.post.count({
+      const postCountPromise = prisma.post.count({
         where,
       });
+
+      const [posts, postCount] = await Promise.all([
+        postsPromise,
+        postCountPromise,
+      ]);
 
       res.status(200).json({
         ok: true,

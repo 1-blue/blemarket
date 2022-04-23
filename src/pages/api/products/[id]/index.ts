@@ -138,6 +138,25 @@ async function handler(
         product: modifiedProduct,
       });
     }
+    // 상품 정보 요청
+    else if (method === "GET") {
+      const foundProduct = await prisma.product.findUnique({
+        where: { id: productId },
+        include: {
+          keywords: {
+            select: {
+              keyword: true,
+            },
+          },
+        },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "특정 상품의 정보를 가져왔습니다.",
+        product: foundProduct,
+      });
+    }
   } catch (error) {
     console.error("/api/products/[id] error >> ", error);
 
@@ -150,5 +169,5 @@ async function handler(
 }
 
 export default withApiSession(
-  withHandler({ methods: ["DELETE", "PATCH"], handler })
+  withHandler({ methods: ["DELETE", "PATCH", "GET"], handler })
 );

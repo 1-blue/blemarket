@@ -28,12 +28,16 @@ async function handler(
 
     if (!exToken)
       return res
-        .status(400)
+        .status(403)
         .json({ ok: false, message: "유효하지 않은 토큰입니다." });
 
     req.session.user = { id: exToken.userId };
-    await req.session.save();
-    await prisma.token.deleteMany({ where: { userId: exToken.userId } });
+    const sessionSavePromise = req.session.save();
+    const tokenDeletePromise = prisma.token.deleteMany({
+      where: { userId: exToken.userId },
+    });
+
+    await Promise.allSettled([sessionSavePromise, tokenDeletePromise]);
 
     res.status(200).json({
       ok: true,

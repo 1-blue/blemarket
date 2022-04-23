@@ -37,7 +37,7 @@ async function handler(
       user: exUser,
     });
   } catch (error) {
-    console.error("/api/users/me error >> ", error);
+    console.error("/api/users/[id] error >> ", error);
 
     res.status(500).json({
       ok: false,

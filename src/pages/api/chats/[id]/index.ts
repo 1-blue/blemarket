@@ -19,7 +19,7 @@ async function handler(
       const page = +req.query.page;
       const offset = +req.query.offset;
 
-      const chats = await prisma.chat.findMany({
+      const chatsPromise = prisma.chat.findMany({
         take: offset,
         skip: page * offset,
         where: {
@@ -40,7 +40,7 @@ async function handler(
       });
 
       // 현재 채팅방에 접근권한 확인
-      const isMine = await prisma.user.findFirst({
+      const isMinePromise = prisma.user.findFirst({
         where: {
           AND: {
             id: +user?.id!,
@@ -52,6 +52,8 @@ async function handler(
           },
         },
       });
+
+      const [chats, isMine] = await Promise.all([chatsPromise, isMinePromise]);
 
       return res.status(200).json({
         ok: true,

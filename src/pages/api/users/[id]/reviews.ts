@@ -77,7 +77,7 @@ async function handler(
       });
     }
   } catch (error) {
-    console.error("/api/reviews error >> ", error);
+    console.error("/api/users/[id]/reviews error >> ", error);
 
     res.status(500).json({
       ok: false,

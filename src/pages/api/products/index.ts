@@ -185,10 +185,11 @@ async function handler(
         })
       );
 
-      await Promise.all(keywordsPromise);
+      await Promise.allSettled(keywordsPromise);
 
       // >>> 이거 실행이 안 되는 이유는...?
       await res.unstable_revalidate("/");
+
       res.status(201).json({
         ok: true,
         message: `"${name}"을 등록했습니다.`,

@@ -39,6 +39,11 @@ async function handler(
       const email = req.body.email as string;
       const phone = req.body.phone as string;
 
+      let namePromise = null;
+      let emailPromise = null;
+      let phonePromise = null;
+      let photoPromise = null;
+
       // 이름 변경
       if (name && exUser?.name !== name) {
         const isOverlapName = await prisma.user.findFirst({
@@ -58,7 +63,7 @@ async function handler(
             message: "이미 사용중인 이름입니다.",
           });
 
-        await prisma.user.update({
+        namePromise = prisma.user.update({
           where: {
             id: userId,
           },
@@ -86,7 +91,7 @@ async function handler(
             message: "이미 사용중인 이메일입니다.",
           });
 
-        await prisma.user.update({
+        emailPromise = prisma.user.update({
           where: {
             id: userId,
           },
@@ -95,7 +100,7 @@ async function handler(
           },
         });
       }
-      // 휴대폰번호 변경
+      // 휴대폰 번호 변경
       if (phone && exUser?.phone !== phone) {
         const isOverlapPhone = await prisma.user.findFirst({
           where: {
@@ -114,7 +119,7 @@ async function handler(
             message: "이미 사용중인 전화번호입니다.",
           });
 
-        await prisma.user.update({
+        phonePromise = prisma.user.update({
           where: {
             id: userId,
           },
@@ -123,7 +128,7 @@ async function handler(
           },
         });
       }
-
+      // 프로필 사진 변경
       if (photo) {
         // 이미 multer-s3를 이용해서 이미지를 넣어놓은 상태임
         // 기존 이미지 지우기
@@ -132,7 +137,7 @@ async function handler(
           deletePhoto(exUser.avatar);
         }
 
-        await prisma.user.update({
+        photoPromise = prisma.user.update({
           where: {
             id: userId,
           },
@@ -141,6 +146,13 @@ async function handler(
           },
         });
       }
+
+      await Promise.allSettled([
+        namePromise,
+        emailPromise,
+        phonePromise,
+        photoPromise,
+      ]);
 
       await res.unstable_revalidate(`/profile/user/${userId}`);
 

@@ -14,6 +14,7 @@ async function handler(
   const productId = +req.query.id;
 
   try {
+    // 특정 상품에 대한 채팅 유저를 찾음
     const roomWithUser = await prisma.room.findMany({
       where: {
         productId,

@@ -28,15 +28,9 @@ async function handler(
         message: "존재하지 않는 게시글입니다.",
       });
 
-    const exRecommendation = await prisma.recommendation.findFirst({
-      where: {
-        postId,
-        userId: user?.id,
-      },
-    });
     // 궁금해요 정보 요청
     if (method === "GET") {
-      const isRecommendation = await prisma.recommendation.findFirst({
+      const isRecommendationPromise = prisma.recommendation.findFirst({
         where: {
           postId,
           userId: req.session.user?.id,
@@ -45,11 +39,16 @@ async function handler(
           id: true,
         },
       });
-      const recommendationCount = await prisma.recommendation.count({
+      const recommendationCountPromise = prisma.recommendation.count({
         where: {
           postId,
         },
       });
+
+      const [isRecommendation, recommendationCount] = await Promise.all([
+        isRecommendationPromise,
+        recommendationCountPromise,
+      ]);
 
       return res.status(200).json({
         ok: true,
@@ -59,33 +58,42 @@ async function handler(
       });
     }
     // 궁금해요 추가
-    else if (method === "POST") {
-      if (exRecommendation)
-        return res.status(409).json({
-          ok: false,
-          message: "이미 궁금해요를 누른 게시글입니다.",
-        });
-
-      await prisma.recommendation.create({
-        data: {
-          user: { connect: { id: user?.id } },
-          post: { connect: { id: postId } },
-        },
-      });
-    }
-    // 궁금해요 취소
-    else if (method === "DELETE") {
-      if (!exRecommendation)
-        return res.status(409).json({
-          ok: false,
-          message: "궁금해요를 누르지 않은 게시글입니다.",
-        });
-
-      await prisma.recommendation.delete({
+    else {
+      const exRecommendation = await prisma.recommendation.findFirst({
         where: {
-          id: exRecommendation?.id,
+          postId,
+          userId: user?.id,
         },
       });
+
+      if (method === "POST") {
+        if (exRecommendation)
+          return res.status(409).json({
+            ok: false,
+            message: "이미 궁금해요를 누른 게시글입니다.",
+          });
+
+        await prisma.recommendation.create({
+          data: {
+            user: { connect: { id: user?.id } },
+            post: { connect: { id: postId } },
+          },
+        });
+      }
+      // 궁금해요 취소
+      else if (method === "DELETE") {
+        if (!exRecommendation)
+          return res.status(409).json({
+            ok: false,
+            message: "궁금해요를 누르지 않은 게시글입니다.",
+          });
+
+        await prisma.recommendation.delete({
+          where: {
+            id: exRecommendation?.id,
+          },
+        });
+      }
     }
 
     return res.status(200).json({
