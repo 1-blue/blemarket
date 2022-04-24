@@ -1,9 +1,5 @@
 import React, { useCallback, useEffect } from "react";
-import type {
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  NextPage,
-} from "next";
+import type { NextPage } from "next";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -15,6 +11,7 @@ import { Post } from "@prisma/client";
 import Button from "@src/components/common/Button";
 import Textarea from "@src/components/common/Textarea";
 import HeadInfo from "@src/components/common/HeadInfo";
+import Spinner from "@src/components/common/Spinner";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
@@ -23,9 +20,10 @@ import useResponseToast from "@src/libs/hooks/useResponseToast";
 import usePermission from "@src/libs/hooks/usePermission";
 
 // util
-import prisma from "@src/libs/client/prisma";
+import useSWR from "swr";
+import { useRouter } from "next/router";
 
-interface IWriteResponse extends ApiResponse {
+interface IResponseOfPost extends ApiResponse {
   post: Post;
 }
 type QuestionForm = {
@@ -34,22 +32,31 @@ type QuestionForm = {
   longitude: number | null;
 };
 
-const Write: NextPage<Post> = (post) => {
+const Write: NextPage = () => {
+  const router = useRouter();
+
+  // 2022/04/24 - 수정할 게시글 정보 패치 - by 1-blue
+  const { data: post } = useSWR<IResponseOfPost>(
+    router.query.postId ? `/api/posts/${router.query.postId}` : null
+  );
+
   // 2022/04/13 - 위도, 경도 허용 요청 및 가져오기 - by 1-blue
   const coords = useCoords(
     "GPS를 허용하지 않아서 위치기반 검색결과에서 제외됩니다."
   );
   // 2022/04/13 - 질문 폼 - by 1-blue
   const { register, handleSubmit, setValue } = useForm<QuestionForm>();
-  const [modifyQuestion, { loading, data }] = useMutation<IWriteResponse>(
-    `/api/posts/${post.id}`,
+  const [modifyQuestion, { loading, data }] = useMutation<IResponseOfPost>(
+    `/api/posts/${post?.post.id}`,
     "PATCH"
   );
   // 2022/04/18 - 기존 데이터 주입 - by 1-blue
   useEffect(() => {
-    setValue("question", post.question);
-    if (post.latitude) setValue("latitude", post.latitude);
-    if (post.longitude) setValue("longitude", post.longitude);
+    if (!post) return;
+
+    setValue("question", post.post.question);
+    if (post.post.latitude) setValue("latitude", post.post.latitude);
+    if (post.post.longitude) setValue("longitude", post.post.longitude);
   }, [setValue, post]);
   // 2022/03/27 - 질문 생성 - by 1-blue
   const onCreateQuestion = useCallback(
@@ -72,10 +79,12 @@ const Write: NextPage<Post> = (post) => {
 
   // 2022/04/18 - 접근 권한 확인 - by 1-blue
   usePermission({
-    userId: post.userId,
+    userId: post?.post.userId,
     message: "접근 권한이 없습니다.",
     move: "/community",
   });
+
+  if (!post) return <Spinner kinds="page" />;
 
   return (
     <>
@@ -102,24 +111,10 @@ const Write: NextPage<Post> = (post) => {
           />
         </form>
       </article>
+
+      {loading && <Spinner kinds="page" />}
     </>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const postId = Number(context.query?.postId);
-
-  const foundPost = await prisma.post.findUnique({
-    where: { id: postId },
-  });
-
-  return {
-    props: {
-      ...JSON.parse(JSON.stringify(foundPost)),
-    },
-  };
 };
 
 export default Write;

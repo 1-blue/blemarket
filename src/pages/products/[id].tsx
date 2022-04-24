@@ -182,14 +182,7 @@ const ProductsDatail: NextPage<IProductResponse> = ({ product }) => {
 
       {/* 상품 이미지, 유저 프로필, 이름, 설명, 가격, 키워드, 좋아요 */}
       <article className="px-4 pb-8 mb-8 border-b">
-        <section
-          className="mb-2"
-          onClick={() =>
-            toast.success(
-              "사이즈 테스트, 사이즈 테스트, 사이즈 테스트, 사이즈 테스트,사이즈 테스트"
-            )
-          }
-        >
+        <section className="mb-2">
           <Photo photo={product.image} className="h-96 w-full" $contain />
         </section>
         <section>

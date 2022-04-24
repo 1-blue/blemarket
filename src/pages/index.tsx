@@ -146,10 +146,10 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
     return () => window.removeEventListener("click", handleCloseModal);
   }, [handleCloseModal]);
   // 2022/04/16 - 추천 키워드 패치 - by 1-blue
-  const { data: recommendKeywords } = useSWR<IResponseOfRecommendKeywords>(
-    debounce && keyword ? `/api/keyword/${keyword}` : null
-  );
-  // >>> 추천 키워드 방향키로 이동하는 기능 추가하기
+  const { data: recommendKeywords, isValidating } =
+    useSWR<IResponseOfRecommendKeywords>(
+      debounce && keyword ? `/api/keyword/${keyword}` : null
+    );
 
   return (
     <>
@@ -215,7 +215,9 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
           ) : (
             <div className="absolute  top-[43px] w-full rounded-b-md overflow-hidden z-10">
               <span className="block bg-slate-200 p-4">
-                ⁉️ 추천 검색어가 없습니다.
+                {isValidating
+                  ? "키워드를 검색중입니다..."
+                  : "⁉️ 추천 검색어가 없습니다."}
               </span>
             </div>
           ))}
@@ -295,9 +297,8 @@ const Home: NextPage<IResponseOfProducts> = (props) => {
   );
 };
 
-// 상품 생성 시 `res.unstable_revalidate("/")`를 실행
 export const getStaticProps: GetStaticProps = async () => {
-  const products = await prisma.product.findMany({
+  const productsPromise = await prisma.product.findMany({
     take: 10,
     skip: 0,
     orderBy: [
@@ -306,7 +307,12 @@ export const getStaticProps: GetStaticProps = async () => {
       },
     ],
   });
-  const productCount = await prisma.product.count();
+  const productCountPromise = await prisma.product.count();
+
+  const [products, productCount] = await Promise.all([
+    productsPromise,
+    productCountPromise,
+  ]);
 
   return {
     props: {

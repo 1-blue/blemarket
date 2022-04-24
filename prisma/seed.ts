@@ -8,14 +8,12 @@ const main = async () => {
     .fill(null)
     .map((v, i) => i + 1)
     .map((v) =>
-      prisma.stream.create({
+      prisma.post.create({
         data: {
-          title: v + "번째 제목",
-          price: v,
-          description: v + "번째 스트림",
+          question: "[테스트] 질문" + v,
           user: {
             connect: {
-              id: 4,
+              id: 1,
             },
           },
         },

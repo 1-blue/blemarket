@@ -10,7 +10,7 @@ export default function usePagination<T>(
   url: string | null,
   { initialPage = 1, initialOffset = 10 }: IOption
 ): [
-  { data?: T; error: any },
+  { data?: T; error: any; isValidating: boolean },
   { page: number; setPage: Dispatch<SetStateAction<number>> },
   {
     offset: number;
@@ -19,7 +19,7 @@ export default function usePagination<T>(
 ] {
   const [page, setPage] = useState(initialPage);
   const [offset, setOffset] = useState(initialOffset);
-  const { data, error } = useSWR<T>(
+  const { data, error, isValidating } = useSWR<T>(
     url === null
       ? null
       : url.includes("?")
@@ -28,7 +28,7 @@ export default function usePagination<T>(
   );
 
   return [
-    { data, error },
+    { data, error, isValidating },
     { page, setPage },
     { offset, setOffset },
   ];

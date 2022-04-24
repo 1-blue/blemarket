@@ -19,6 +19,7 @@ export enum ICON_SHAPE {
   SEARCH,
   DOTS_H,
   GIFT,
+  DOUBLE_DOWN,
 }
 
 // 검색 조건

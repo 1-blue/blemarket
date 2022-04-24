@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -15,6 +15,7 @@ import Input from "@src/components/common/Input";
 import Notice from "@src/components/common/Notice";
 import Textarea from "@src/components/common/Textarea";
 import HeadInfo from "@src/components/common/HeadInfo";
+import Spinner from "@src/components/common/Spinner";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
@@ -43,6 +44,8 @@ const Upload: NextPage = () => {
   // 2022/04/13 - 상품 업로드 메서드 - by 1-blue
   const [uploadProuct, { data, loading }] =
     useMutation<IProductResponse>("/api/products");
+  // 2022/04/23 - 상품 이미지 업로드 로딩 변수 - by 1-blue
+  const [photoUploadLoading, setPhotoUploadLoading] = useState(false);
 
   // 2022/03/25 - 상품 생성 - by 1-blue
   const onCreateProduct = useCallback(
@@ -57,12 +60,14 @@ const Upload: NextPage = () => {
           }
         }
 
+        setPhotoUploadLoading(true);
         const formData = new FormData();
         formData.append("photo", photo?.[0]!);
         const { photo: image } = await await fetch("/api/photo", {
           method: "POST",
           body: formData,
         }).then((res) => res.json());
+        setPhotoUploadLoading(false);
 
         return uploadProuct({
           photo: image,
@@ -77,7 +82,7 @@ const Upload: NextPage = () => {
         return uploadProuct({ name, price, description, keywords });
       }
     },
-    [uploadProuct]
+    [uploadProuct, setPhotoUploadLoading]
   );
 
   // 2022/03/25 - 상품 업로드 완료 후 리다이렉트 - by 1-blue
@@ -218,13 +223,15 @@ const Upload: NextPage = () => {
                 type="submit"
                 text="상품 등록"
                 $primary
-                $loading={loading}
+                $loading={loading || photoUploadLoading}
                 className="w-full"
               />
             </li>
           </ul>
         </form>
       </article>
+
+      {(photoUploadLoading || loading) && <Spinner kinds="page" />}
     </>
   );
 };

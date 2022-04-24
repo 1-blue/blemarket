@@ -25,6 +25,7 @@ const Layout = ({ children, hasTabBar }: IProps) => {
   const getTitle = useCallback((asPath: string) => {
     if (
       asPath === "/" ||
+      asPath === "/#" ||
       asPath.includes("/?keyword=") ||
       asPath.includes("/products")
     )

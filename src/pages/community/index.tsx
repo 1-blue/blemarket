@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { GetStaticProps, NextPage } from "next";
 
 // type
@@ -43,14 +43,21 @@ const Community: NextPage<IPostResponse> = (props) => {
   );
   // 2022/04/13 - 검색할 거리 - by 1-blue
   const [distance, setDistance] = useState(10);
+  // 2022/04/23 - 디바운싱 - by 1-blue
+  const [debounce, setDebounce] = useState(false);
+  // 2022/04/23 - timerId - by 1-blue
+  const timerId = useRef<any>(null);
   // 2022/04/13 - 검색 조건 - by 1-blue
   const [condition, setCondition] = useState<SEARCH_CONDITION>(
     SEARCH_CONDITION.ALL
   );
   // 2022/04/13 - 검색 조건에 의해 검색된 게시글들 - by 1-blue
-  const [{ data: searchedPost }, { page, setPage }, { offset }] =
+  const [{ data: searchedPost, isValidating }, { page, setPage }, { offset }] =
     usePagination<IPostResponse>(
-      +condition === SEARCH_CONDITION.AROUND && latitude && longitude
+      +condition === SEARCH_CONDITION.AROUND &&
+        latitude &&
+        longitude &&
+        debounce
         ? `/api/posts?latitude=${latitude}&longitude=${longitude}&distance=${distance}`
         : `/api/posts`,
       {}
@@ -64,9 +71,16 @@ const Community: NextPage<IPostResponse> = (props) => {
   );
   // 2022/03/28 - 거리 조절 - by 1-blue
   const onChangeDistance = useCallback(
-    (e: React.FormEvent<HTMLInputElement>) =>
-      setDistance(+e.currentTarget.value),
-    []
+    (e: React.FormEvent<HTMLInputElement>) => {
+      if (!debounce) {
+        clearTimeout(timerId.current);
+        timerId.current = setTimeout(() => {
+          setDebounce(true);
+        }, 300);
+      }
+      setDistance(+e.currentTarget.value);
+    },
+    [debounce, setDebounce]
   );
 
   // 2022/04/07 - 랜더링할 게시글 - by 1-blue
@@ -75,7 +89,12 @@ const Community: NextPage<IPostResponse> = (props) => {
   useEffect(() => {
     if (!searchedPost) return;
     setTargetPost(searchedPost);
-  }, [setTargetPost, searchedPost]);
+    setDebounce(false);
+  }, [setTargetPost, searchedPost, setDebounce]);
+  useEffect(() => {
+    if (!isValidating) return;
+    setDebounce(false);
+  }, [isValidating]);
 
   return (
     <>
@@ -159,7 +178,7 @@ const Community: NextPage<IPostResponse> = (props) => {
 
 export const getStaticProps: GetStaticProps = async () => {
   // GPS관계없이, 최신 게시글 10개
-  const posts = await prisma.post.findMany({
+  const postsPromise = await prisma.post.findMany({
     take: 10,
     skip: 0,
     include: {
@@ -182,7 +201,12 @@ export const getStaticProps: GetStaticProps = async () => {
     ],
   });
   // 게시글 개수
-  const postCount = await prisma.post.count();
+  const postCountPromise = await prisma.post.count();
+
+  const [posts, postCount] = await Promise.all([
+    postsPromise,
+    postCountPromise,
+  ]);
 
   return {
     props: {

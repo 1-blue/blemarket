@@ -177,7 +177,18 @@ async function handler(
         copyPhoto(exUser.avatar);
         deletePhoto(exUser.avatar);
       }
-      // >>> 연관된 게시글의 이미지들도 모두 aws-s3에서 삭제 폴더로 이동하는 로직 필요
+      // 해당 유저의 상품 게시글 이미지도 모두 제거
+      const productsOfMe = await prisma.product.findMany({ where: { userId } });
+      const productPhotos = productsOfMe
+        ?.filter((product) => product.image)
+        ?.map((product) => product.image);
+      if (productPhotos.length > 0) {
+        productPhotos.forEach((photo) => {
+          if (!photo) return;
+          copyPhoto(photo);
+          deletePhoto(photo);
+        });
+      }
 
       await prisma.user.delete({
         where: {

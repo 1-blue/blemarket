@@ -1,13 +1,10 @@
-import { useCallback, useEffect } from "react";
-import type {
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  NextPage,
-} from "next";
+import { useCallback, useEffect, useState } from "react";
+import type { NextPage } from "next";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
+import useSWR from "swr";
 
 // type
 import { ICON_SHAPE, ApiResponse } from "@src/types";
@@ -20,6 +17,7 @@ import Input from "@src/components/common/Input";
 import Notice from "@src/components/common/Notice";
 import Textarea from "@src/components/common/Textarea";
 import HeadInfo from "@src/components/common/HeadInfo";
+import Spinner from "@src/components/common/Spinner";
 
 // hook
 import useMutation from "@src/libs/hooks/useMutation";
@@ -28,15 +26,17 @@ import usePreview from "@src/libs/hooks/usePreview";
 import usePermission from "@src/libs/hooks/usePermission";
 
 // util
-import prisma from "@src/libs/client/prisma";
 import { combinePhotoUrl } from "@src/libs/client/util";
 
-interface IProps extends Product {
+interface IProductWithKeyword extends Product {
   keywords: {
     keyword: string;
   }[];
 }
 interface IProductResponse extends ApiResponse {
+  product: IProductWithKeyword;
+}
+interface IProductModifyResponse extends ApiResponse {
   product: Product;
 }
 type UploadForm = {
@@ -47,9 +47,16 @@ type UploadForm = {
   keywords: string;
 };
 
-const Upload: NextPage<IProps> = (product) => {
+const Upload: NextPage = () => {
   const router = useRouter();
   const { productId } = router.query;
+
+  // 2022/04/23 - 상품 기존 데이터 패치 - by 1-blue
+  const { data: product } = useSWR<IProductResponse>(
+    productId ? `/api/products/${productId}` : null
+  );
+  // 2022/04/23 - 상품 이미지 업로드 로딩 변수 - by 1-blue
+  const [photoUploadLoading, setPhotoUploadLoading] = useState(false);
 
   // 2022/04/13 - 상품 정보 form - by 1-blue
   const {
@@ -61,20 +68,19 @@ const Upload: NextPage<IProps> = (product) => {
   } = useForm<UploadForm>({ mode: "onBlur" });
   // 2022/04/17 - 기존 상품 데이터 주입 - by 1-blue
   useEffect(() => {
-    setValue("name", product.name);
-    setValue("description", product.description);
-    setValue("price", product.price);
+    if (!product) return;
+    setValue("name", product.product.name);
+    setValue("description", product.product.description);
+    setValue("price", product.product.price);
     setValue(
       "keywords",
-      product.keywords.map((keyword) => keyword.keyword).join(" ")
+      product.product.keywords.map((keyword) => keyword.keyword).join(" ")
     );
   }, [product, setValue]);
 
   // 2022/04/13 - 상품 업로드 메서드 - by 1-blue
-  const [modifyProduct, { data, loading }] = useMutation<IProductResponse>(
-    `/api/products/${productId}`,
-    "PATCH"
-  );
+  const [modifyProduct, { data, loading }] =
+    useMutation<IProductModifyResponse>(`/api/products/${productId}`, "PATCH");
 
   // 2022/03/25 - 상품 수정 - by 1-blue
   const onModifyProduct = useCallback(
@@ -92,12 +98,14 @@ const Upload: NextPage<IProps> = (product) => {
           }
         }
 
+        setPhotoUploadLoading(true);
         const formData = new FormData();
         formData.append("photo", photo?.[0]!);
         const { photo: image } = await await fetch("/api/photo", {
           method: "POST",
           body: formData,
         }).then((res) => res.json());
+        setPhotoUploadLoading(false);
 
         return modifyProduct({
           photo: image,
@@ -113,10 +121,10 @@ const Upload: NextPage<IProps> = (product) => {
         price,
         description,
         keywords,
-        photo: product.image,
+        photo: product?.product.image,
       });
     },
-    [loading, modifyProduct, product]
+    [loading, modifyProduct, product, setPhotoUploadLoading]
   );
 
   // 2022/03/25 - 상품 업로드 완료 후 리다이렉트 - by 1-blue
@@ -144,10 +152,12 @@ const Upload: NextPage<IProps> = (product) => {
 
   // 2022/04/17 - 접근 권한 확인 - by 1-blue
   usePermission({
-    userId: product.userId,
+    userId: product?.product.userId,
     message: "접근 권한이 없습니다.",
     move: "/",
   });
+
+  if (!product) return <Spinner kinds="page" />;
 
   return (
     <>
@@ -177,10 +187,10 @@ const Upload: NextPage<IProps> = (product) => {
                   </figure>
                 ) : (
                   <>
-                    {product.image ? (
+                    {product.product.image ? (
                       <figure className="relative w-full h-full bg-black rounded-md">
                         <Image
-                          src={combinePhotoUrl(product.image)}
+                          src={combinePhotoUrl(product.product.image)}
                           alt="상품 이미지 미리보기"
                           layout="fill"
                           className="object-contain"
@@ -291,31 +301,10 @@ const Upload: NextPage<IProps> = (product) => {
           </ul>
         </form>
       </article>
+
+      {(photoUploadLoading || loading) && <Spinner kinds="page" />}
     </>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const productId = Number(context.query?.productId);
-
-  const foundProduct = await prisma.product.findUnique({
-    where: { id: productId },
-    include: {
-      keywords: {
-        select: {
-          keyword: true,
-        },
-      },
-    },
-  });
-
-  return {
-    props: {
-      ...JSON.parse(JSON.stringify(foundProduct)),
-    },
-  };
 };
 
 export default Upload;

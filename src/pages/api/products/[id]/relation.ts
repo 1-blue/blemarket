@@ -84,8 +84,6 @@ async function handler(
       await Promise.all(relatedKeywordProductsPromise!)
     ).flat(1);
 
-    // >>> 애초에 DB에서 검색할 때 제거하는게 효율적이라고 생각하는데 다른 방법이 있는지 못찾아서 찾고 나서 중복된 상품들 제거하는 방식으로 해결했지만 찝찝함
-    // >>> 상품이 늘어나고 키워드가 많아질수록 연산 시간이 늘어날 것 같음
     // 중복 제거
     const distinctRelatedKeywordProducts = relatedKeywordProducts.filter(
       (outerProduct, index, products) =>

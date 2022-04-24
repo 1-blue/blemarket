@@ -17,7 +17,61 @@ async function handler(
 
   try {
     if (method === "GET") {
-      // >>> 채팅방 페이지네이션 필요하다면 코드 작성할 곳
+      const rooms = await prisma.room.findMany({
+        where: {
+          users: {
+            some: {
+              id: user?.id,
+            },
+          },
+        },
+        include: {
+          users: {
+            where: {
+              NOT: {
+                id: user?.id,
+              },
+            },
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+
+      // 방들의 마지막 채팅만 추출하고 시간순 정렬
+      const chatPromises = rooms.map((room) =>
+        prisma.chat.findMany({
+          take: 1,
+          where: {
+            roomId: room.id,
+          },
+          select: {
+            chat: true,
+            updatedAt: true,
+            roomId: true,
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        })
+      );
+      const roomsOfLastChat = (await Promise.all(chatPromises)).flat(1);
+      roomsOfLastChat.sort((x, y) => (+x.updatedAt > +y.updatedAt ? -1 : 1));
+
+      // 마지막 채팅을 기준으로 방들을 정렬
+      const sortRooms = roomsOfLastChat.map((chat) =>
+        rooms.find((room) => room.id === chat.roomId)
+      );
+
+      return res.status(200).json({
+        ok: true,
+        message: "모든 채팅방을 가져왔습니다.",
+        rooms: sortRooms,
+        roomsOfLastChat: roomsOfLastChat,
+      });
     } else if (method === "POST") {
       const title = req.body.title;
       const productId = +req.body.productId;

@@ -9,6 +9,7 @@ import Link from "next/link";
 import useSWRInfinite from "swr/infinite";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 // type
 import { ICON_SHAPE, ApiResponse, SimpleUser } from "@src/types";
@@ -31,7 +32,6 @@ import { combineClassNames } from "@src/libs/client/util";
 import useMe from "@src/libs/hooks/useMe";
 import useMutation from "@src/libs/hooks/useMutation";
 import SideButton from "@src/components/common/SideButton";
-import { toast } from "react-toastify";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
 
 interface IReviewWithWriter extends Review {
@@ -351,9 +351,13 @@ const Profile: NextPage<IUserResponse> = ({ user }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = () => {
+export const getStaticPaths: GetStaticPaths = async () => {
+  const users = await prisma.user.findMany();
+
   return {
-    paths: [],
+    paths: users.map((user) => ({
+      params: { id: user.id + "" },
+    })),
     fallback: true,
   };
 };
@@ -361,11 +365,11 @@ export const getStaticPaths: GetStaticPaths = () => {
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
-  const userId = Number(context.params?.id);
+  const userId = Number(context.params?.id) || +context.params?.id!;
 
   const exUser = await prisma.user.findUnique({
     where: {
-      id: userId || 1,
+      id: userId,
     },
     select: {
       id: true,

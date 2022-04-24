@@ -2,14 +2,18 @@ import React, { useCallback } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import useSWR from "swr";
+import { useForm } from "react-hook-form";
 
 // type
 import { ApiResponse, SimpleUser } from "@src/types";
-import useMe from "@src/libs/hooks/useMe";
+
+// common-component
 import Avatar from "@src/components/common/Avatar";
 import Spinner from "@src/components/common/Spinner";
-import { useForm } from "react-hook-form";
 import Button from "@src/components/common/Button";
+
+// hook
+import useMe from "@src/libs/hooks/useMe";
 import useMutation from "@src/libs/hooks/useMutation";
 import useResponseToast from "@src/libs/hooks/useResponseToast";
 
@@ -38,10 +42,11 @@ const Purchase: NextPage = () => {
       : null
   );
   // 2022/04/22 - 상품 판매 완료로 변경 - by 1-blue
-  const [changePurchase, { data: purchaseResponse }] = useMutation<ApiResponse>(
-    `/api/products/${router.query.productId}/kinds`,
-    "PATCH"
-  );
+  const [changePurchase, { data: purchaseResponse, loading: purchaseLoading }] =
+    useMutation<ApiResponse>(
+      `/api/products/${router.query.productId}/kinds`,
+      "PATCH"
+    );
 
   // 2022/04/22 - 현재 상품 구매 확정 - by 1-blue
   const onPurchase = useCallback(
@@ -108,6 +113,8 @@ const Purchase: NextPage = () => {
           </ul>
         </form>
       </section>
+
+      {purchaseLoading && <Spinner kinds="page" />}
     </>
   );
 };

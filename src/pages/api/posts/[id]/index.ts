@@ -62,6 +62,16 @@ async function handler(
         message: "특정 게시글을 수정했습니다.",
         post: modifiedPost,
       });
+    } else if (method === "GET") {
+      const foundPost = await prisma.post.findUnique({
+        where: { id: postId },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "특정 게시글에 대한 정보를 가져왔습니다.",
+        post: foundPost,
+      });
     }
 
     res.status(405).json({
@@ -80,5 +90,5 @@ async function handler(
 }
 
 export default withApiSession(
-  withHandler({ methods: ["DELETE", "PATCH"], handler })
+  withHandler({ methods: ["DELETE", "PATCH", "GET"], handler })
 );

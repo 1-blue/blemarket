@@ -151,6 +151,7 @@ const ChatDetail: NextPage = () => {
             type="text"
             className="peer rounded-l-md border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400 flex-[8.5]"
             {...register("chat")}
+            autoFocus
           />
           <Button
             type="submit"

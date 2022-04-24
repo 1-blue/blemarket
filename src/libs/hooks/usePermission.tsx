@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import useMe from "@src/libs/hooks/useMe";
 
 type Props = {
-  userId: number;
+  userId: number | undefined;
   message: string;
   move: string;
 };
@@ -16,6 +16,7 @@ const usePermission = ({ userId, message, move }: Props) => {
   const { me } = useMe();
 
   useEffect(() => {
+    if (userId === undefined) return;
     if (me && me.id === userId) return;
 
     toast.warning(message);

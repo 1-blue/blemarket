@@ -10,6 +10,7 @@ import { Post } from "@prisma/client";
 import Button from "@src/components/common/Button";
 import Textarea from "@src/components/common/Textarea";
 import HeadInfo from "@src/components/common/HeadInfo";
+import Spinner from "@src/components/common/Spinner";
 
 // hooks
 import useMutation from "@src/libs/hooks/useMutation";
@@ -73,6 +74,8 @@ const Write: NextPage = () => {
           />
         </form>
       </article>
+
+      {loading && <Spinner kinds="page" />}
     </>
   );
 };
