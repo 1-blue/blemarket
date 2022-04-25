@@ -29,7 +29,7 @@ type PurchaseForm = {
   userId: number;
 };
 
-const Purchase: NextPage = () => {
+const Complete: NextPage = () => {
   const router = useRouter();
   const { me } = useMe();
 
@@ -119,4 +119,4 @@ const Purchase: NextPage = () => {
   );
 };
 
-export default Purchase;
+export default Complete;

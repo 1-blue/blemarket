@@ -87,7 +87,7 @@ const Community: NextPage<IPostResponse> = (props) => {
   const [targetPosts, setTargetPost] = useState<IPostResponse>(props);
   // 2022/04/13 - 검색 조건에 의해 검색된 게시글 랜더링을 위한 데이터 교체 - by 1-blue
   useEffect(() => {
-    if (!searchedPost?.ok) return;
+    if (!searchedPost) return;
     setTargetPost(searchedPost);
     setDebounce(false);
   }, [setTargetPost, searchedPost, setDebounce]);
@@ -95,8 +95,6 @@ const Community: NextPage<IPostResponse> = (props) => {
     if (!isValidating) return;
     setDebounce(false);
   }, [isValidating]);
-
-  console.log("searchedPost >> ", searchedPost);
 
   return (
     <>

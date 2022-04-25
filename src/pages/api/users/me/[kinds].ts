@@ -42,6 +42,8 @@ async function handler(
         },
       });
 
+      console.log("products >> ", products);
+
       return res.status(200).json({
         ok: true,
         message: "구매한 상품들을 불러왔습니다.",

@@ -39,7 +39,7 @@ model User {
   messages        Message[]
   rooms           Room[]
   chats           Chat[]
-  buyerProduct    Product?         @relation(name: "buyer")
+  buyerProduct    Product[]        @relation(name: "buyer")
 }
 
 model Token {
@@ -71,7 +71,7 @@ model Product {
   user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  Int
   buyer   User? @relation(fields: [buyerId], references: [id], onDelete: Cascade, name: "buyer")
-  buyerId Int?  @unique
+  buyerId Int?
 
   @@index([userId])
   @@index([buyerId])
