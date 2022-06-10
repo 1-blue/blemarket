@@ -47,7 +47,7 @@ export type ApiResponse = {
 export type SimpleUser = {
   id: number;
   name: string;
-  avatar: string;
+  avatar?: string | null;
 };
 
 export interface IAnswerForm {
@@ -61,3 +61,19 @@ export interface IStramForm {
 export interface IMessageForm {
   message: string;
 }
+
+// socket.io 타입
+export type ServerToClientEvents = {
+  onReceive: ({ user, chat }: { user: SimpleUser; chat: string }) => void;
+};
+export type ClientToServerEvents = {
+  onJoinRoom: (roomId: string) => void;
+  onSend: (data: { userId: number; roomId: string; chat: string }) => void;
+};
+export type InterServerEvents = {
+  ping: () => void;
+};
+export type SocketData = {
+  name: string;
+  age: number;
+};
