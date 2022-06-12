@@ -103,7 +103,8 @@ const Enter = () => {
         {createUserResponse?.ok ? (
           <form onSubmit={tokenHandleSubmit(onTokenValid)} className="mb-8">
             <label className="text-sm text-gray-600 font-semibold">
-              토큰 확인 ( 현재는 토큰값이 55555로 고정입니다! )
+              토큰 확인 ( 현재는 토큰값이 입력한 이메일 or 폰번호로 고정입니다!
+              )
             </label>
             <div className="mb-4">
               <Input
