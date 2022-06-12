@@ -29,7 +29,7 @@ const withHandler =
 
     if (isPrivate && !req.session.user)
       return res
-        .status(401)
+        .status(200)
         .json({ ok: false, message: "비로그인 상태입니다." });
 
     try {

@@ -44,7 +44,7 @@ model User {
 
 model Token {
   id        Int      @id @default(autoincrement())
-  payload   String   @unique
+  payload   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

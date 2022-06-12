@@ -151,6 +151,12 @@ const Community: NextPage<IPostResponse> = (props) => {
               <CommunityItem key={post.id} post={post} />
             ))}
           </ul>
+
+          {targetPosts.posts.length === 0 && (
+            <h3 className="text-center text-gray-500 text-xl">
+              게시글이 없습니다.
+            </h3>
+          )}
         </section>
       </article>
 

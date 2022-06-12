@@ -32,7 +32,7 @@ const HeadInfo = ({ title, description, photo }: Props) => {
         content={
           photo
             ? combinePhotoUrl(photo)
-            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/logo.svg`
+            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/logo.jpg`
         }
       />
 
@@ -49,7 +49,7 @@ const HeadInfo = ({ title, description, photo }: Props) => {
         content={
           photo
             ? combinePhotoUrl(photo)
-            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/logo.svg`
+            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/logo.jpg`
         }
       />
     </Head>
