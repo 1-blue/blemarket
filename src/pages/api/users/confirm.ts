@@ -17,7 +17,7 @@ async function handler(
       message: "이미 로그인한 상태입니다.\n로그아웃후에 다시 시도해주세요.",
     });
 
-  const { token } = req.body;
+  const token = req.body.token;
 
   try {
     const exToken = await prisma.token.findUnique({
