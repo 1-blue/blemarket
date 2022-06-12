@@ -7,6 +7,7 @@ import { Socket, io } from "socket.io-client";
 
 // common-component
 import Button from "@src/components/common/Button";
+import Spinner from "@src/components/common/Spinner";
 
 // component
 import Message from "@src/components/Message";
@@ -23,7 +24,7 @@ import { Chat } from "@prisma/client";
 // hook
 import useMe from "@src/libs/hooks/useMe";
 import useSWRInfinite from "swr/infinite";
-import Spinner from "@src/components/common/Spinner";
+import useMutation from "@src/libs/hooks/useMutation";
 
 interface IChatWithUser extends Chat {
   User: SimpleUser;
@@ -32,6 +33,7 @@ interface IChatResponse extends ApiResponse {
   chats: IChatWithUser[];
   isMine: boolean;
 }
+interface IExitRoomResponse extends ApiResponse {}
 type ChatForm = {
   chat: string;
 };
@@ -189,6 +191,25 @@ const ChatDetail: NextPage = () => {
     }
   }, [chatsResponse, router]);
 
+  // 2022/06/12 - 채팅방 나가기 메서드 - by 1-blue
+  const [exitRoom, { data: exitRoomResponse, loading: exitRoomLoading }] =
+    useMutation<IExitRoomResponse>(`/api/chats/room`, "DELETE");
+  // 2022/06/12 - 채팅방 나가기 - by 1-blue
+  const onExitRoom = useCallback(
+    () =>
+      exitRoom({
+        roomId: router.query.id,
+      }),
+    [exitRoom, router]
+  );
+  // 2022/06/12 - 채팅방 나가기 성공 메시지 - by 1-blue
+  useEffect(() => {
+    if (exitRoomResponse?.ok) {
+      toast.success(exitRoomResponse.message);
+      router.back();
+    }
+  }, [exitRoomResponse, router]);
+
   return (
     <>
       <article className="space-y-4 bg-slate-200 min-h-[70vh] p-4 rounded-sm mb-[10vh]">
@@ -247,7 +268,17 @@ const ChatDetail: NextPage = () => {
             className="peer-focus:ring-1 bg-orange-400 text-white rounded-r-md ring-orange-400 hover:bg-orange-500 focus:outline-orange-500 flex-[1.5] py-[10px]"
           />
         </form>
+
+        <button
+          type="button"
+          onClick={onExitRoom}
+          className="absolute top-0 right-0"
+        >
+          exit!!
+        </button>
       </article>
+
+      {exitRoomLoading && <Spinner kinds="page" />}
     </>
   );
 };
