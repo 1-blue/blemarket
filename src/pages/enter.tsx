@@ -103,7 +103,7 @@ const Enter = () => {
         {createUserResponse?.ok ? (
           <form onSubmit={tokenHandleSubmit(onTokenValid)} className="mb-8">
             <label className="text-sm text-gray-600 font-semibold">
-              토큰 확인
+              토큰 확인 ( 현재는 토큰값이 55555로 고정입니다! )
             </label>
             <div className="mb-4">
               <Input
@@ -243,7 +243,7 @@ const Enter = () => {
           <div className="absolute w-full border-t border-gray-300" />
           <div className="relative -top-3 text-center ">
             <span className="bg-white px-2 text-sm text-gray-500">
-              다른 회원가입 선택
+              다른 회원가입 선택 ( 미구현 )
             </span>
           </div>
         </div>

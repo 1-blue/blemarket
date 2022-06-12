@@ -365,7 +365,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
-  const userId = Number(context.params?.id) || +context.params?.id!;
+  const userId = Number(context.params?.id) || +context.params?.id! || 1;
 
   const exUser = await prisma.user.findUnique({
     where: {

@@ -1,19 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 // helper function
-import withHandler, { IResponseType } from "@src/libs/server/widthHandler";
+import withHandler from "@src/libs/server/widthHandler";
 import { withApiSession } from "@src/libs/server/withSession";
 import prisma from "@src/libs/client/prisma";
 
-async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<IResponseType>
-) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const {
     method,
     session: { user },
   } = req;
   const roomId = +req.query.id;
+
   try {
     if (method === "GET") {
       const page = +req.query.page;
@@ -35,7 +33,7 @@ async function handler(
           },
         },
         orderBy: {
-          updatedAt: "asc",
+          updatedAt: "desc",
         },
       });
 
@@ -58,41 +56,10 @@ async function handler(
       return res.status(200).json({
         ok: true,
         message: "모든 메시지를 가져왔습니다.",
-        chats,
+        chats: chats.reverse(),
         isMine: !!isMine,
       });
     } else if (method === "POST") {
-      const chat = req.body.chat;
-      const createdChat = await prisma.chat.create({
-        data: {
-          chat,
-          User: {
-            connect: {
-              id: +user?.id!,
-            },
-          },
-          Room: {
-            connect: {
-              id: roomId,
-            },
-          },
-        },
-        include: {
-          User: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
-          },
-        },
-      });
-
-      return res.status(201).json({
-        ok: true,
-        message: "채팅 생성 성공!",
-        createdChat,
-      });
     }
   } catch (error) {
     console.error("/api/chats/[id] error >> ", error);
