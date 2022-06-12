@@ -179,15 +179,17 @@ model Message {
 }
 
 model Room {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
+  // null: 둘 다 읽기 가능, 특정 유저의 아이디: 해당 유저만 읽기 불가능
+  chatInvisibleTo Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   users User[]
   chats Chat[]
 
-  Product   Product? @relation(fields: [productId], references: [id])
+  Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int?
 }
 
@@ -197,9 +199,9 @@ model Chat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  User   User? @relation(fields: [userId], references: [id])
+  User   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int?
-  Room   Room? @relation(fields: [roomId], references: [id])
+  Room   Room? @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId Int?
 
   @@index([userId])

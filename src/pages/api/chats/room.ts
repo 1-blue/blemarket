@@ -24,6 +24,18 @@ async function handler(
               id: user?.id,
             },
           },
+          OR: [
+            {
+              chatInvisibleTo: {
+                equals: null,
+              },
+            },
+            {
+              chatInvisibleTo: {
+                not: user?.id,
+              },
+            },
+          ],
         },
         include: {
           users: {
@@ -40,6 +52,8 @@ async function handler(
           },
         },
       });
+
+      console.dir(rooms);
 
       // 방들의 마지막 채팅만 추출하고 시간순 정렬
       const chatPromises = rooms.map((room) =>
@@ -83,6 +97,13 @@ async function handler(
 
       // 이미 채팅방이 존재하면
       if (exRoom) {
+        if (exRoom.chatInvisibleTo === user?.id) {
+          await prisma.room.update({
+            where: { id: exRoom.id },
+            data: { chatInvisibleTo: null },
+          });
+        }
+
         return res.status(200).json({
           ok: true,
           message: "이미 채팅방이 존재합니다.",
@@ -116,7 +137,36 @@ async function handler(
         message: "채팅방을 생성했습니다.",
         roomId,
       });
+    } else if (method === "DELETE") {
+      const roomId = +req.body.roomId;
+
+      const exRoom = await prisma.room.findUnique({ where: { id: roomId } });
+
+      // 채팅방이 존재하지 않으면
+      if (!exRoom) {
+        return res.status(404).json({
+          ok: true,
+          message: "채팅방이 존재하지 않습니다.",
+        });
+      }
+
+      // 이미 한명이 채팅방 나갔으면
+      if (exRoom.chatInvisibleTo) {
+        await prisma.room.delete({ where: { id: roomId } });
+      }
+      // 아무도 채팅방 안나갔다면
+      else {
+        await prisma.room.update({
+          where: { id: roomId },
+          data: { chatInvisibleTo: user?.id },
+        });
+      }
     }
+
+    return res.status(200).json({
+      ok: true,
+      message: "채팅방을 나갔습니다.",
+    });
   } catch (error) {
     console.error("/api/chats/room error >> ", error);
 
@@ -129,5 +179,5 @@ async function handler(
 }
 
 export default withApiSession(
-  withHandler({ methods: ["GET", "POST"], handler })
+  withHandler({ methods: ["GET", "POST", "DELETE"], handler })
 );
